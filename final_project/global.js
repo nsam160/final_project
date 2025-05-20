@@ -1,6 +1,12 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { renderSystem } from './camilleOrbit.js'; // Import Camille's function for camilleOrbit.js
+
+
+// ===========================
+// Nghi's Code 
+// ===========================
 
 const scenes = []
 const cameras = []
@@ -63,3 +69,21 @@ function animate(time) {
   renderer.render(scene, camera);
 }
 animate();
+
+// ===========================
+// D3 ORBIT STORIES: Camille's Code 
+// ===========================
+
+// Load the exoplanet CSV and render 3 story-based systems
+d3.csv("exoplanet.csv").then(data => {
+  // Story 1: KOI-351 (First large multi-planet system)
+  const koi351 = data.filter(d => d.hostname === "KOI-351");
+  renderSystem("container-system1", koi351);
+
+ // System 2: TBD (e.g. most eccentric planet system)
+  const system2 = data.filter(d => d.hostname === "TOI-178");  // just a placeholder
+  renderSystem("container-system2", system2);
+
+  // System 3: TBD (e.g. closest match to Earth)
+  const system3 = data.filter(d => d.hostname === "GJ 667 C");  // placeholder
+  renderSystem("container-system3", system3)});
