@@ -301,3 +301,52 @@ function getOrbitValue(p) {
 // ==================================================
 // D3 ORBIT STORIES Global Code: Camille's Code END
 // ==================================================
+
+
+// ==================================================
+// Jacquelyn's Code
+// ==================================================
+
+// Defining Planets in Timeline
+const planets = [
+  { name: "Mercury", discovered: "Prehistoric", color: "#b1b1b1", radius: 10 },
+  { name: "Venus", discovered: "Prehistoric", color: "#f5deb3", radius: 20 },
+  { name: "Earth", discovered: "Prehistoric", color: "#2e8b57", radius: 22 },
+  { name: "Mars", discovered: "Prehistoric", color: "#b22222", radius: 18 },
+  { name: "Jupiter", discovered: "Prehistoric", color: "#d2b48c", radius: 40 },
+  { name: "Saturn", discovered: "Prehistoric", color: "#deb887", radius: 35 },
+  { name: "Uranus", discovered: "1781", color: "#afeeee", radius: 28 },
+  { name: "Neptune", discovered: "1846", color: "#4169e1", radius: 28 }
+];
+
+// SVG Container
+const svg = d3.select("#timeline")
+  .append("svg")
+  .attr("width", "100%")
+  .attr("height", planets.length * 150)
+  .style("background", "#000");
+
+const g = svg.selectAll("g")
+  .data(planets)
+  .enter()
+  .append("g")
+  .attr("transform", (d, i) => `translate(200, ${i * 150 + 75})`);
+
+// Circles for each planet
+g.append("circle")
+  .attr("r", d => d.radius)
+  .attr("fill", d => d.color)
+  .attr("stroke", "#fff")
+  .attr("stroke-width", 2);
+
+// Adding labels
+g.append("text")
+  .text(d => `${d.name} — Discovered: ${d.discovered}`)
+  .attr("x", d => d.radius + 20)
+  .attr("y", 5)
+  .attr("fill", "#fff")
+  .attr("font-size", "16px");
+
+// ==================================================
+// Jacquelyn's Code END
+// ==================================================
