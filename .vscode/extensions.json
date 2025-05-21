@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-renderers",
+        "ritwickdey.liveserver",
+        "ms-python.python",
+        "ms-vscode-remote.remote-ssh",
+        "ms-vscode-remote.remote-ssh-edit"
+    ]
+}
