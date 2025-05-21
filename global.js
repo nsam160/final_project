@@ -70,7 +70,8 @@ function animate(time) {
 animate();
 
 // ==================================================
-// D3 ORBIT STORIES Global Code: Camille's Code START: Scroll to line:279
+// D3 ORBIT STORIES Global Code: Camille's Code START
+// END at line:279
 // ==================================================
 import { renderSystem } from './camilleOrbit.js';
 
@@ -177,6 +178,21 @@ function showDetailedSystem(systemKey) {
   const system = systemData.find(s => s.id === systemKey);
   document.getElementById("system-title").textContent = system.title;
   document.getElementById("system-description").textContent = system.fullDesc;
+  // Hide all system containers first
+  ["system1", "system2", "system3"].forEach(id => {
+    document.getElementById(id).style.display = "none";
+  });
+
+  // Then show the correct one
+  const systemMap = {
+    kepler: "system1",
+    toi: "system2",
+    gj: "system3"
+  };
+  const containerId = systemMap[systemKey];
+  if (containerId) {
+    document.getElementById(containerId).style.display = "block";
+  }
 
   const data = allExoplanets.filter(d => d.hostname === system.hostname);
   orbitContainer.innerHTML = "";
@@ -214,6 +230,12 @@ function enhanceCapsules() {
     setTimeout(() => {
       detailedView.style.display = "none";
       orbitContainer.innerHTML = "";
+
+    // Hide all system containers
+    ["system1", "system2", "system3"].forEach(id => {
+      document.getElementById(id).style.display = "none";
+    });
+    
       overview.style.display = "flex";
       overview.style.opacity = 1;
     }, 400);
