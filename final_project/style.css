@@ -1,0 +1,404 @@
+
+/* ============================ */
+/* Camille's style.css  START */
+/* ============================ */
+
+/* Global Space Background */
+body {
+  background-image: url('svg/galaxy.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  color: white;
+  font-family: 'Outfit', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* theme colors are defined in JavaScript, not CSS */
+
+/* System Container Styling */
+.system-container {
+  background-color: rgba(0, 0, 0, 0.65);
+  margin: 2rem auto;
+  padding: 1rem;
+  border-radius: 8px;
+  max-width: 1000px;
+}
+
+/* Tooltip Styling */
+#tooltip {
+  z-index: 999;
+  background-color: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+  max-width: 300px;
+  font-size: 0.9rem;
+}
+
+#tooltip strong {
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  display: block;
+}
+
+/* Controls & Text */
+.controls-container {
+  margin-top: 1em;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.control-group {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1em;
+  border-radius: 5px;
+}
+
+.control-button {
+  background-color: #222;
+  border: 1px solid #888;
+  color: #fff;
+  padding: 0.4em 0.8em;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.control-button:hover {
+  background-color: #444;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.control-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive SVG Container */
+.visualization-container svg {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  display: block;
+  margin: auto;
+}
+
+/* Story Panel Styling */
+.story-container {
+  color: #eee;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.story-container h2 {
+  font-size: 1.5rem;
+  margin-top: 1rem;
+  color: #fff;
+}
+
+.story-intro {
+  font-style: italic;
+  color: #ccc;
+}
+
+/* Planet Glow Effect */
+.planet {
+  filter: drop-shadow(0 0 4px rgba(0, 150, 255, 0.7));
+}
+
+/* Scroll Reveal Animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease-out;
+  will-change: opacity, transform;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Floating Capsule Map Layout */
+.flex-capsules {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding: 2rem;
+  flex-wrap: wrap;
+  max-width: 1000px;
+  margin: auto;
+}
+
+/* === Detailed View === */
+#detailed-view {
+  position: relative;
+  padding: 2rem;
+  text-align: center;
+  color: white;
+  transition: opacity 0.4s ease;
+}
+
+#orbit-container svg {
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+  display: block;
+}
+
+#system-info {
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+#back-button {
+  background: #222;
+  color: white;
+  border: 1px solid #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+#back-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+  transform: translateX(-5px);
+}
+
+#back-button::before {
+  content: "←";
+  margin-right: 8px;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+#back-button:hover::before {
+  transform: translateX(-3px);
+}
+
+/* Capsule Styling - Enhanced */
+.capsule {
+  position: relative;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid var(--glow, #fff);
+  border-radius: 16px;
+  padding: 1.5rem 1rem;
+  width: 180px;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 0 15px var(--glow, #fff);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Improved hover effects */
+.capsule:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px var(--glow, #fff);
+}
+
+.capsule:hover .mini-orbit {
+  filter: drop-shadow(0 0 5px var(--glow, #fff));
+}
+
+/* Visited capsule styling */
+.capsule.visited {
+  border-width: 3px;
+}
+
+.capsule.visited::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, transparent 80%, var(--glow, #fff) 100%);
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+/* Visited marker */
+.visited-marker {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #4CAF50;
+  color: white;
+  font-size: 0.7rem;
+  padding: 3px 6px;
+  border-radius: 4px;
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.capsule.visited .visited-marker {
+  opacity: 1;
+  transform: scale(1);
+  animation: pop-visited 0.6s ease;
+}
+
+/* Connection lines between capsules */
+.connection-line {
+  stroke: #fff;
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  opacity: 0;
+  transition: stroke-dashoffset 1.5s ease, opacity 0.5s ease;
+}
+
+.connection-line.visible {
+  stroke-dashoffset: 0;
+  opacity: 0.7;
+}
+
+/* Connection descriptions */
+.connection-description {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  max-width: 150px;
+  text-align: center;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Connection container */
+#capsule-connections {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Enhanced mini system visualizations */
+.mini-orbit {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  margin-bottom: 0.5rem;
+}
+
+.mini-orbit .mini-star {
+  animation: pulse-glow 3s infinite ease-in-out;
+}
+
+/* Enhance label styling */
+.capsule .label {
+  font-weight: bold;
+  margin-top: 0.5rem;
+  color: var(--glow, #fff);
+  font-size: 1.1rem;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+  transition: color 0.3s ease;
+}
+
+.capsule:hover .label {
+  text-shadow: 0 0 8px var(--glow, #fff);
+}
+
+.capsule .subtext {
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+  opacity: 0.8;
+  text-align: center;
+}
+
+/* System-specific content in detailed view */
+.system-specific-content {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fade-in-up 0.8s 0.3s forwards ease-out;
+}
+
+.system-specific-content h3 {
+  margin-top: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 0.5rem;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Synthesis section styling */
+#synthesis {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 2rem;
+  text-align: center;
+  margin-top: 2rem;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+#synthesis.visible {
+  opacity: 1;
+}
+
+#synthesis h2 {
+  color: #fff;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+#synthesis p {
+  max-width: 800px;
+  margin: 1rem auto;
+  line-height: 1.6;
+}
+
+#synthesis p:last-child {
+  font-style: italic;
+  color: #ccc;
+  margin-top: 2rem;
+}
+
+/* Smooth transitions between views */
+#overview, #detailed-view, #synthesis {
+  transition: opacity 0.4s ease;
+}
+
+/* Animations */
+@keyframes pop-visited {
+  0% { opacity: 0; transform: scale(0.5) rotate(-10deg); }
+  50% { opacity: 1; transform: scale(1.2) rotate(5deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+@keyframes pulse-glow {
+  0% { filter: drop-shadow(0 0 2px gold); }
+  50% { filter: drop-shadow(0 0 8px gold); }
+  100% { filter: drop-shadow(0 0 2px gold); }
+}
+
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================ */
+/*  Camille's style.css   END */
+/* ============================ */
