@@ -18,17 +18,106 @@
 </head>
 <body>
     <h1>Title</h1>
-    <!-- Camille's Orbit Systems -->
-    <section id="camille-orbits">
-        <h2>KOI-351: Multi-Planet System</h2>
-        <div id="container-system1"></div>
 
-        <h2>System 2: Placeholder</h2>
-        <div id="container-system2"></div>
+    
+  <!-- ============================= -->
+  <!-- Camille's Orbit Systems START -->
+  <!-- ============================= -->
+   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
 
-        <h2>System 3: Placeholder</h2>
-        <div id="container-system3"></div>
-    </section>
-    <!-- Camille's Orbit Systems -->
+  <!--Story-capsules Selector  -->
+  <section id="overview" class="flex-capsules">
+    <div class="capsule" data-system="kepler" style="--glow:#FFA500;">
+      <svg class="mini-orbit" id="mini-kepler"></svg>
+      <div class="label">Kepler-90</div>
+      <p class="subtext">The first 8-planet system discovered</p>
+    </div>
+    <div class="capsule" data-system="toi" style="--glow:#4682B4;">
+      <svg class="mini-orbit" id="mini-toi"></svg>
+      <div class="label">TOI-178</div>
+      <p class="subtext">Six planets dancing in perfect resonance</p>
+    </div>
+    <div class="capsule" data-system="gj" style="--glow:#8B0000;">
+      <svg class="mini-orbit" id="mini-gj"></svg>
+      <div class="label">GJ 667C</div>
+      <p class="subtext">Multiple potentially habitable planets</p>
+    </div>
+</section>
+<section id="detailed-view" style="display: none;">
+  <button id="back-button">← Return to Overview</button>
+  <div id="orbit-container"></div>
+  <div id="system-info">
+    <h2 id="system-title"></h2>
+    <p id="system-description"></p>
+  </div>
+</section>
+  <!--Orbit System 1 = Kepler-90 -->
+  <div class="system-container" id="system1">
+  <div id="container-system1" class="visualization-container"></div>
+  <div id="story-system1" class="story-container">
+    <h2>KOI-351/Kepler-90: The Cosmic Mirror</h2>
+    <p class="story-intro">Our solar system's doppelgänger with 8 confirmed planets...</p>
+
+    <!-- Interactive Controls for Kepler-90 -->
+    <div class="controls-container">
+      <div class="control-group">
+        <h3>Orbital Resonance</h3>
+        <button id="toggle-resonance" class="control-button">Show Resonance</button>
+        <button id="toggle-sound" class="control-button">Enable Sonification</button>
+      </div>
+
+      <div class="control-group">
+        <h3>Compare to Our Solar System</h3>
+        <input type="range" id="comparison-slider" min="0" max="100" value="0">
+        <span id="comparison-label">Kepler-90</span>
+      </div>
+    </div>
+  </div>
+</div>
+ <!--Orbit System 2 Placeholder -->
+<div class="system-container" id="system2">
+  <div id="container-system2" class="visualization-container"></div>
+
+  <div id="story-system2" class="story-container">
+    <h2>System 2 Title (e.g., TOI-178: The Cosmic Orchestra)</h2>
+    <p class="story-intro">Intro sentence about the system...</p>
+
+    <!-- Interactive Controls (optional) -->
+    <div class="controls-container">
+      <!-- Example: Placeholder for future system-specific controls -->
+      <div class="control-group">
+        <h3>Coming Soon</h3>
+        <p>Interactive elements for System 2 can go here.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<!--Orbit System 3 Placeholder -->
+<div class="system-container" id="system3">
+  <div id="container-system3" class="visualization-container"></div>
+
+  <div id="story-system3" class="story-container">
+    <h2>System 3 Title (e.g., GJ 667C: The Habitable Triad)</h2>
+    <p class="story-intro">Intro sentence about the system...</p>
+
+    <!-- Interactive Controls (optional) -->
+    <div class="controls-container">
+      <!-- Example: Placeholder for future system-specific controls -->
+      <div class="control-group">
+        <h3>Coming Soon</h3>
+        <p>Interactive elements for System 3 can go here.</p>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- Synthesis Message -->
+  <section id="synthesis" style="display: none; padding: 2rem; text-align: center; background: rgba(255,255,255,0.1); border-top: 1px solid #666;">
+    <h2> 🛰️ What We’ve Learned</h2>
+    <p>By exploring Kepler-90, TOI-178, and GJ 667C, we’ve seen the variety and wonder of distant worlds. These systems challenge our assumptions and expand our imagination.</p>
+    <p><em>Let’s now look ahead — what’s next in our search for new Earths?</em></p>
+  </section>
+  <!-- =========================== -->
+  <!-- Camille's Orbit Systems END -->
+  <!-- =========================== -->
 </body>
 </html>
