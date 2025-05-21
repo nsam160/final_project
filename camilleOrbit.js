@@ -5,7 +5,7 @@ import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 // D3 ORBIT STORIES: Camille's Code  
 // =========================== 
 
-// System data for narrative purposes
+// System data for narrative
 const systemNarratives = {
   "KOI-351": {
     title: "Kepler-90: The Cosmic Mirror",
@@ -62,7 +62,7 @@ export function renderSystem(containerId, planetData) {
     .attr("viewBox", [-width / 2, -height / 2, width, height])
     .style("background", "#000");
 
-  // Add system-specific background elements
+  //system-specific background elements
   addSystemSpecificBackground(svg, hostname);
 
   const maxOrbitalDistance = d3.max(planetData, d => getOrbitValue(d));
@@ -197,7 +197,7 @@ export function renderSystem(containerId, planetData) {
     updateResonanceLines(svg, elapsed, hostname, planetData, auToPixels);
   });
 
-  // Optional: hook up system-specific interactive elements
+  // hook up system-specific interactive elements
   if (containerId === "container-kepler") {
     setupComparisonSlider(svg, planetData, auToPixels, radiusScale);
     setupResonanceToggle(svg, planetData);
@@ -223,7 +223,7 @@ function addSystemSpecificBackground(svg, hostname) {
     .attr("fill", starColor)
     .style("filter", `drop-shadow(0 0 10px ${starColor})`);
 
-  // Add system-specific background elements
+  //system-specific background elements
   if (hostname === "GJ 667 C") {
     // Add habitable zone for GJ 667C
     svg.append("circle")
@@ -236,7 +236,7 @@ function addSystemSpecificBackground(svg, hostname) {
       .attr("stroke-width", 8)
       .attr("stroke-opacity", 0.15);
       
-    // Add distant binary companion stars
+    //distant binary companion stars
     svg.append("circle")
       .attr("class", "companion-star")
       .attr("cx", -180)
@@ -253,7 +253,7 @@ function addSystemSpecificBackground(svg, hostname) {
       .attr("fill", "#FFD700")
       .style("filter", "drop-shadow(0 0 4px gold)");
       
-    // Add text label for triple star system
+    //text label for triple star system
     svg.append("text")
       .attr("x", -190)
       .attr("y", -185)
@@ -263,7 +263,7 @@ function addSystemSpecificBackground(svg, hostname) {
       .text("GJ 667 A & B");
   } 
   else if (hostname === "TOI-178") {
-    // Add musical note decorations for the "cosmic orchestra"
+    // musical note decorations for the "cosmic orchestra"
     const notePositions = [
       { x: -140, y: -120, rotation: 15, opacity: 0.15, symbol: "♪" },
       { x: 120, y: 150, rotation: -20, opacity: 0.12, symbol: "♫" },
@@ -282,7 +282,7 @@ function addSystemSpecificBackground(svg, hostname) {
         .text(note.symbol);
     });
     
-    // Add resonance chain label
+    //resonance chain label
     svg.append("text")
       .attr("x", 0)
       .attr("y", -220)
@@ -293,7 +293,7 @@ function addSystemSpecificBackground(svg, hostname) {
       .text("18 : 9 : 6 : 4 : 3 Resonance Chain");
   }
   else if (hostname === "KOI-351") {
-    // Add Solar System comparison marker
+    //Solar System comparison marker
     svg.append("circle")
       .attr("class", "earth-orbit-marker")
       .attr("cx", 0)
@@ -313,7 +313,7 @@ function addSystemSpecificBackground(svg, hostname) {
       .style("opacity", 0.5)
       .text("Earth's orbit");
       
-    // Add AI discovery highlight
+    //AI discovery highlight
     svg.append("text")
       .attr("x", 0)
       .attr("y", -220)
