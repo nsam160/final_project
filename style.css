@@ -1,9 +1,7 @@
-
 /* ============================ */
-/* Camille's style.css  START */
+/*     GLOBAL style.css  */
 /* ============================ */
-
-/* Global Space Background */
+/* Space Background */
 body {
   background-image: url('svg/galaxy.jpg');
   background-repeat: repeat;
@@ -16,7 +14,147 @@ body {
   padding: 0;
 }
 
-/* theme colors are defined in JavaScript, not CSS */
+ /* Progress Bar Container */
+#progress-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05); /* More transparent */
+  backdrop-filter: blur(5px); /* Less blur to show galaxy */
+  z-index: 10001;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/*Progress Bar */
+#progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, 
+    #ff6b6b 0%, 
+    #4ecdc4 25%, 
+    #45b7d1 50%, 
+    #96ceb4 75%, 
+    #feca57 100%);
+  width: 0%;
+  transition: width 0.15s ease-out;
+  box-shadow: 
+    0 0 20px rgba(255, 107, 107, 0.4),
+    0 0 40px rgba(78, 205, 196, 0.2);
+  position: relative;
+}
+
+#progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8));
+  border-radius: 0 3px 3px 0;
+}
+
+/* Progress Percentage Display */
+#progress-percentage {
+  position: absolute;
+  top: 8px;
+  right: 20px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.3); /* Subtle background for readability */
+  padding: 2px 6px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  z-index: 10002;
+  transition: opacity 0.3s ease;
+}
+
+/*Main Header */
+#main-header {
+  position: fixed;
+  top: 6px;
+  left: 0;
+  width: 100%;
+  padding: 15px 0;
+  background: transparent; /* Completely transparent */
+  backdrop-filter: blur(5px); /* Subtle blur to maintain readability */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 10000;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1); /* Very subtle shadow */
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.header-content h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #feca57;
+  text-shadow: 
+    0 0 20px rgba(254, 202, 87, 0.8),
+    0 0 40px rgba(254, 202, 87, 0.4),
+    2px 2px 4px rgba(0, 0, 0, 0.8); 
+  margin: 0;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+/* Progress Labels (Clickable Section Links) */
+.progress-labels {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 8px 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
+  color: #ccc;
+  text-shadow: 0 0 5px black;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+.progress-labels a {
+  transition: all 0.3s ease;
+  padding: 6px 10px;
+  border-radius: 12px;
+  color: #ccc;
+  text-decoration: none;
+  background: rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.progress-labels a:hover,
+.progress-labels a.active {
+  background: rgba(254, 202, 87, 0.1);
+  color: #feca57;
+  text-shadow: 0 0 8px rgba(254, 202, 87, 0.5);
+}
+/* Offset first section so it doesn't hide behind header + progress bar */
+.scroll-section:first-of-type {
+  padding-top: 160px;
+}
+
+#timeline {
+  margin-top: 2rem;
+}
+
+/* ============================ */
+/* Camille's style.css  START */
+/* ============================ */
 
 /* System Container Styling */
 .system-container {
@@ -26,7 +164,6 @@ body {
   border-radius: 8px;
   max-width: 1000px;
 }
-
 /* Tooltip Styling */
 #tooltip {
   z-index: 999;
@@ -38,7 +175,6 @@ body {
   max-width: 300px;
   font-size: 0.9rem;
 }
-
 #tooltip strong {
   color: #fff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
@@ -136,8 +272,6 @@ body {
   max-width: 1000px;
   margin: auto;
 }
-
-/* === Detailed View === */
 #detailed-view {
   position: relative;
   padding: 2rem;
@@ -186,7 +320,6 @@ body {
 #back-button:hover::before {
   transform: translateX(-3px);
 }
-
 /* Capsule Styling - Enhanced */
 .capsule {
   position: relative;
@@ -205,22 +338,18 @@ body {
   justify-content: center;
   overflow: hidden;
 }
-
 /* Improved hover effects */
 .capsule:hover {
   transform: scale(1.05);
   box-shadow: 0 0 25px var(--glow, #fff);
 }
-
 .capsule:hover .mini-orbit {
   filter: drop-shadow(0 0 5px var(--glow, #fff));
 }
-
 /* Visited capsule styling */
 .capsule.visited {
   border-width: 3px;
 }
-
 .capsule.visited::before {
   content: "";
   position: absolute;
@@ -232,7 +361,6 @@ body {
   opacity: 0.2;
   pointer-events: none;
 }
-
 /* Visited marker */
 .visited-marker {
   position: absolute;
@@ -247,13 +375,11 @@ body {
   transform: scale(0);
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
-
 .capsule.visited .visited-marker {
   opacity: 1;
   transform: scale(1);
   animation: pop-visited 0.6s ease;
 }
-
 /* Connection lines between capsules */
 .connection-line {
   stroke: #fff;
@@ -264,7 +390,6 @@ body {
   opacity: 0;
   transition: stroke-dashoffset 1.5s ease, opacity 0.5s ease;
 }
-
 .connection-line.visible {
   stroke-dashoffset: 0;
   opacity: 0.7;

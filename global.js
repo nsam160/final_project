@@ -2,6 +2,130 @@ import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+// ===========================
+// PROGRESS BAR SYSTEM: Line 128 END
+// ===========================
+// Initialize enhanced progress bar functionality
+function initEnhancedProgressBar() {
+  const progressBar = d3.select('#progress-bar');
+  const progressPercentage = d3.select('#progress-percentage');
+  const header = d3.select('#main-header');
+  const progressLabels = d3.selectAll('.progress-labels span');
+  const navLinks = d3.selectAll('.nav-link');
+  
+  // Calculate scroll progress with enhanced features
+  function updateProgress() {
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Calculate progress percentage
+    const scrollableHeight = documentHeight - windowHeight;
+    const progress = Math.min(Math.max(scrollTop / scrollableHeight, 0), 1);
+    const percentage = Math.round(progress * 100);
+    
+    // Update progress bar with smooth D3 transition
+    progressBar
+      .transition()
+      .duration(50)
+      .style('width', `${percentage}%`);
+    
+    // Update percentage display
+    progressPercentage.text(`${percentage}%`);
+
+    // Enhanced header background opacity based on scroll
+    const headerOpacity = Math.min(0.95, 0.7 + (progress * 0.25));
+    header
+      .transition()
+      .duration(100)
+      .style('background', `rgba(0, 0, 0, ${headerOpacity})`);
+    
+    // Update active section highlighting
+    updateActiveSections();
+  }
+  
+  // Update active sections and navigation
+  function updateActiveSections() {
+  const sections = document.querySelectorAll('.scroll-section');
+  const scrollPosition = window.pageYOffset + window.innerHeight * 0.3;
+
+  let activeSectionId = null;
+
+  sections.forEach((section) => {
+    const sectionTop = section.offsetTop;
+    const sectionBottom = sectionTop + section.offsetHeight;
+
+    if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+      activeSectionId = section.id;
+    }
+  });
+
+  document.querySelectorAll('.progress-labels a').forEach((link) => {
+    if (link.getAttribute('href') === `#${activeSectionId}`) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
+}
+window.addEventListener('scroll', () => {
+  requestAnimationFrame(updateActiveSections);
+});
+  // Enhanced smooth scroll navigation
+  function setupSmoothNavigation() {
+    navLinks.on('click', function(event) {
+      event.preventDefault();
+      
+      const target = d3.select(this).attr('href');
+      const targetElement = document.querySelector(target);
+      
+      if (targetElement) {
+        // Add click animation
+        d3.select(this)
+          .transition()
+          .duration(150)
+          .style('transform', 'scale(0.95)')
+          .transition()
+          .duration(150)
+          .style('transform', 'scale(1)');
+        
+        // Smooth scroll with custom easing
+        const targetPosition = targetElement.offsetTop - 120; // Account for fixed header
+        const startPosition = window.pageYOffset;
+        const distance = targetPosition - startPosition;
+        const duration = 800;
+        let startTime = null;
+        
+        function animation(currentTime) {
+          if (startTime === null) startTime = currentTime;
+          const timeElapsed = currentTime - startTime;
+          const progress = Math.min(timeElapsed / duration, 1);
+          
+          // Easing function (ease-in-out-cubic)
+          const ease = progress < 0.5 
+            ? 4 * progress * progress * progress 
+            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+          
+          window.scrollTo(0, startPosition + distance * ease);
+          
+          if (timeElapsed < duration) {
+            requestAnimationFrame(animation);
+          }
+        }
+        
+        requestAnimationFrame(animation);
+      }
+    });
+  }
+  // Setup navigation
+  setupSmoothNavigation();
+  
+  // Initial progress calculation
+  updateProgress();
+  
+  console.log('Progress Bar System Initialized');
+}
+
 
 // ===========================
 // Nghi's Code 
@@ -68,6 +192,9 @@ function animate(time) {
   renderer.render(scene, camera);
 }
 animate();
+// ===========================
+// Nghi's Code 
+// ===========================
 
 // ==================================================
 // D3 ORBIT STORIES Global Code: Camille's Code START
@@ -235,7 +362,7 @@ function enhanceCapsules() {
     ["system1", "system2", "system3"].forEach(id => {
       document.getElementById(id).style.display = "none";
     });
-    
+
       overview.style.display = "flex";
       overview.style.opacity = 1;
     }, 400);
@@ -350,3 +477,74 @@ g.append("text")
 // ==================================================
 // Jacquelyn's Code END
 // ==================================================
+
+
+// ================================
+// Global code
+// ================================
+// Scroll-Based Progress Bar
+// Initialize everything when DOM is ready
+function initializeApp() {
+  // Initialize enhanced progress bar
+  initEnhancedProgressBar();
+  
+  // Add resize listener to recalculate progress
+  window.addEventListener('resize', () => {
+    setTimeout(() => {
+      const event = new Event('scroll');
+      window.dispatchEvent(event);
+    }, 100);
+  });
+  
+  // Add section intersection observer for better performance
+  initSectionObserver();
+  console.log('Exoplanet Explorer App Initialized');
+}
+
+// Enhanced section observer for better scroll performance
+function initSectionObserver() {
+  const observerOptions = {
+    threshold: [0.1, 0.25, 0.5, 0.75],
+    rootMargin: '-120px 0px -50px 0px'
+  };
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const section = entry.target;
+      const sectionId = section.id;
+      
+      // Add fade-in animation for sections
+      if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
+        section.classList.add('section-visible');
+        
+        // Trigger any section-specific animations
+        if (sectionId === 'section-systems') {
+          animateSystemCapsules();
+        }
+      }
+    });
+  }, observerOptions);
+  
+  document.querySelectorAll('.scroll-section').forEach(section => {
+    observer.observe(section);
+  }); 
+}
+
+// Animate system capsules when they come into view
+function animateSystemCapsules() {
+  const capsules = document.querySelectorAll('.capsule');
+  capsules.forEach((capsule, index) => {
+    setTimeout(() => {
+      capsule.style.transform = 'translateY(0) scale(1)';
+      capsule.style.opacity = '1';
+    }, index * 200);
+  });
+}
+
+// Wait for DOM to be ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+  initializeApp();
+}
+
