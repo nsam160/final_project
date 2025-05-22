@@ -126,7 +126,6 @@ window.addEventListener('scroll', () => {
   console.log('Progress Bar System Initialized');
 }
 
-
 // ===========================
 // Nghi's Code 
 // ===========================
