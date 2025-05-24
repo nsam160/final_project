@@ -82,6 +82,7 @@ function loadExoplanetData() {
     
     // Initialize indvidual sections that depend on data
     initializeCamilleSection();
+
     
   }).catch(error => {
     console.error('Error loading exoplanet data:', error);
@@ -295,7 +296,7 @@ animate();
 // D3 ORBIT STORIES Global Code: Camille's Code START
 // END at line:279
 // ==================================================
-import { renderSystem } from './camilleOrbit.js';
+import { renderSystem, initializeEnhancedSystem, cleanupEnhancedSystem, setupKeyboardNavigation } from './camilleOrbit.js';
 
 const visitedSystems = new Set();
 // let allExoplanets = [];
@@ -346,6 +347,9 @@ function initializeCamilleSection() {
   });
   setupConnectionLines();
   enhanceCapsules();
+  
+  // ADD THIS LINE:
+  setupKeyboardNavigation();
 }
 
 /*
@@ -406,6 +410,7 @@ function drawMiniSystem(selector, planets) {
 }
 
 // Show detailed view
+/*
 function showDetailedSystem(systemKey) {
   const system = systemData.find(s => s.id === systemKey);
   document.getElementById("system-title").textContent = system.title;
@@ -432,6 +437,46 @@ function showDetailedSystem(systemKey) {
   container.id = `container-${system.id}`;
   orbitContainer.appendChild(container);
   renderSystem(`container-${system.id}`, data);
+}*/
+
+function showDetailedSystem(systemKey) {
+  const system = systemData.find(s => s.id === systemKey);
+  
+  // Update the orbit section title
+  document.getElementById("system-title-orbit").textContent = system.title;
+  
+  // Keep existing system info for compatibility
+  document.getElementById("system-title").textContent = system.title;
+  document.getElementById("system-description").textContent = system.fullDesc;
+  
+  // Hide all system containers first
+  ["system1", "system2", "system3"].forEach(id => {
+    document.getElementById(id).style.display = "none";
+  });
+
+  // Show the correct system container
+  const systemMap = {
+    kepler: "system1",
+    toi: "system2", 
+    gj: "system3"
+  };
+  const containerId = systemMap[systemKey];
+  if (containerId) {
+    document.getElementById(containerId).style.display = "block";
+  }
+
+  // Clear previous orbit container and cleanup
+  cleanupEnhancedSystem();
+  orbitContainer.innerHTML = "";
+  
+  // Create new container for enhanced system
+  const container = document.createElement("div");
+  container.id = `container-${system.id}`;
+  orbitContainer.appendChild(container);
+  
+  // Initialize enhanced system with planet selection
+  //initializeEnhancedSystem(`container-${containerId.replace("system", "")}`, system.hostname);
+  initializeEnhancedSystem(`container-${system.id}`, system.hostname);
 }
 
 // Capsule click + back
@@ -462,6 +507,9 @@ function enhanceCapsules() {
     setTimeout(() => {
       detailedView.style.display = "none";
       orbitContainer.innerHTML = "";
+   
+      // ADD THIS LINE:
+       cleanupEnhancedSystem();
 
     // Hide all system containers
     ["system1", "system2", "system3"].forEach(id => {

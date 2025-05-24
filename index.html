@@ -81,6 +81,7 @@
     </div>
   </div>
 </section>
+<!--
 <section id="detailed-view" style="display: none;">
   <button id="back-button"> Return to Overview</button>
   <div id="orbit-container"></div>
@@ -89,9 +90,89 @@
     <p id="system-description"></p>
   </div>
 </section>
+-->
+<section id="detailed-view" style="display: none;">
+  <button id="back-button">Return to Overview</button>
+  
+  <!-- NEW: Enhanced layout with orbit animation and planet profile -->
+  <div class="enhanced-system-layout">
+    <div class="orbit-animation-section">
+      <h2 id="system-title-orbit">System orbit animation</h2>
+      <div id="orbit-container"></div>
+    </div>
+    
+    <div class="planet-profile-section">
+      <h2>Planet profile:</h2>
+      
+      <div class="planet-visual-container">
+        <div class="planet-visual" id="planet-visual-display"></div>
+      </div>
+      
+      <div class="planet-info-panel" id="planet-info-panel">
+        <div class="info-row">
+          <span class="info-label">Planet:</span>
+          <span class="info-value" id="profile-planet-name">Select a planet</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Mass:</span>
+          <span class="info-value" id="profile-planet-mass">Unknown</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Radius:</span>
+          <span class="info-value" id="profile-planet-radius">Unknown</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Orbital Period:</span>
+          <span class="info-value" id="profile-planet-period">Unknown</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Temperature:</span>
+          <span class="info-value" id="profile-planet-temp">Unknown</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Distance:</span>
+          <span class="info-value" id="profile-planet-distance">Unknown</span>
+        </div>
+      </div>
+      
+      <div class="planet-description-panel">
+        <div class="description" id="profile-planet-description">
+          Click on a planet in the orbit animation to view its detailed information.
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- NEW: Animation Controls -->
+  <div class="animation-controls-section">
+    <div class="control-group">
+      <h3>Animation Controls</h3>
+      <button class="play-pause-btn" id="animation-play-pause">⏸️ Pause</button>
+      <div class="speed-control">
+        <span>Speed:</span>
+        <input type="range" class="speed-slider" min="0.1" max="3" step="0.1" value="1" id="animation-speed-slider">
+        <span id="animation-speed-value">1x</span>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <button class="toggle-button" id="next-planet-btn">
+        Toggle: button to press to view the next planet
+      </button>
+    </div>
+  </div>
+  
+  <!-- Keep existing system info for compatibility -->
+  <div id="system-info" style="display: none;">
+    <h2 id="system-title"></h2>
+    <p id="system-description"></p>
+  </div>
+</section>
+
   <!--Orbit System 1 = Kepler-90 -->
   <div class="system-container" id="system1" style="display: none;">
-  <div id="container-system1" class="visualization-container"></div>
+  <!-- <div id="container-system1" class="visualization-container"></div> -->
+  <div id="container-kepler" class="visualization-container"></div>
   <div id="story-system1" class="story-container">
     <h2>KOI-351/Kepler-90: The Cosmic Mirror</h2>
     <p class="story-intro">Our solar system's doppelgänger with 8 confirmed planets...</p>
@@ -114,7 +195,8 @@
 </div>
  <!--Orbit System 2 Placeholder -->
 <div class="system-container" id="system2" style="display: none;">
-  <div id="container-system2" class="visualization-container"></div>
+  <div id="container-toi" class="visualization-container"></div>
+<!-- <div id="container-system2" class="visualization-container"></div>-->
 
   <div id="story-system2" class="story-container">
     <h2>System 2 Title (e.g., TOI-178: The Cosmic Orchestra)</h2>
@@ -132,7 +214,8 @@
 </div>
 <!--Orbit System 3 Placeholder -->
 <div class="system-container" id="system3" style="display: none;">
-  <div id="container-system3" class="visualization-container"></div>
+  <!--<div id="container-system3" class="visualization-container"></div> -->
+  <div id="container-gj" class="visualization-container"></div>
 
   <div id="story-system3" class="story-container">
     <h2>System 3 Title (e.g., GJ 667C: The Habitable Triad)</h2>

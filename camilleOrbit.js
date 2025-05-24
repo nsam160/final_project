@@ -1,6 +1,13 @@
 /// camilleOrbit.js
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
+// planet selection and animation control variables
+let currentSelectedPlanet = 0;
+let animationSpeed = 1;
+let isAnimationPlaying = true;
+let currentSystemPlanets = [];
+let animationTimer = null;
+
 // =========================== 
 // D3 ORBIT STORIES: Camille's Code  
 // =========================== 
@@ -54,9 +61,9 @@ const systemNarratives = {
 };
 
 export function renderSystem(containerId, planetData) {
-  const width = 500;
-  const height = 500;
-  const maxRadius = 200;
+  const width = 600;
+  const height = 600;
+  const maxRadius = 280;
 
   // Determine which system we're rendering
   const hostname = planetData.length > 0 ? planetData[0].hostname : "";
@@ -78,10 +85,11 @@ export function renderSystem(containerId, planetData) {
   const auToPixels = d3.scaleLinear()
     .domain([0, maxOrbitalDistance])
     .range([0, maxRadius]);
+ 
 
   const radiusScale = d3.scaleSqrt()
     .domain([0.1, d3.max(planetData, d => d.pl_rade || 1)])
-    .range([2, 10]);
+    .range([3, 12]); // Slightly larger planets: from [2,10] to [3,12]
 
   const tempColorScale = d3.scaleSequential(d3.interpolateRdYlBu)
     .domain([3000, 0]);
@@ -108,6 +116,7 @@ export function renderSystem(containerId, planetData) {
     .append("circle")
     .attr("class", "planet")
     .attr("r", d => getPlanetRadius(d, hostname, radiusScale))
+    .attr("data-base-radius", d => getPlanetRadius(d, hostname, radiusScale)) // Store original radius
     .style("fill", (d, i) => getPlanetColor(d, i, hostname, tempColorScale))
     .style("stroke", (d, i) => getPlanetStroke(d, i, hostname))
     .style("stroke-width", 1.5)
@@ -154,19 +163,52 @@ export function renderSystem(containerId, planetData) {
       specialInfo = `<p class="special-info">Discovered by Google's machine learning AI in 2017.</p>`;
     }
     
-    tooltip.style("opacity", 1)
-      .html(`
-        <strong>${d.pl_name}</strong>
-        <p>${description}</p>
-        ${specialInfo}
-        <ul>
-          <li>Mass: ${d.pl_masse || 'Unknown'} Earth masses</li>
-          <li>Radius: ${d.pl_rade || 'Unknown'} Earth radii</li>
-          <li>Orbital period: ${d.pl_orbper || 'Unknown'} days</li>
-          <li>Temperature: ${d.pl_eqt || 'Unknown'} K</li>
-          <li>Year discovered: ${d.disc_year || 'Unknown'}</li>
-        </ul>
-      `);
+    // Format values safely
+  const formatMass = (planet) => {
+    const mass = planet.pl_masse || planet.pl_massj || planet.pl_mass;
+    if (mass && !isNaN(parseFloat(mass))) {
+      return `${parseFloat(mass).toFixed(2)} Earth masses`;
+    }
+    return 'Unknown';
+  };
+
+  const formatRadius = (planet) => {
+    const radius = planet.pl_rade || planet.pl_radj || planet.pl_radius;
+    if (radius && !isNaN(parseFloat(radius))) {
+      return `${parseFloat(radius).toFixed(2)} Earth radii`;
+    }
+    return 'Unknown';
+  };
+
+  const formatPeriod = (planet) => {
+    const period = planet.pl_orbper;
+    if (period && !isNaN(parseFloat(period))) {
+      return `${parseFloat(period).toFixed(1)} days`;
+    }
+    return 'Unknown';
+  };
+
+  const formatTemp = (planet) => {
+    const temp = planet.pl_eqt || planet.pl_teq;
+    if (temp && !isNaN(parseFloat(temp))) {
+      return `${Math.round(parseFloat(temp))} K`;
+    }
+    return 'Unknown';
+  };
+
+  tooltip.style("opacity", 1)
+    .html(`
+      <strong>${d.pl_name}</strong>
+      <p>${description}</p>
+      ${specialInfo}
+      <ul>
+        <li>Mass: ${formatMass(d)}</li>
+        <li>Radius: ${formatRadius(d)}</li>
+        <li>Orbital period: ${formatPeriod(d)}</li>
+        <li>Temperature: ${formatTemp(d)}</li>
+        <li>Year discovered: ${d.disc_year || 'Unknown'}</li>
+      </ul>
+    `);
   })
   .on("mousemove", function(event) {
     tooltip.style("left", (event.pageX + 10) + "px")
@@ -174,6 +216,44 @@ export function renderSystem(containerId, planetData) {
   })
   .on("mouseout", () => tooltip.style("opacity", 0));
 
+  // Animate planets orbiting
+  if (animationTimer) {
+    animationTimer.stop();
+  }
+
+  animationTimer = d3.timer(function(elapsed) {
+    if (!isAnimationPlaying) return;
+    
+    planets.attr("transform", function(d) {
+      const period = +d.pl_orbper || 365;
+      const ecc = +d.pl_orbeccen || 0;
+      const a = getOrbitValue(d);
+      
+      // Adjust speed based on system - TOI-178 planets move in harmonic rhythm
+      let speedFactor = 1;
+      if (hostname === "TOI-178") {
+        // Slower movement to emphasize the resonance
+        speedFactor = 0.7;
+      } else if (hostname === "GJ 667 C") {
+        // Slightly faster for the closer system
+        speedFactor = 1.2;
+      }
+      
+      // Apply both system speed factor AND user speed control
+      const progress = (elapsed * animationSpeed / (period * 100 / speedFactor)) % 1;
+      const meanAnomaly = progress * 2 * Math.PI;
+      const trueAnomaly = calculateTrueAnomaly(meanAnomaly, ecc);
+      const r = a * (1 - ecc * ecc) / (1 + ecc * Math.cos(trueAnomaly));
+      const x = auToPixels(r * Math.cos(trueAnomaly));
+      const y = auToPixels(r * Math.sin(trueAnomaly));
+      
+      return `translate(${x}, ${y})`;
+    });
+    
+    // Update any resonance lines if they exist
+    updateResonanceLines(svg, elapsed, hostname, planetData, auToPixels);
+  });
+  /*
   // Animate planets orbiting
   d3.timer(function(elapsed) {
     planets.attr("transform", function(d) {
@@ -190,8 +270,8 @@ export function renderSystem(containerId, planetData) {
         // Slightly faster for the closer system
         speedFactor = 1.2;
       }
-      
-      const progress = (elapsed / (period * 100 / speedFactor)) % 1;
+      //const progress = (elapsed / (period * 100 / speedFactor)) % 1;
+      const progress = (elapsed * animationSpeed / (period * 100 / speedFactor)) % 1;
       const meanAnomaly = progress * 2 * Math.PI;
       const trueAnomaly = calculateTrueAnomaly(meanAnomaly, ecc);
       const r = a * (1 - ecc * ecc) / (1 + ecc * Math.cos(trueAnomaly));
@@ -204,7 +284,8 @@ export function renderSystem(containerId, planetData) {
     // Update any resonance lines if they exist
     updateResonanceLines(svg, elapsed, hostname, planetData, auToPixels);
   });
-
+  
+  */ 
   // hook up system-specific interactive elements
   if (containerId === "container-kepler") {
     setupComparisonSlider(svg, planetData, auToPixels, radiusScale);
@@ -653,5 +734,239 @@ function setupHabitableZoneToggle(svg, data) {
       });
       
     button.textContent = isVisible ? "Show Habitable Zone" : "Hide Habitable Zone";
+  });
+}
+
+// Enhanced renderSystem function with planet selection support
+export function renderSystemEnhanced(containerId, planetData) {
+  currentSystemPlanets = planetData;
+  currentSelectedPlanet = 0;
+  
+  // Render the original system
+  renderSystem(containerId, planetData);
+  
+  // Add planet selection functionality
+  addPlanetSelectionToSystem(containerId, planetData);
+  
+  // Initialize planet profile
+  updatePlanetProfile(0);
+  
+  // Setup animation controls
+  setupAnimationControls();
+  
+  // Setup planet navigation
+  setupPlanetNavigation();
+}
+
+// Add clickable functionality to planets in the orbit animation
+function addPlanetSelectionToSystem(containerId, planetData) {
+  const container = d3.select(`#${containerId}`);
+  
+  // Add click handlers to planets
+  container.selectAll(".planet")
+    .classed("orbit-planet", true)
+    .on("click", function(event, d) {
+      const planetIndex = planetData.indexOf(d);
+      selectPlanetInSystem(planetIndex);
+    });
+    
+  // Highlight the first planet by default
+  if (planetData.length > 0) {
+    container.selectAll(".planet")
+      .classed("selected", (d, i) => i === 0);
+  }
+}
+
+// Select a specific planet and update the profile
+function selectPlanetInSystem(planetIndex) {
+  if (planetIndex < 0 || planetIndex >= currentSystemPlanets.length) return;
+  
+  currentSelectedPlanet = planetIndex;
+  
+  // Update visual selection in orbit animation
+  d3.selectAll(".orbit-planet")
+    .classed("selected", (d, i) => i === planetIndex)
+    .attr("r", function(d, i) {
+      // Scale the radius instead of using CSS transform
+      const baseRadius = d3.select(this).attr("data-base-radius") || d3.select(this).attr("r");
+      return i === planetIndex ? parseFloat(baseRadius) * 1.3 : baseRadius;
+    });
+  
+  // Update planet profile panel
+  updatePlanetProfile(planetIndex);
+}
+
+// Update the planet profile panel with selected planet data
+function updatePlanetProfile(planetIndex) {
+  if (planetIndex >= currentSystemPlanets.length) return;
+  
+  const planet = currentSystemPlanets[planetIndex];
+  const hostname = planet.hostname;
+  const systemInfo = systemNarratives[hostname] || {};
+  
+  // Get planet letter for description lookup
+  const planetLetter = planet.pl_name.split(" ").pop();
+  const descriptions = systemInfo.descriptions || {};
+  const description = descriptions[planetLetter] || 
+    `A fascinating planet in the ${hostname} system. This ${planet.pl_name} offers unique characteristics that add to our understanding of planetary formation and evolution.`;
+  
+  const safeText = (val, unit = "") => {
+    const num = parseFloat(val);
+    return isNaN(num) ? "Unknown" : `${num.toFixed(2)}${unit}`;
+  };
+  
+// Update planet info
+  document.getElementById('profile-planet-name').textContent = planet.pl_name || 'Unknown';
+  document.getElementById('profile-planet-mass').textContent = safeText(planet.pl_bmasse, " Earth masses");
+  document.getElementById('profile-planet-radius').textContent = safeText(planet.pl_rade, " Earth radii");
+  document.getElementById('profile-planet-period').textContent = safeText(planet.pl_orbper, " days");
+  document.getElementById('profile-planet-temp').textContent = safeText(planet.pl_eqt, " K");
+
+  const distanceAU = parseFloat(planet.pl_orbsmax) || getOrbitValue(planet);
+  document.getElementById('profile-planet-distance').textContent = isNaN(distanceAU) ? 'Unknown' : `${distanceAU.toFixed(3)} AU`;
+
+  // Update description
+  document.getElementById('profile-planet-description').textContent = description;
+
+  // Update visual representation
+  updatePlanetVisual(planet, hostname);
+}
+
+// Update the 3D planet visual based on selected planet
+function updatePlanetVisual(planet, hostname) {
+  const visual = document.getElementById('planet-visual-display');
+  if (!visual) return;
+  
+  // Get planet color based on system and properties
+  let planetColor = getPlanetDisplayColor(planet, hostname);
+  
+  // Update visual styling
+  visual.style.background = `radial-gradient(circle at 30% 30%, ${planetColor}, ${planetColor}88)`;
+  visual.style.boxShadow = `0 0 30px ${planetColor}66, inset -10px -10px 20px rgba(0, 0, 0, 0.3)`;
+  
+  // Add special effects for notable planets
+  if (hostname === "GJ 667 C" && isInHabitableZone(planet)) {
+    visual.style.boxShadow += `, 0 0 40px rgba(50, 205, 50, 0.4)`;
+  } else if (hostname === "KOI-351" && planet.pl_name.includes("i")) {
+    visual.style.boxShadow += `, 0 0 40px rgba(255, 215, 0, 0.4)`;
+  }
+}
+
+// Get display color for planet visual
+function getPlanetDisplayColor(planet, hostname) {
+  if (hostname === "KOI-351") {
+    return planet.pl_name.includes("i") ? "#feca57" : "#ff6b6b";
+  } else if (hostname === "TOI-178") {
+    return "#4ecdc4";
+  } else if (hostname === "GJ 667 C") {
+    return isInHabitableZone(planet) ? "#50C878" : "#8B4513";
+  }
+  return "#4ecdc4";
+}
+
+// Setup animation controls
+function setupAnimationControls() {
+  const playPauseBtn = document.getElementById('animation-play-pause');
+  const speedSlider = document.getElementById('animation-speed-slider');
+  const speedValue = document.getElementById('animation-speed-value');
+  
+  // Play/Pause button
+  if (playPauseBtn) {
+    playPauseBtn.addEventListener('click', function() {
+      isAnimationPlaying = !isAnimationPlaying;
+      this.textContent = isAnimationPlaying ? '⏸️ Pause' : '▶️ Play';
+      console.log(`Animation ${isAnimationPlaying ? 'resumed' : 'paused'}`);
+    });
+  }
+  
+  // Speed control
+  if (speedSlider && speedValue) {
+    speedSlider.addEventListener('input', function() {
+      animationSpeed = parseFloat(this.value);
+      speedValue.textContent = `${animationSpeed}x`;
+
+      console.log(`Animation speed set to: ${animationSpeed}x`);
+    });
+  }
+  console.log('Animation controls setup completed');
+}
+
+// Setup planet navigation controls
+function setupPlanetNavigation() {
+  const nextPlanetBtn = document.getElementById('next-planet-btn');
+  
+  if (nextPlanetBtn) {
+    nextPlanetBtn.addEventListener('click', function() {
+      if (currentSystemPlanets.length === 0) return;
+      
+      currentSelectedPlanet = (currentSelectedPlanet + 1) % currentSystemPlanets.length;
+      selectPlanetInSystem(currentSelectedPlanet);
+      
+      // Add visual feedback
+      this.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        this.style.transform = 'scale(1)';
+      }, 150);
+    });
+  }
+}
+
+// Initialize enhanced system when called from global.js
+export function initializeEnhancedSystem(containerId, hostname) {
+  if (!window.ExoplanetData || !window.ExoplanetData.isLoaded()) {
+    console.warn(`Cannot initialize enhanced system ${hostname}: Global data not loaded yet`);
+    
+    if (window.ExoplanetData) {
+      window.ExoplanetData.onDataLoaded(() => {
+        const planetData = window.ExoplanetData.getByHostname(hostname);
+        renderSystemEnhanced(containerId, planetData);
+      });
+    }
+    return;
+  }
+  
+  const planetData = window.ExoplanetData.getByHostname(hostname);
+  if (planetData.length === 0) {
+    console.warn(`No planets found for hostname: ${hostname}`);
+    return;
+  }
+  
+  renderSystemEnhanced(containerId, planetData);
+}
+
+// Cleanup function for when switching between systems
+export function cleanupEnhancedSystem() {
+  if (animationTimer) {
+    animationTimer.stop();
+    animationTimer = null;
+  }
+  
+  currentSystemPlanets = [];
+  currentSelectedPlanet = 0;
+  isAnimationPlaying = true;
+  animationSpeed = 1;
+}
+
+// Keyboard navigation support
+export function setupKeyboardNavigation() {
+  document.addEventListener('keydown', function(event) {
+    if (!currentSystemPlanets.length) return;
+    
+    switch(event.key) {
+      case 'ArrowLeft':
+        event.preventDefault();
+        currentSelectedPlanet = currentSelectedPlanet > 0 ? currentSelectedPlanet - 1 : currentSystemPlanets.length - 1;
+        selectPlanetInSystem(currentSelectedPlanet);
+        break;
+      case 'ArrowRight':
+        event.preventDefault();
+        currentSelectedPlanet = (currentSelectedPlanet + 1) % currentSystemPlanets.length;
+        selectPlanetInSystem(currentSelectedPlanet);
+        break;
+      case ' ':
+        event.preventDefault();
+        document.getElementById('animation-play-pause')?.click();
+        break;
+    }
   });
 }
