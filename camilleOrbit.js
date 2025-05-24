@@ -5,6 +5,12 @@ import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 // D3 ORBIT STORIES: Camille's Code  
 // =========================== 
 
+function getHostnameFromId(containerId) {
+  if (containerId.includes("kepler")) return "KOI-351";
+  if (containerId.includes("toi")) return "TOI-178";
+  if (containerId.includes("gj")) return "GJ 667 C";
+  return "";
+}
 // System data for narrative
 const systemNarratives = {
   "KOI-351": {
@@ -56,6 +62,8 @@ export function renderSystem(containerId, planetData) {
   const hostname = planetData.length > 0 ? planetData[0].hostname : "";
   const systemInfo = systemNarratives[hostname] || {};
   const systemColor = systemInfo.color || "#FFFFFF";
+
+  console.log(`Rendering system: ${hostname} with ${planetData.length} planets`);
 
   const svg = d3.select(`#${containerId}`)
     .append("svg")
@@ -208,6 +216,69 @@ export function renderSystem(containerId, planetData) {
     setupHabitableZoneToggle(svg, planetData);
   }
 }
+
+// Helper function to render system using global data (new addition)
+export function renderSystemByHostname(containerId, hostname) {
+  // Check if global data is available
+  if (!window.ExoplanetData || !window.ExoplanetData.isLoaded()) {
+    console.warn(`Cannot render system ${hostname}: Global data not loaded yet`);
+    
+    // Register callback to render when data becomes available
+    if (window.ExoplanetData) {
+      window.ExoplanetData.onDataLoaded(() => {
+        console.log(`Retrying render for ${hostname} after data load`);
+        const planetData = window.ExoplanetData.getByHostname(hostname);
+        renderSystem(containerId, planetData);
+      });
+    }
+    return;
+  }
+  
+  // Get planet data using global data management
+  const planetData = window.ExoplanetData.getByHostname(hostname);
+  
+  if (planetData.length === 0) {
+    console.warn(`No planets found for hostname: ${hostname}`);
+    return;
+  }
+  
+  console.log(`Found ${planetData.length} planets for ${hostname}`);
+  renderSystem(containerId, planetData);
+}
+
+// Helper function to get system data with additional filtering (new addition)
+export function getSystemDataWithFilters(hostname, filters = {}) {
+  if (!window.ExoplanetData || !window.ExoplanetData.isLoaded()) {
+    console.warn('Global data not loaded yet');
+    return [];
+  }
+  
+  let planetData = window.ExoplanetData.getByHostname(hostname);
+  
+  // Apply additional filters if provided
+  if (filters.minRadius) {
+    planetData = planetData.filter(d => parseFloat(d.pl_rade || 0) >= filters.minRadius);
+  }
+  
+  if (filters.maxRadius) {
+    planetData = planetData.filter(d => parseFloat(d.pl_rade || 0) <= filters.maxRadius);
+  }
+  
+  if (filters.minPeriod) {
+    planetData = planetData.filter(d => parseFloat(d.pl_orbper || 0) >= filters.minPeriod);
+  }
+  
+  if (filters.maxPeriod) {
+    planetData = planetData.filter(d => parseFloat(d.pl_orbper || 0) <= filters.maxPeriod);
+  }
+  
+  if (filters.habitableOnly && hostname === "GJ 667 C") {
+    planetData = planetData.filter(d => isInHabitableZone(d));
+  }
+  
+  return planetData;
+}
+
 
 // Add background elements specific to each system
 function addSystemSpecificBackground(svg, hostname) {

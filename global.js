@@ -2,6 +2,92 @@ import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+
+// =========================================
+// GLOBAL DATA USAGE loading main csv file 
+// ==========================================
+let allExoplanets = [];
+let dataLoadedCallbacks = [];
+let isDataLoaded = false;
+
+// Global data management object for everyone to use
+window.ExoplanetData = {
+  // Get all exoplanet data
+  getAll: () => allExoplanets,
+  // Filter by hostname (star system)
+  getByHostname: (hostname) => allExoplanets.filter(d => d.hostname === hostname),
+  // Filter by multiple hostnames
+  getByHostnames: (hostnames) => allExoplanets.filter(d => hostnames.includes(d.hostname)),
+  // Filter by discovery year
+  getByDiscoveryYear: (year) => allExoplanets.filter(d => d.disc_year == year),
+  // Filter by discovery year range
+  getByYearRange: (startYear, endYear) => allExoplanets.filter(d => {
+    const year = parseInt(d.disc_year);
+    return year >= startYear && year <= endYear;
+  }),
+  // Filter by planet radius range
+  getByRadiusRange: (minRadius, maxRadius) => allExoplanets.filter(d => {
+    const radius = parseFloat(d.pl_rade);
+    return radius >= minRadius && radius <= maxRadius;
+  }),
+  // Filter by orbital period range
+  getByPeriodRange: (minPeriod, maxPeriod) => allExoplanets.filter(d => {
+    const period = parseFloat(d.pl_orbper);
+    return period >= minPeriod && period <= maxPeriod;
+  }),
+  // Filter by discovery method
+  getByDiscoveryMethod: (method) => allExoplanets.filter(d => d.discoverymethod === method),
+  // Get unique values for a specific column
+  getUniqueValues: (column) => [...new Set(allExoplanets.map(d => d[column]).filter(v => v))],
+  // Custom filter function - pass your own filter function
+  getFiltered: (filterFunction) => allExoplanets.filter(filterFunction),
+  // Get summary statistics
+  getStats: () => ({
+    total: allExoplanets.length,
+    uniqueStars: new Set(allExoplanets.map(d => d.hostname)).size,
+    discoveryMethods: [...new Set(allExoplanets.map(d => d.discoverymethod))],
+    yearRange: {
+      min: Math.min(...allExoplanets.map(d => parseInt(d.disc_year)).filter(y => !isNaN(y))),
+      max: Math.max(...allExoplanets.map(d => parseInt(d.disc_year)).filter(y => !isNaN(y)))
+    }
+  }),
+  
+  // Check if data is loaded
+  isLoaded: () => isDataLoaded,
+  
+  // Register callback for when data is loaded
+  onDataLoaded: (callback) => {
+    if (isDataLoaded) {
+      callback(allExoplanets);
+    } else {
+      dataLoadedCallbacks.push(callback);
+    }
+  }
+};
+
+// Load exoplanet data globally
+function loadExoplanetData() {
+  console.log('Loading exoplanet data...');
+  
+  d3.csv("exoplanet.csv").then(data => {
+    allExoplanets = data;
+    isDataLoaded = true;
+    
+    console.log(`Loaded ${data.length} exoplanets`);
+    console.log('Sample data:', data[0]);
+    
+    // Execute all callbacks waiting for data
+    dataLoadedCallbacks.forEach(callback => callback(allExoplanets));
+    dataLoadedCallbacks = []; // Clear callbacks after execution
+    
+    // Initialize indvidual sections that depend on data
+    initializeCamilleSection();
+    
+  }).catch(error => {
+    console.error('Error loading exoplanet data:', error);
+  });
+}
+
 // ===========================
 // PROGRESS BAR SYSTEM: Line 128 END
 // ===========================
@@ -153,6 +239,16 @@ function createSystem(starRadius, planetsRadius){
 
 }
 
+// Example on how to load your data 
+// ExoplanetData.onDataLoaded((data) => {
+//   // Your code here - this will run when data is loaded
+//   
+//   // EXAMPLE; Filter data for your specific needs heres an example:
+//   // const multiPlanetSystems = ExoplanetData.getFiltered(d => 
+//   //   ExoplanetData.getByHostname(d.hostname).length > 3
+//   // );
+// });
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
@@ -202,7 +298,7 @@ animate();
 import { renderSystem } from './camilleOrbit.js';
 
 const visitedSystems = new Set();
-let allExoplanets = [];
+// let allExoplanets = [];
 let showingConnections = false;
 
 const overview = document.getElementById("overview");
@@ -243,6 +339,16 @@ const systemData = [
 ];
 
 // Load exoplanet data
+function initializeCamilleSection() {
+  systemData.forEach(system => {
+    const planetData = ExoplanetData.getByHostname(system.hostname);
+    drawMiniSystem(`#mini-${system.id}`, planetData);
+  });
+  setupConnectionLines();
+  enhanceCapsules();
+}
+
+/*
 d3.csv("exoplanet.csv").then(data => {
   allExoplanets = data;
   systemData.forEach(system => {
@@ -251,7 +357,7 @@ d3.csv("exoplanet.csv").then(data => {
   });
   setupConnectionLines();
   enhanceCapsules();
-});
+});*/
 
 // Draw mini orbit previews
 function drawMiniSystem(selector, planets) {
@@ -320,7 +426,7 @@ function showDetailedSystem(systemKey) {
     document.getElementById(containerId).style.display = "block";
   }
 
-  const data = allExoplanets.filter(d => d.hostname === system.hostname);
+  const data = ExoplanetData.getByHostname(system.hostname);
   orbitContainer.innerHTML = "";
   const container = document.createElement("div");
   container.id = `container-${system.id}`;
@@ -433,6 +539,14 @@ function getOrbitValue(p) {
 // Jacquelyn's Code
 // ==================================================
 
+// Example on how to load your data 
+// ExoplanetData.onDataLoaded((data) => {
+//   
+//   // EXAMPLE; Filter data for your specific needs heres an example:
+//   const recentDiscoveries = ExoplanetData.getByYearRange(2020, 2024);
+//   // Add them to your timeline visualization
+// });
+
 // Defining Planets in Timeline
 const planets = [
   { name: "Mercury", discovered: "Prehistoric", color: "#b1b1b1", radius: 10 },
@@ -484,6 +598,8 @@ g.append("text")
 // Scroll-Based Progress Bar
 // Initialize everything when DOM is ready
 function initializeApp() {
+ // Load exoplanet data first (this is now global)
+  loadExoplanetData();
   // Initialize enhanced progress bar
   initEnhancedProgressBar();
   
