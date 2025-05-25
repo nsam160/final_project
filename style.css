@@ -2,6 +2,11 @@
 /*     GLOBAL style.css  */
 /* ============================ */
 /* Space Background */
+html {
+  width: 100%;
+  height: 100%;
+}
+
 body {
   background-image: url('svg/galaxy.jpg');
   background-repeat: repeat;
@@ -12,6 +17,8 @@ body {
   font-family: 'Outfit', sans-serif;
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
 }
 
  /* Progress Bar Container */
@@ -779,3 +786,43 @@ body {
 /* ============================ */
 /*  Camille's style.css   END */
 /* ============================ */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+#solarExplorer {
+  display: flex;
+  width: 100%;
+  height: 100%; /* Fill viewport */
+  overflow: hidden;
+}
+
+#dropdownSelector {
+  width: 150px;
+  padding: 4px;
+  font-size: 14px;
+  height: auto;
+}
+
+#solarDropdown {
+  width: 100%;
+}
+
+#lastCanvas {
+  flex: 1; /* Take all remaining space */
+  height: 100%;
+  position: relative;
+  background: transparent; /* or none */
+}
+
+#lastCanvas canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
