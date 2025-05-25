@@ -6,6 +6,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // =========================================
 // GLOBAL DATA USAGE loading main csv file 
 // ==========================================
+async function loadData() {
+    const data = await d3.csv('exoplanet.csv', (row) => ({
+        ...row
+    }));
+    return data;
+}
+
+let data = await loadData();
+
 let allExoplanets = [];
 let dataLoadedCallbacks = [];
 let isDataLoaded = false;
@@ -627,15 +636,6 @@ function animateSystemCapsules() {
 // Nghi's Code 
 // ===========================
 
-async function loadData() {
-    const data = await d3.csv('exoplanet.csv', (row) => ({
-        ...row
-    }));
-    return data;
-}
-
-let data = await loadData();
-
 let validSystemToDraw = Array.from(d3.group(
     data,
     d => d.system_id
@@ -810,7 +810,6 @@ function drawThreeDimension(speed = 1){
         let planetDistance = [];
         planets.forEach(p => {
             let pColor = starColor.clone().multiply(rockyOrGas(+p.mass, +p.radius)[1]);
-            console.log([pColor, starColor]);
             let pTexture = new THREE.TextureLoader().load(rockyOrGas(+p.mass, +p.radius)[0]);
             planetMaterial.push({map: pTexture, color: pColor});
             planetRadius.push(Math.log10(+p.radius * 6378));
@@ -823,7 +822,6 @@ function drawThreeDimension(speed = 1){
             }
         });
 
-        console.log([starRadius, starMaterial, planetRadius, planetMaterial, planetOrbit, planetDistance]);
         return [starRadius, starMaterial, planetRadius, planetMaterial, planetOrbit, planetDistance];
     }
 
