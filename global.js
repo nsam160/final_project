@@ -621,7 +621,7 @@ g.append("text")
   let planetOrbitRing = [];
 
   function drawThreeDimension(speed = 1){
-      function updateSystemDrawing(starRadius, starFeature, planetsRadius, planetsFeature, planetDistance, planetIncline){
+      function updateSystemDrawing(starRadius, starFeature, planetsRadius, planetsFeature, planetDistance, planetIncline, planetEcc){
           scene.remove(starsSystem);
           if (starsSystem.geometry){
               starsSystem.geometry.dispose();
@@ -661,27 +661,61 @@ g.append("text")
               ));
               scene.add(planetsSystem.at(-1));
 
-              planetOrbitRing.push(new THREE.Mesh(
-                  new THREE.TorusGeometry(planetDistance[i], 0.15, 64),
-                  new THREE.MeshBasicMaterial({color: 0xffffff})
-              ));
-              planetOrbitRing.at(-1).rotation.x = planetIncline[i];
+            //   planetOrbitRing.push(new THREE.Mesh(
+            //       new THREE.TorusGeometry(planetDistance[i], 0.15, 64),
+            //       new THREE.MeshBasicMaterial({color: 0xffffff})
+            //   ));
+            //  planetOrbitRing.at(-1).rotation.x = planetIncline[i];
+              planetOrbitRing.push(createEllipticalOrbit(planetDistance[i], planetEcc[i], planetIncline[i]));
               scene.add(planetOrbitRing.at(-1));
           }
 
           camera.position.z = planetDistance.at(-1) + (planetsRadius.at(-1) * 10);
       }
 
-      function createAnimator(orbitalPeriod, planetDistance, planetIncline, speedUpTimes = 1){
+      function createEllipticalOrbit(radius, ecc, incline, segments = 256) {
+        const geometry = new THREE.BufferGeometry();
+        const points = [];
+        const b = radius * Math.sqrt(1 - ecc * ecc); // semi-minor axis
+
+        for (let i = 0; i <= segments; i++) {
+            const theta = (i / segments) * 2 * Math.PI;
+            const x = radius * Math.cos(theta) - radius * ecc;  // center ellipse at focus
+            const y = b * Math.sin(theta);
+            const z = y * Math.sin(incline);
+            const yInclined = y * Math.cos(incline);
+            points.push(new THREE.Vector3(x, yInclined, z));
+        }
+
+        geometry.setFromPoints(points);
+        const material = new THREE.LineBasicMaterial({ color: 0xffffff });
+        return new THREE.LineLoop(geometry, material);
+     }
+
+      function createAnimator(orbitalPeriod, planetDistance, planetIncline, planetEcc, speedUpTimes = 1){
           function animate(time) {
               requestAnimationFrame(animate);
               control.update();
               const t = time / (1000) * speedUpTimes; // time in days * speed, 1 sec = 1 day
               for (let i = 0; i < planetsSystem.length; i++){
-                  let angleRadian = 2 * Math.PI * ((t % orbitalPeriod[i]) / orbitalPeriod[i]);
-                  planetsSystem[i].position.x = planetDistance[i] * Math.cos(angleRadian);
-                  planetsSystem[i].position.y = planetDistance[i] * Math.sin(angleRadian) * Math.cos(planetIncline[i]); 
-                  planetsSystem[i].position.z = planetDistance[i] * Math.sin(angleRadian) * Math.sin(planetIncline[i]);
+                let a = planetDistance[i]; 
+                let e = planetEcc[i];
+                let iRad = planetIncline[i];
+
+                let M = 2 * Math.PI * ((t % orbitalPeriod[i]) / orbitalPeriod[i]);
+                let E = M;
+                for (let j = 0; j < 5; j++) {
+                    E = M + e * Math.sin(E);
+                }
+
+                let x_orb = a * (Math.cos(E) - e);
+                let y_orb = a * Math.sqrt(1 - e * e) * Math.sin(E);
+
+                let x = x_orb;
+                let y = y_orb * Math.cos(iRad);
+                let z = y_orb * Math.sin(iRad);
+
+                planetsSystem[i].position.set(x, y, z);
               }
               renderer.render(scene, camera);
           }
@@ -772,8 +806,8 @@ g.append("text")
       }
 
       let canvasSystem = calculateParameters();
-      updateSystemDrawing(canvasSystem[0], canvasSystem[1], canvasSystem[2], canvasSystem[3], canvasSystem[5], canvasSystem[6]);
-      createAnimator(canvasSystem[4], canvasSystem[5], canvasSystem[6], speed);
+      updateSystemDrawing(canvasSystem[0], canvasSystem[1], canvasSystem[2], canvasSystem[3], canvasSystem[5], canvasSystem[6], canvasSystem[7]);
+      createAnimator(canvasSystem[4], canvasSystem[5], canvasSystem[6], canvasSystem[7], speed);
   }
 
   drawThreeDimension();
