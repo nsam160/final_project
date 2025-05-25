@@ -76,9 +76,9 @@ window.ExoplanetData = {
 // functions for all sections
 function initAllSections() {
   initializeCamilleSection();
-  initJackieSection();
-  initRoyceSection();
-  initNghiSection();
+  //initJackieSection();
+  //initRoyceSection();
+  //initNghiSection();
 }
 
 
@@ -560,8 +560,7 @@ g.append("text")
               planet.pl_eqt !== '' && // planet temperature
               planet.pl_orbper !== '' && // planet orbital period
               planet.pl_rade !== '' && // planet radius in earth
-              planet.pl_bmasse !== '' && // planet mass in earth
-              planet.pl_orbeccen !== '' && // planet shape
+              (planet.pl_bmasse !== '' || planet.pl_dens !== '') && // planet mass in earth
               planet.st_rad !== '' && // star radius
               planet.pl_orbsmax !== '' && // planet distance from star in au
               (planet.st_spectype !== '' || planet.st_teff !== '') // star color
@@ -580,7 +579,9 @@ g.append("text")
           mass: p.pl_bmasse,
           orbitDays: p.pl_orbper,
           eccentricity: p.pl_orbeccen,
-          distanceAU: p.pl_orbsmax
+          distanceAU: p.pl_orbsmax,
+          density: p.pl_dens,
+          inclination: p.pl_orbincl
       }))
   }));
 
@@ -594,10 +595,10 @@ g.append("text")
 
   // First letter in st_spectype
   const starColorMap = {'O':'rgb(86, 104, 203)', 'B':'rgb(129, 163, 252)', 'A':'rgb(151, 177, 236)', 'F':'rgb(255, 244, 243)', 'G':'rgb(255, 229, 207)', 'K':'rgb(255, 199, 142)', 'M':'rgb(255, 166, 81)'}
-  // Planet temperature in kelvin from pl_eqt
+  // Planet color from planet density
   const customPlanetColor = d3.scaleLinear()
-                              .domain([0, 0.3, 0.5, 0.7, 1]) 
-                              .range(["tan", "lightblue", "#90D5FF", "lightblue", "tan"])
+                              .domain([0, 1.5, 2.5, 3.5, 5, 15000]) 
+                              .range(["tan", "lightblue", "#90D5FF", "lightblue", "tan", "tan"])
                               .interpolate(d3.interpolateRgb);
   // The number of segment the spheres should be cut into
   const longLatCut = 32;
@@ -620,7 +621,7 @@ g.append("text")
   let planetOrbitRing = [];
 
   function drawThreeDimension(speed = 1){
-      function updateSystemDrawing(starRadius, starFeature, planetsRadius, planetsFeature, planetDistance){
+      function updateSystemDrawing(starRadius, starFeature, planetsRadius, planetsFeature, planetDistance, planetIncline){
           scene.remove(starsSystem);
           if (starsSystem.geometry){
               starsSystem.geometry.dispose();
@@ -664,13 +665,14 @@ g.append("text")
                   new THREE.TorusGeometry(planetDistance[i], 0.15, 64),
                   new THREE.MeshBasicMaterial({color: 0xffffff})
               ));
+              planetOrbitRing.at(-1).rotation.x = planetIncline[i];
               scene.add(planetOrbitRing.at(-1));
           }
 
           camera.position.z = planetDistance.at(-1) + (planetsRadius.at(-1) * 10);
       }
 
-      function createAnimator(orbitalPeriod, planetDistance, speedUpTimes = 1){
+      function createAnimator(orbitalPeriod, planetDistance, planetIncline, speedUpTimes = 1){
           function animate(time) {
               requestAnimationFrame(animate);
               control.update();
@@ -678,7 +680,8 @@ g.append("text")
               for (let i = 0; i < planetsSystem.length; i++){
                   let angleRadian = 2 * Math.PI * ((t % orbitalPeriod[i]) / orbitalPeriod[i]);
                   planetsSystem[i].position.x = planetDistance[i] * Math.cos(angleRadian);
-                  planetsSystem[i].position.y = planetDistance[i] * Math.sin(angleRadian); 
+                  planetsSystem[i].position.y = planetDistance[i] * Math.sin(angleRadian) * Math.cos(planetIncline[i]); 
+                  planetsSystem[i].position.z = planetDistance[i] * Math.sin(angleRadian) * Math.sin(planetIncline[i]);
               }
               renderer.render(scene, camera);
           }
@@ -724,42 +727,53 @@ g.append("text")
           let planetMaterial = [];
           let planetOrbit = [];
           let planetDistance = [];
+          let planetIncline = [];
+          let planetEcc = [];
           planets.forEach(p => {
-              let pColor = starColor.clone().multiply(rockyOrGas(+p.mass, +p.radius)[1]);
-              let pTexture = new THREE.TextureLoader().load(rockyOrGas(+p.mass, +p.radius)[0]);
+              let pColor = starColor.clone().multiply(rockyOrGas(+p.mass, +p.radius, p.density)[1]);
+              let pTexture = new THREE.TextureLoader().load(rockyOrGas(+p.mass, +p.radius, p.density)[0]);
               planetMaterial.push({map: pTexture, color: pColor});
               planetRadius.push(Math.log10(+p.radius * 6378));
               planetOrbit.push(+p.orbitDays);
-              if (planetDistance.length === 0){
+              if (planetDistance.length === 0)
                   planetDistance.push(Math.log(+p.distanceAU * 149680000));
-              }
-              else {
+              else
                   planetDistance.push(planetDistance.at(-1) + Math.log(+p.distanceAU * 149680000));
-              }
+              
+              if (p.inclination === '')
+                  planetIncline.push(0);
+              else 
+                  planetIncline.push(+p.inclination);
+              
+              if (p.eccentricity === '')
+                  planetEcc.push(0);
+              else 
+                  planetEcc.push(+p.eccentricity);
           });
 
-          return [starRadius, starMaterial, planetRadius, planetMaterial, planetOrbit, planetDistance];
+          return [starRadius, starMaterial, planetRadius, planetMaterial, planetOrbit, planetDistance, planetIncline, planetEcc];
       }
 
-      function rockyOrGas(massEarth, radiusEarth){
-          let density = massEarth / (radiusEarth ** 3);
-          if (density >= 1){
-              return [`basic_texture/rocky_${(Math.floor(density) % 7) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
+      function rockyOrGas(massEarth, radiusEarth, density){
+          if (density === '')
+            density = (massEarth / (radiusEarth ** 3)) * 5.51;
+          else
+            density = +density;
+
+          if (density >= 3.5){
+            return [`basic_texture/rocky_${(Math.floor(density) % 7) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
           }
-          else if (density >= 0.65){
-              return [`basic_texture/rocky_${(Math.floor(density) % 7) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
-          }
-          else if (density >= 0.3){
-              return [`basic_texture/gas_${(Math.floor(density) % 4) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
+          else if (density >= 1.5){
+            return [`basic_texture/gas_${(Math.floor(density) % 4) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
           }
           else {
-              return [`basic_texture/gas_${(Math.floor(density) % 4) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
+            return [`basic_texture/gas_${(Math.floor(density) % 4) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
           }
       }
 
       let canvasSystem = calculateParameters();
-      updateSystemDrawing(canvasSystem[0], canvasSystem[1], canvasSystem[2], canvasSystem[3], canvasSystem[5]);
-      createAnimator(canvasSystem[4], canvasSystem[5], speed);
+      updateSystemDrawing(canvasSystem[0], canvasSystem[1], canvasSystem[2], canvasSystem[3], canvasSystem[5], canvasSystem[6]);
+      createAnimator(canvasSystem[4], canvasSystem[5], canvasSystem[6], speed);
   }
 
   drawThreeDimension();
