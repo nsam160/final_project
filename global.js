@@ -347,34 +347,6 @@ function drawMiniSystem(selector, planets) {
 }
 
 // Show detailed view
-/*
-function showDetailedSystem(systemKey) {
-  const system = systemData.find(s => s.id === systemKey);
-  document.getElementById("system-title").textContent = system.title;
-  document.getElementById("system-description").textContent = system.fullDesc;
-  // Hide all system containers first
-  ["system1", "system2", "system3"].forEach(id => {
-    document.getElementById(id).style.display = "none";
-  });
-
-  // Then show the correct one
-  const systemMap = {
-    kepler: "system1",
-    toi: "system2",
-    gj: "system3"
-  };
-  const containerId = systemMap[systemKey];
-  if (containerId) {
-    document.getElementById(containerId).style.display = "block";
-  }
-
-  const data = ExoplanetData.getByHostname(system.hostname);
-  orbitContainer.innerHTML = "";
-  const container = document.createElement("div");
-  container.id = `container-${system.id}`;
-  orbitContainer.appendChild(container);
-  renderSystem(`container-${system.id}`, data);
-}*/
 
 function showDetailedSystem(systemKey) {
   const system = systemData.find(s => s.id === systemKey);
@@ -523,14 +495,10 @@ function getOrbitValue(p) {
 // ==================================================
 // Jacquelyn's Code
 // ==================================================
-
-// Example on how to load your data 
-// ExoplanetData.onDataLoaded((data) => {
-//   
-//   // EXAMPLE; Filter data for your specific needs heres an example:
-//   const recentDiscoveries = ExoplanetData.getByYearRange(2020, 2024);
-//   // Add them to your timeline visualization
-// });
+// Load exoplanet data 
+//ExoplanetData.onDataLoaded((data) => {
+  // use data
+//});
 
 // Defining Planets in Timeline
 const planets = [
@@ -814,6 +782,19 @@ g.append("text")
 //}
 // ===========================
 // Nghi's Code 
+// ===========================
+
+// ===========================
+// Royce's Code 
+// ===========================
+// Load exoplanet data 
+//ExoplanetData.onDataLoaded((data) => {
+
+//});
+
+
+// ===========================
+// Royce's Code 
 // ===========================
 
 // ================================
