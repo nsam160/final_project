@@ -6,14 +6,14 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // =========================================
 // GLOBAL DATA USAGE loading main csv file 
 // ==========================================
-async function loadData() {
-    const data = await d3.csv('exoplanet.csv', (row) => ({
-        ...row
-    }));
-    return data;
-}
+//async function loadData() {
+    //const data = await d3.csv('exoplanet.csv', (row) => ({
+       //...row
+    //}));
+    //return data;
+//}
 
-let data = await loadData();
+//let data = await loadData();
 
 let allExoplanets = [];
 let dataLoadedCallbacks = [];
@@ -73,6 +73,14 @@ window.ExoplanetData = {
     }
   }
 };
+// functions for all sections
+function initAllSections() {
+  initializeCamilleSection();
+  initJackieSection();
+  initRoyceSection();
+  initNghiSection();
+}
+
 
 // Load exoplanet data globally
 function loadExoplanetData() {
@@ -90,9 +98,8 @@ function loadExoplanetData() {
     dataLoadedCallbacks = []; // Clear callbacks after execution
     
     // Initialize indvidual sections that depend on data
-    initializeCamilleSection();
+    initAllSections();
 
-    
   }).catch(error => {
     console.error('Error loading exoplanet data:', error);
   });
@@ -569,6 +576,245 @@ g.append("text")
 // Jacquelyn's Code END
 // ==================================================
 
+// ===========================
+// Nghi's Code 
+// ===========================
+
+//function initNghiSection() {
+  //console.log(" Nghi section initialized");
+  //let validSystemToDraw = Array.from(d3.group(
+  ExoplanetData.onDataLoaded((data) => {
+    let validSystemToDraw = Array.from(d3.group(
+      data,
+      d => d.system_id
+    )).filter(([_, planets]) => {
+      return planets.every(planet =>
+              planet.pl_eqt !== '' && // planet temperature
+              planet.pl_orbper !== '' && // planet orbital period
+              planet.pl_rade !== '' && // planet radius in earth
+              planet.pl_bmasse !== '' && // planet mass in earth
+              planet.pl_orbeccen !== '' && // planet shape
+              planet.st_rad !== '' && // star radius
+              planet.pl_orbsmax !== '' && // planet distance from star in au
+              (planet.st_spectype !== '' || planet.st_teff !== '') // star color
+          );
+      });
+
+  validSystemToDraw = validSystemToDraw.map(([systemId, planets]) => ({
+      systemId,
+      starRadius: planets[0].st_rad, // assuming all same star
+      starType: planets[0].st_spectype,
+      starTemp: planets[0].st_teff,
+      planets: planets.sort((a, b) => a.pl_orbsmax - b.pl_orbsmax).map(p => ({
+          name: p.pl_name,
+          temp: p.pl_eqt,
+          radius: p.pl_rade,
+          mass: p.pl_bmasse,
+          orbitDays: p.pl_orbper,
+          eccentricity: p.pl_orbeccen,
+          distanceAU: p.pl_orbsmax
+      }))
+  }));
+
+  const dropdownSolar = document.getElementById('solarDropdown');
+  validSystemToDraw.sort((a, b) => a.systemId.localeCompare(b.systemId)).forEach(system => {
+      const option = document.createElement("option");
+      option.value = system.systemId;
+      option.textContent = system.systemId;
+      dropdownSolar.appendChild(option);
+  });
+
+  // First letter in st_spectype
+  const starColorMap = {'O':'rgb(86, 104, 203)', 'B':'rgb(129, 163, 252)', 'A':'rgb(151, 177, 236)', 'F':'rgb(255, 244, 243)', 'G':'rgb(255, 229, 207)', 'K':'rgb(255, 199, 142)', 'M':'rgb(255, 166, 81)'}
+  // Planet temperature in kelvin from pl_eqt
+  const customPlanetColor = d3.scaleLinear()
+                              .domain([0, 0.3, 0.5, 0.7, 1]) 
+                              .range(["tan", "lightblue", "#90D5FF", "lightblue", "tan"])
+                              .interpolate(d3.interpolateRgb);
+  // The number of segment the spheres should be cut into
+  const longLatCut = 32;
+
+  // All of the parameters below should have the same length matching number of canvas on the webpage
+  const container = document.getElementById('lastCanvas');
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientWidth, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({alpha: true});
+  renderer.setSize(container.clientWidth, container.clientWidth);
+  container.appendChild(renderer.domElement);
+
+  const control = new OrbitControls(camera, renderer.domElement);
+  control.enableDamping = true;
+  let starsSystem = new THREE.Mesh(
+      new THREE.SphereGeometry(0, longLatCut, longLatCut),
+      new THREE.MeshBasicMaterial({color: 'yellow'})
+  );
+  let planetsSystem = [];
+  let planetOrbitRing = [];
+
+  function drawThreeDimension(speed = 1){
+      function updateSystemDrawing(starRadius, starFeature, planetsRadius, planetsFeature, planetDistance){
+          scene.remove(starsSystem);
+          if (starsSystem.geometry){
+              starsSystem.geometry.dispose();
+          }
+          if (starsSystem.material){
+              starsSystem.material.dispose();
+          }
+          for (let planet_i = 0; planet_i < planetsSystem.length; planet_i++){
+              scene.remove(planetsSystem[planet_i]);
+              if (planetsSystem[planet_i].geometry){
+                  planetsSystem[planet_i].geometry.dispose();
+              }
+              if (planetsSystem[planet_i].material){
+                  planetsSystem[planet_i].material.dispose();
+              }
+              scene.remove(planetOrbitRing[planet_i]);
+              if (planetOrbitRing[planet_i].geometry){
+                  planetOrbitRing[planet_i].geometry.dispose();
+              }
+              if (planetOrbitRing[planet_i].material){
+                  planetOrbitRing[planet_i].material.dispose();
+              }
+          }
+          planetsSystem.length = 0;
+          planetOrbitRing.length = 0;
+
+          starsSystem = new THREE.Mesh(
+              new THREE.SphereGeometry(starRadius, longLatCut, longLatCut),
+              new THREE.MeshBasicMaterial(starFeature)
+          );
+          scene.add(starsSystem);
+
+          for (let i = 0; i < planetsRadius.length; i++){
+              planetsSystem.push(new THREE.Mesh(
+                  new THREE.SphereGeometry(planetsRadius[i], longLatCut, longLatCut),
+                  new THREE.MeshBasicMaterial(planetsFeature[i])
+              ));
+              scene.add(planetsSystem.at(-1));
+
+              planetOrbitRing.push(new THREE.Mesh(
+                  new THREE.TorusGeometry(planetDistance[i], 0.15, 64),
+                  new THREE.MeshBasicMaterial({color: 0xffffff})
+              ));
+              scene.add(planetOrbitRing.at(-1));
+          }
+
+          camera.position.z = planetDistance.at(-1) + (planetsRadius.at(-1) * 10);
+      }
+
+      function createAnimator(orbitalPeriod, planetDistance, speedUpTimes = 1){
+          function animate(time) {
+              requestAnimationFrame(animate);
+              control.update();
+              const t = time / (1000) * speedUpTimes; // time in days * speed, 1 sec = 1 day
+              for (let i = 0; i < planetsSystem.length; i++){
+                  let angleRadian = 2 * Math.PI * ((t % orbitalPeriod[i]) / orbitalPeriod[i]);
+                  planetsSystem[i].position.x = planetDistance[i] * Math.cos(angleRadian);
+                  planetsSystem[i].position.y = planetDistance[i] * Math.sin(angleRadian); 
+              }
+              renderer.render(scene, camera);
+          }
+          animate();
+      }
+
+      function calculateParameters(){
+          const system = validSystemToDraw.find(system => system.systemId === dropdownSolar.value);
+          const planets = system.planets;
+          let starColor = null;
+          if (system.systType !== null){
+              starColor = starColorMap[system.starType[0]];
+          }
+          else {
+              if (system.starTemp > 30000 + 273.15){
+                  starColor = starColorMap['O']
+              }
+              else if (system.starTemp > 9700 + 273.15){
+                  starColor = starColorMap['B']
+              }
+              else if (system.starTemp > 7200 + 273.15){
+                  starColor = starColorMap['A']
+              }
+              else if (system.starTemp > 5700 + 273.15){
+                  starColor = starColorMap['F']
+              }
+              else if (system.starTemp > 4900 + 273.15){
+                  starColor = starColorMap['G']
+              }
+              else if (system.starTemp > 3400 + 273.15){
+                  starColor = starColorMap['K']
+              }
+              else {
+                  starColor = starColorMap['M']
+              }
+          }
+          starColor = new THREE.Color(starColor);
+          let starRadius = (Math.log10(+system.starRadius * 109 * 6378))  // In earth radius
+          let starTexture = new THREE.TextureLoader().load('basic_texture/sun.jpg');
+          let starMaterial = {map: starTexture, color: starColor};
+
+          let planetRadius = [];
+          let planetMaterial = [];
+          let planetOrbit = [];
+          let planetDistance = [];
+          planets.forEach(p => {
+              let pColor = starColor.clone().multiply(rockyOrGas(+p.mass, +p.radius)[1]);
+              let pTexture = new THREE.TextureLoader().load(rockyOrGas(+p.mass, +p.radius)[0]);
+              planetMaterial.push({map: pTexture, color: pColor});
+              planetRadius.push(Math.log10(+p.radius * 6378));
+              planetOrbit.push(+p.orbitDays);
+              if (planetDistance.length === 0){
+                  planetDistance.push(Math.log(+p.distanceAU * 149680000));
+              }
+              else {
+                  planetDistance.push(planetDistance.at(-1) + Math.log(+p.distanceAU * 149680000));
+              }
+          });
+
+          return [starRadius, starMaterial, planetRadius, planetMaterial, planetOrbit, planetDistance];
+      }
+
+      function rockyOrGas(massEarth, radiusEarth){
+          let density = massEarth / (radiusEarth ** 3);
+          if (density >= 1){
+              return [`basic_texture/rocky_${(Math.floor(density) % 7) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
+          }
+          else if (density >= 0.65){
+              return [`basic_texture/rocky_${(Math.floor(density) % 7) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
+          }
+          else if (density >= 0.3){
+              return [`basic_texture/gas_${(Math.floor(density) % 4) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
+          }
+          else {
+              return [`basic_texture/gas_${(Math.floor(density) % 4) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
+          }
+      }
+
+      let canvasSystem = calculateParameters();
+      updateSystemDrawing(canvasSystem[0], canvasSystem[1], canvasSystem[2], canvasSystem[3], canvasSystem[5]);
+      createAnimator(canvasSystem[4], canvasSystem[5], speed);
+  }
+
+  drawThreeDimension();
+
+  // SET WIDTH OF CANVAS
+  container.style.height = `${container.clientWidth}px`;
+  window.addEventListener('resize', () => {
+      const width = container.clientWidth;
+      const height = container.clientWidth;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+      container.style.height = `${container.clientWidth}px`;
+  });
+
+  dropdownSolar.addEventListener('change', (event) => {
+      drawThreeDimension();
+  });
+  });
+//}
+// ===========================
+// Nghi's Code 
+// ===========================
 
 // ================================
 // Global code
@@ -576,6 +822,8 @@ g.append("text")
 // Scroll-Based Progress Bar
 // Initialize everything when DOM is ready
 function initializeApp() {
+  // Load exoplanet data first (this is now global)
+  loadExoplanetData();
   // Initialize enhanced progress bar
   initEnhancedProgressBar();
   
@@ -631,238 +879,9 @@ function animateSystemCapsules() {
     }, index * 200);
   });
 }
-
-// ===========================
-// Nghi's Code 
-// ===========================
-
-let validSystemToDraw = Array.from(d3.group(
-    data,
-    d => d.system_id
-)).filter(([systemId, planets]) => {
-    return planets.every(planet =>
-            planet.pl_eqt !== '' && // planet temperature
-            planet.pl_orbper !== '' && // planet orbital period
-            planet.pl_rade !== '' && // planet radius in earth
-            planet.pl_bmasse !== '' && // planet mass in earth
-            planet.pl_orbeccen !== '' && // planet shape
-            planet.st_rad !== '' && // star radius
-            planet.pl_orbsmax !== '' && // planet distance from star in au
-            (planet.st_spectype !== '' || planet.st_teff !== '') // star color
-        );
-});
-
-validSystemToDraw = validSystemToDraw.map(([systemId, planets]) => ({
-    systemId,
-    starRadius: planets[0].st_rad, // assuming all same star
-    starType: planets[0].st_spectype,
-    starTemp: planets[0].st_teff,
-    planets: planets.sort((a, b) => a.pl_orbsmax - b.pl_orbsmax).map(p => ({
-        name: p.pl_name,
-        temp: p.pl_eqt,
-        radius: p.pl_rade,
-        mass: p.pl_bmasse,
-        orbitDays: p.pl_orbper,
-        eccentricity: p.pl_orbeccen,
-        distanceAU: p.pl_orbsmax
-    }))
-}));
-
-const dropdownSolar = document.getElementById('solarDropdown');
-validSystemToDraw.sort((a, b) => a.systemId.localeCompare(b.systemId)).forEach(system => {
-    const option = document.createElement("option");
-    option.value = system.systemId;
-    option.textContent = system.systemId;
-    dropdownSolar.appendChild(option);
-});
-
-// First letter in st_spectype
-const starColorMap = {'O':'rgb(86, 104, 203)', 'B':'rgb(129, 163, 252)', 'A':'rgb(151, 177, 236)', 'F':'rgb(255, 244, 243)', 'G':'rgb(255, 229, 207)', 'K':'rgb(255, 199, 142)', 'M':'rgb(255, 166, 81)'}
-// Planet temperature in kelvin from pl_eqt
-const customPlanetColor = d3.scaleLinear()
-                            .domain([0, 0.3, 0.5, 0.7, 1]) 
-                            .range(["tan", "lightblue", "#90D5FF", "lightblue", "tan"])
-                            .interpolate(d3.interpolateRgb);
-// The number of segment the spheres should be cut into
-const longLatCut = 32;
-
-// All of the parameters below should have the same length matching number of canvas on the webpage
-const container = document.getElementById('lastCanvas');
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientWidth, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({alpha: true});
-renderer.setSize(container.clientWidth, container.clientWidth);
-container.appendChild(renderer.domElement);
-
-const control = new OrbitControls(camera, renderer.domElement);
-control.enableDamping = true;
-let starsSystem = new THREE.Mesh(
-    new THREE.SphereGeometry(0, longLatCut, longLatCut),
-    new THREE.MeshBasicMaterial({color: 'yellow'})
-);
-let planetsSystem = [];
-let planetOrbitRing = [];
-
-function drawThreeDimension(speed = 1){
-    function updateSystemDrawing(starRadius, starFeature, planetsRadius, planetsFeature, planetDistance){
-        scene.remove(starsSystem);
-        if (starsSystem.geometry){
-            starsSystem.geometry.dispose();
-        }
-        if (starsSystem.material){
-            starsSystem.material.dispose();
-        }
-        for (let planet_i = 0; planet_i < planetsSystem.length; planet_i++){
-            scene.remove(planetsSystem[planet_i]);
-            if (planetsSystem[planet_i].geometry){
-                planetsSystem[planet_i].geometry.dispose();
-            }
-            if (planetsSystem[planet_i].material){
-                planetsSystem[planet_i].material.dispose();
-            }
-            scene.remove(planetOrbitRing[planet_i]);
-            if (planetOrbitRing[planet_i].geometry){
-                planetOrbitRing[planet_i].geometry.dispose();
-            }
-            if (planetOrbitRing[planet_i].material){
-                planetOrbitRing[planet_i].material.dispose();
-            }
-        }
-        planetsSystem.length = 0;
-        planetOrbitRing.length = 0;
-
-        starsSystem = new THREE.Mesh(
-            new THREE.SphereGeometry(starRadius, longLatCut, longLatCut),
-            new THREE.MeshBasicMaterial(starFeature)
-        );
-        scene.add(starsSystem);
-
-        for (let i = 0; i < planetsRadius.length; i++){
-            planetsSystem.push(new THREE.Mesh(
-                new THREE.SphereGeometry(planetsRadius[i], longLatCut, longLatCut),
-                new THREE.MeshBasicMaterial(planetsFeature[i])
-            ));
-            scene.add(planetsSystem.at(-1));
-
-            planetOrbitRing.push(new THREE.Mesh(
-                new THREE.TorusGeometry(planetDistance[i], 0.15, 64),
-                new THREE.MeshBasicMaterial({color: 0xffffff})
-            ));
-            scene.add(planetOrbitRing.at(-1));
-        }
-
-        camera.position.z = planetDistance.at(-1) + (planetsRadius.at(-1) * 10);
-    }
-
-    function createAnimator(orbitalPeriod, planetDistance, speedUpTimes = 1){
-        function animate(time) {
-            requestAnimationFrame(animate);
-            control.update();
-            const t = time / (1000) * speedUpTimes; // time in days * speed, 1 sec = 1 day
-            for (let i = 0; i < planetsSystem.length; i++){
-                let angleRadian = 2 * Math.PI * ((t % orbitalPeriod[i]) / orbitalPeriod[i]);
-                planetsSystem[i].position.x = planetDistance[i] * Math.cos(angleRadian);
-                planetsSystem[i].position.y = planetDistance[i] * Math.sin(angleRadian); 
-            }
-            renderer.render(scene, camera);
-        }
-        animate();
-    }
-
-    function calculateParameters(){
-        const system = validSystemToDraw.find(system => system.systemId === dropdownSolar.value);
-        const planets = system.planets;
-        let starColor = null;
-        if (system.systType !== null){
-            starColor = starColorMap[system.starType[0]];
-        }
-        else {
-            if (system.starTemp > 30000 + 273.15){
-                starColor = starColorMap['O']
-            }
-            else if (system.starTemp > 9700 + 273.15){
-                starColor = starColorMap['B']
-            }
-            else if (system.starTemp > 7200 + 273.15){
-                starColor = starColorMap['A']
-            }
-            else if (system.starTemp > 5700 + 273.15){
-                starColor = starColorMap['F']
-            }
-            else if (system.starTemp > 4900 + 273.15){
-                starColor = starColorMap['G']
-            }
-            else if (system.starTemp > 3400 + 273.15){
-                starColor = starColorMap['K']
-            }
-            else {
-                starColor = starColorMap['M']
-            }
-        }
-        starColor = new THREE.Color(starColor);
-        let starRadius = (Math.log10(+system.starRadius * 109 * 6378))  // In earth radius
-        let starTexture = new THREE.TextureLoader().load('basic_texture/sun.jpg');
-        let starMaterial = {map: starTexture, color: starColor};
-
-        let planetRadius = [];
-        let planetMaterial = [];
-        let planetOrbit = [];
-        let planetDistance = [];
-        planets.forEach(p => {
-            let pColor = starColor.clone().multiply(rockyOrGas(+p.mass, +p.radius)[1]);
-            let pTexture = new THREE.TextureLoader().load(rockyOrGas(+p.mass, +p.radius)[0]);
-            planetMaterial.push({map: pTexture, color: pColor});
-            planetRadius.push(Math.log10(+p.radius * 6378));
-            planetOrbit.push(+p.orbitDays);
-            if (planetDistance.length === 0){
-                planetDistance.push(Math.log(+p.distanceAU * 149680000));
-            }
-            else {
-                planetDistance.push(planetDistance.at(-1) + Math.log(+p.distanceAU * 149680000));
-            }
-        });
-
-        return [starRadius, starMaterial, planetRadius, planetMaterial, planetOrbit, planetDistance];
-    }
-
-    function rockyOrGas(massEarth, radiusEarth){
-        let density = massEarth / (radiusEarth ** 3);
-        if (density >= 1){
-            return [`basic_texture/rocky_${(Math.floor(density) % 7) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
-        }
-        else if (density >= 0.65){
-            return [`basic_texture/rocky_${(Math.floor(density) % 7) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
-        }
-        else if (density >= 0.3){
-            return [`basic_texture/gas_${(Math.floor(density) % 4) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
-        }
-        else {
-            return [`basic_texture/gas_${(Math.floor(density) % 4) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
-        }
-    }
-
-    let canvasSystem = calculateParameters();
-    updateSystemDrawing(canvasSystem[0], canvasSystem[1], canvasSystem[2], canvasSystem[3], canvasSystem[5]);
-    createAnimator(canvasSystem[4], canvasSystem[5], speed);
+// Wait for DOM to be ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+  initializeApp();
 }
-
-drawThreeDimension();
-
-// SET WIDTH OF CANVAS
-container.style.height = `${container.clientWidth}px`;
-window.addEventListener('resize', () => {
-    const width = container.clientWidth;
-    const height = container.clientWidth;
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.setSize(width, height);
-    container.style.height = `${container.clientWidth}px`;
-});
-
-dropdownSolar.addEventListener('change', (event) => {
-    drawThreeDimension();
-});
-
-// ===========================
-// Nghi's Code 
-// ===========================
