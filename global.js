@@ -500,30 +500,33 @@ function getOrbitValue(p) {
   // use data
 //});
 
+// Current spacing value per planet
+const verticalSpacing = 200;
+
 // Load planet and respective pictures
 const planets = [
-  { name: "Mercury", discovered: "Prehistoric", color: "#b1b1b1", radius: 30, imageUrl: "images/mercury.png" },
-  { name: "Venus", discovered: "Prehistoric", color: "#f5deb3", radius: 40, imageUrl: "images/venus.jpeg" },
-  { name: "Earth", discovered: "Prehistoric", color: "#2e8b57", radius: 45, imageUrl: "images/earth.png" },
-  { name: "Mars", discovered: "Prehistoric", color: "#b22222", radius: 35, imageUrl: "images/mars.png" },
+  { name: "Mercury", discovered: "Prehistoric", color: "#b1b1b1", radius: 45, imageUrl: "images/mercury.png" },
+  { name: "Venus", discovered: "Prehistoric", color: "#f5deb3", radius: 50, imageUrl: "images/venus.jpeg" },
+  { name: "Earth", discovered: "Prehistoric", color: "#2e8b57", radius: 55, imageUrl: "images/earth.png" },
+  { name: "Mars", discovered: "Prehistoric", color: "#b22222", radius: 55, imageUrl: "images/mars.png" },
   { name: "Jupiter", discovered: "Prehistoric", color: "#d2b48c", radius: 80, imageUrl: "images/jupiter.png" },
-  { name: "Saturn", discovered: "Prehistoric", color: "#deb887", radius: 70, imageUrl: "images/saturn.jpg" },
-  { name: "Uranus", discovered: "1781", color: "#afeeee", radius: 55, imageUrl: "images/uranus.jpg" },
-  { name: "Neptune", discovered: "1846", color: "#4169e1", radius: 55, imageUrl: "images/neptune.jpg" }
+  { name: "Saturn", discovered: "Prehistoric", color: "#deb887", radius: 80, imageUrl: "images/saturn.jpg" },
+  { name: "Uranus", discovered: "1781", color: "#afeeee", radius: 60, imageUrl: "images/uranus.jpg" },
+  { name: "Neptune", discovered: "1846", color: "#4169e1", radius: 60, imageUrl: "images/neptune.jpg" }
 ];
 
 // SVG Container
 const svg = d3.select("#timeline")
   .append("svg")
   .attr("width", "100%")
-  .attr("height", planets.length * 150)
+  .attr("height", planets.length * verticalSpacing)
 
 // Create a group for each planet
 const g = svg.selectAll("g")
   .data(planets)
   .enter()
   .append("g")
-  .attr("transform", (d, i) => `translate(200, ${i * 150 + 75})`);
+  .attr("transform", (d, i) => `translate(200, ${i * verticalSpacing + (verticalSpacing / 2)})`);
 
 // Append image for each planet
 g.append("image")
