@@ -839,6 +839,73 @@ html, body {
 /* Jacquelyn's style.css  START */
 /* ============================ */
 
+#section-discoveries {
+  min-height: 100vh;
+}
+
+#exoplanet-map-container {
+  width: 100%;
+  max-width: 900px;
+  height: 650px;
+  margin: 20px auto;
+  background-color: #0d0d1a;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  overflow: hidden;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#exoplanet-map-container svg {
+  display: block;
+  margin: auto;
+}
+
+.axis text {
+  fill: #ccc;
+  font-size: 11px;
+}
+.axis path, .axis line {
+  stroke: #555;
+}
+.grid line {
+  stroke: #444;
+  stroke-opacity: 0.7;
+  shape-rendering: crispEdges;
+}
+.highlight-border {
+  stroke: gold;
+  stroke-width: 2.5px;
+  fill: none;
+}
+.exoplanet-label {
+  fill: white;
+  font-size: 10px;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+.colorbar-axis text {
+  fill: #ccc;
+  font-size: 10px;
+}
+.colorbar-label {
+  fill: #ccc;
+  font-size: 12px;
+  font-weight: bold;
+  text-anchor: middle;
+}
+
+.section-title {
+  font-size: 2.5em;
+  color: #fff;
+  margin-bottom: 40px;
+  text-align: center;
+  width: 100%;
+}
 
 /* ============================ */
 /* Jacquelyn's style.css  END   */

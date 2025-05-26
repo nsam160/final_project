@@ -493,8 +493,9 @@ function getOrbitValue(p) {
 
 
 // ==================================================
-// Jacquelyn's Code
+// Jacquelyn's Code: SOLAR TIMELINE
 // ==================================================
+
 // Load exoplanet data 
 //ExoplanetData.onDataLoaded((data) => {
   // use data
@@ -569,7 +570,204 @@ g.append("text")
   .attr("font-size", "18px");
 
 // ==================================================
-// Jacquelyn's Code END
+// Jacquelyn's Code: SOLAR TIMELINE END
+// ==================================================
+
+// ==================================================
+// Jacquelyn's Code: EXOPLANETS DISCOVERIES
+// ==================================================
+
+// Function to create the Plotly map
+function createExoplanetMap() {
+  const containerElement = d3.select("#exoplanet-map-container").node();
+  if (!containerElement) {
+      console.error("Error: #exoplanet-map-container not found in the DOM.");
+      return;
+  }
+
+  const containerWidth = containerElement.getBoundingClientRect().width;
+  const containerHeight = containerElement.getBoundingClientRect().height;
+
+
+  const mapMargin = { top: 40, right: 100, bottom: 60, left: 80 };
+  const mapWidth = containerWidth - mapMargin.left - mapMargin.right;
+  const mapHeight = containerHeight - mapMargin.top - mapMargin.bottom;
+
+  const mapSvg = d3.select("#exoplanet-map-container")
+      .append("svg")
+      .attr("width", containerWidth)
+      .attr("height", containerHeight)
+      .attr("viewBox", `0 0 ${containerWidth} ${containerHeight}`)
+      .attr("preserveAspectRatio", "xMidYMid meet")
+      .append("g")
+      .attr("transform", `translate(${mapMargin.left}, ${mapMargin.top})`);
+
+  // Create a group for the main chart content
+  const mapChartGroup = mapSvg.append("g");
+
+  // Load the data for the map
+  d3.json("earth_like.json").then(data => {
+      // --- Debugging step: Log data to console ---
+      console.log("Exoplanet map data loaded:", data);
+      if (!data || !Array.isArray(data) || data.length === 0) {
+          console.warn("Exoplanet map data is empty, not an array, or not loaded correctly. No map will be rendered.");
+          return; // Stop execution if data is empty or not an array
+      }
+      // --- End Debugging step ---
+
+      // Scales
+      const xScale = d3.scaleLinear()
+          .domain([360, 0])
+          .range([0, mapWidth]);
+
+      const yScale = d3.scaleLinear()
+          .domain([-90, 90])
+          .range([mapHeight, 0]);
+
+      // Size scale
+      const sizeScale = d3.scaleSqrt()
+          .domain([0, d3.max(data, d => d.temp_diff)])
+          .range([20, 5]);
+
+      // Color scale
+      const colorScale = d3.scaleSequential(d3.interpolateCool)
+          .domain(d3.extent(data, d => d.pl_eqt));
+
+      // Axes
+      const xAxis = d3.axisBottom(xScale)
+          .tickValues(d3.range(0, 361, 30))
+          .tickFormat(d => `${d}°`);
+      const yAxis = d3.axisLeft(yScale)
+          .tickValues(d3.range(-90, 91, 30))
+          .tickFormat(d => `${d}°`);
+
+      mapChartGroup.append("g")
+          .attr("class", "x axis")
+          .attr("transform", `translate(0, ${mapHeight})`)
+          .call(xAxis)
+          .append("text")
+          .attr("fill", "#fff")
+          .attr("x", mapWidth / 2)
+          .attr("y", 35)
+          .attr("text-anchor", "middle")
+          .text("Right Ascension (°)");
+
+      mapChartGroup.append("g")
+          .attr("class", "y axis")
+          .call(yAxis)
+          .append("text")
+          .attr("fill", "#fff")
+          .attr("transform", "rotate(-90)")
+          .attr("y", -60)
+          .attr("x", -mapHeight / 2)
+          .attr("text-anchor", "middle")
+          .text("Declination (°)");
+
+      // Gridlines
+      mapChartGroup.append("g")
+          .attr("class", "grid")
+          .attr("transform", `translate(0, ${mapHeight})`)
+          .call(xAxis.tickSize(-mapHeight).tickFormat(""));
+
+      mapChartGroup.append("g")
+          .attr("class", "grid")
+          .call(yAxis.tickSize(-mapWidth).tickFormat(""));
+
+      // Scatter Plot Points
+      mapChartGroup.selectAll(".exoplanet-point")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("class", "exoplanet-point")
+          .attr("cx", d => xScale(d.ra))
+          .attr("cy", d => yScale(d.dec))
+          .attr("r", d => sizeScale(d.temp_diff))
+          .attr("fill", d => colorScale(d.pl_eqt))
+          .attr("opacity", 0.8)
+          .attr("stroke", "white")
+          .attr("stroke-width", 0.4);
+
+      // Highlight Top 5 and Add Annotations
+      mapChartGroup.selectAll(".top5-highlight")
+          .data(data.filter(d => d.is_top5))
+          .enter()
+          .append("circle")
+          .attr("class", "top5-highlight")
+          .attr("cx", d => xScale(d.ra))
+          .attr("cy", d => yScale(d.dec))
+          .attr("r", d => sizeScale(d.temp_diff) + 2)
+          .attr("class", "highlight-border");
+
+      mapChartGroup.selectAll(".top5-label")
+          .data(data.filter(d => d.is_top5))
+          .enter()
+          .append("text")
+          .attr("class", "exoplanet-label")
+          .attr("x", d => xScale(d.ra) + sizeScale(d.temp_diff) + 5)
+          .attr("y", d => yScale(d.dec) + 3)
+          .text(d => d.pl_name);
+
+      // COLOR BAR (D3.js implementation)
+      const colorbarWidth = 20;
+      const colorbarHeight = mapHeight;
+
+      const mapDefs = mapSvg.append("defs");
+
+      const linearGradient = mapDefs.append("linearGradient")
+          .attr("id", "colorbarGradientMap")
+          .attr("x1", "0%")
+          .attr("y1", "100%")
+          .attr("x2", "0%")
+          .attr("y2", "0%");
+
+      linearGradient.selectAll("stop")
+          .data(colorScale.ticks(5).map(t => ({
+              offset: (t - colorScale.domain()[0]) / (colorScale.domain()[1] - colorScale.domain()[0]),
+              color: colorScale(t)
+          })))
+          .enter().append("stop")
+          .attr("offset", d => d.offset)
+          .attr("stop-color", d => d.color);
+
+
+      const colorbarScale = d3.scaleLinear()
+          .domain(colorScale.domain())
+          .range([colorbarHeight, 0]);
+
+      const colorbarAxis = d3.axisRight(colorbarScale)
+          .ticks(5)
+          .tickFormat(d3.format(".0f"));
+
+      const colorbar = mapSvg.append("g")
+          .attr("transform", `translate(${mapWidth + mapMargin.left + 20}, ${mapMargin.top})`);
+
+      colorbar.append("rect")
+          .attr("width", colorbarWidth)
+          .attr("height", colorbarHeight)
+          .attr("fill", "url(#colorbarGradientMap)");
+
+      colorbar.append("g")
+          .attr("class", "colorbar-axis")
+          .attr("transform", `translate(${colorbarWidth}, 0)`)
+          .call(colorbarAxis);
+
+      colorbar.append("text")
+          .attr("class", "colorbar-label")
+          .attr("transform", "rotate(-90)")
+          .attr("y", -mapMargin.left + 5)
+          .attr("x", -(colorbarHeight / 2))
+          .attr("text-anchor", "middle")
+          .text("Equilibrium Temperature (K)");
+
+  }).catch(error => {
+      console.error("Error loading or parsing exoplanet map data:", error);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', createExoplanetMap);
+
+// ==================================================
+// Jacquelyn's Code: EXOPLANETS DISCOVERIES END
 // ==================================================
 
 // ===========================
