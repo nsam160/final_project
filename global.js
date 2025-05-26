@@ -1076,11 +1076,95 @@ ExoplanetData.onDataLoaded((data) => {
 // ===========================
 // Royce's Code 
 // ===========================
+
 // Load exoplanet data 
-//ExoplanetData.onDataLoaded((data) => {
+const numericCols = [
+  { key: "pl_rade",   label: "Radius [R⊕]"           },
+  { key: "pl_bmasse", label: "Mass [M⊕]"             },
+  { key: "pl_insol",  label: "Insolation [S⊕]"       },
+  { key: "pl_eqt",    label: "Equilibrium Temp [K]"  },
+  { key: "pl_orbeccen", label: "Eccentricity"        },
+  { key: "st_teff",   label: "Stellar T_eff [K]"     },
+];
 
-//});
+numericCols.forEach(c => {
+  d3.select("#xMetric").append("option")
+    .attr("value", c.key).text(c.label);
+  d3.select("#yMetric").append("option")
+    .attr("value", c.key).text(c.label);
+});
+d3.select("#xMetric").property("value", "pl_rade");
+d3.select("#yMetric").property("value", "pl_insol");
 
+
+ExoplanetData.onDataLoaded((raw) => {
+  // Inject Earth
+  raw = raw.concat([{
+    pl_name: "Earth", hostname: "Sun", habitable: true,
+    pl_rade: 1, pl_bmasse: 1, pl_insol: 1,
+    pl_eqt: 255, pl_orbeccen: 0.0167, st_teff: 5772
+  }]);
+
+  // ------------- build the scatter SVG once ----------------
+  const svg    = d3.select("#scatter");
+  const margin = { top: 20, right: 18, bottom: 46, left: 60 };
+  const width  = +svg.attr("width")  - margin.left - margin.right;
+  const height = +svg.attr("height") - margin.top  - margin.bottom;
+  const g      = svg.append("g").attr("transform",
+                                      `translate(${margin.left},${margin.top})`);
+
+  g.append("g").attr("class","x-axis")
+    .attr("transform",`translate(0,${height})`);
+  g.append("g").attr("class","y-axis");
+  g.append("text").attr("class","x-label")
+    .attr("x",width/2).attr("y",height+36).attr("text-anchor","middle");
+  g.append("text").attr("class","y-label")
+    .attr("x",-height/2).attr("y",-44)
+    .attr("transform","rotate(-90)").attr("text-anchor","middle");
+
+  const circles = g.selectAll("circle")
+      .data(raw).enter().append("circle")
+      .attr("r", d => d.pl_name==="Earth" ? 6 : 4)
+      .attr("stroke-width", d => d.pl_name==="Earth" ? 1.4 : 0.6)
+      .attr("stroke", d => d.pl_name==="Earth" ? "#000" : "#ccc")
+      .attr("opacity", 0.9);
+
+  // ------------- update function ---------------------------
+  function updatePlot() {
+    const xKey = d3.select("#xMetric").property("value");
+    const yKey = d3.select("#yMetric").property("value");
+
+    const x = d3.scaleLinear()
+      .domain(d3.extent(raw, d => +d[xKey])).nice()
+      .range([0, width]);
+
+    const y = d3.scaleLinear()
+      .domain(d3.extent(raw, d => +d[yKey])).nice()
+      .range([height, 0]);
+
+    const ex = (xKey === "pl_eqt") ? 255 : 1;   // Earth reference
+    const ey = (yKey === "pl_eqt") ? 255 : 1;
+
+    circles
+      .attr("cx", d => x(+d[xKey]))
+      .attr("cy", d => y(+d[yKey]))
+      .attr("fill", d => {
+        if (d.pl_name === "Earth") return "#ff7f0e";
+        const near = Math.abs(+d[xKey]-ex)/ex < 0.10 &&
+                     Math.abs(+d[yKey]-ey)/ey < 0.10;
+        return near ? "#0ea5e9" : "#cbd5e1";
+      });
+
+    g.select(".x-axis").call(d3.axisBottom(x));
+    g.select(".y-axis").call(d3.axisLeft(y));
+    g.select(".x-label").text(numericCols.find(c=>c.key===xKey).label);
+    g.select(".y-label").text(numericCols.find(c=>c.key===yKey).label);
+  }
+
+  updatePlot();                              // first draw
+  d3.select("#xMetric").on("change", updatePlot);
+  d3.select("#yMetric").on("change", updatePlot);
+});
 
 // ===========================
 // Royce's Code 
