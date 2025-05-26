@@ -500,16 +500,16 @@ function getOrbitValue(p) {
   // use data
 //});
 
-// Defining Planets in Timeline
+// Load planet and respective pictures
 const planets = [
-  { name: "Mercury", discovered: "Prehistoric", color: "#b1b1b1", radius: 10 },
-  { name: "Venus", discovered: "Prehistoric", color: "#f5deb3", radius: 20 },
-  { name: "Earth", discovered: "Prehistoric", color: "#2e8b57", radius: 22 },
-  { name: "Mars", discovered: "Prehistoric", color: "#b22222", radius: 18 },
-  { name: "Jupiter", discovered: "Prehistoric", color: "#d2b48c", radius: 40 },
-  { name: "Saturn", discovered: "Prehistoric", color: "#deb887", radius: 35 },
-  { name: "Uranus", discovered: "1781", color: "#afeeee", radius: 28 },
-  { name: "Neptune", discovered: "1846", color: "#4169e1", radius: 28 }
+  { name: "Mercury", discovered: "Prehistoric", color: "#b1b1b1", radius: 30, imageUrl: "images/mercury.png" },
+  { name: "Venus", discovered: "Prehistoric", color: "#f5deb3", radius: 40, imageUrl: "images/venus.jpeg" },
+  { name: "Earth", discovered: "Prehistoric", color: "#2e8b57", radius: 45, imageUrl: "images/earth.png" },
+  { name: "Mars", discovered: "Prehistoric", color: "#b22222", radius: 35, imageUrl: "images/mars.png" },
+  { name: "Jupiter", discovered: "Prehistoric", color: "#d2b48c", radius: 80, imageUrl: "images/jupiter.png" },
+  { name: "Saturn", discovered: "Prehistoric", color: "#deb887", radius: 70, imageUrl: "images/saturn.jpg" },
+  { name: "Uranus", discovered: "1781", color: "#afeeee", radius: 55, imageUrl: "images/uranus.jpg" },
+  { name: "Neptune", discovered: "1846", color: "#4169e1", radius: 55, imageUrl: "images/neptune.jpg" }
 ];
 
 // SVG Container
@@ -517,20 +517,45 @@ const svg = d3.select("#timeline")
   .append("svg")
   .attr("width", "100%")
   .attr("height", planets.length * 150)
-  .style("background", "#000");
 
+// Create a group for each planet
 const g = svg.selectAll("g")
   .data(planets)
   .enter()
   .append("g")
   .attr("transform", (d, i) => `translate(200, ${i * 150 + 75})`);
 
-// Circles for each planet
+// Append image for each planet
+g.append("image")
+  .attr("xlink:href", d => d.imageUrl)
+  .attr("width", d => d.radius * 2)
+  .attr("height", d => d.radius * 2)
+  .attr("x", d => -d.radius)
+  .attr("y", d => -d.radius);
+
+// Subtle circle/glow behind the image for effect
 g.append("circle")
-  .attr("r", d => d.radius)
-  .attr("fill", d => d.color)
-  .attr("stroke", "#fff")
-  .attr("stroke-width", 2);
+  .attr("r", d => d.radius + 5)
+  .attr("fill", "none")
+  .attr("stroke", d => d.color)
+  .attr("stroke-width", 2)
+  .style("filter", "url(#glow)")
+  .lower();
+
+// Subtle glow filter to SVG
+svg.append("defs")
+  .append("filter")
+  .attr("id", "glow")
+  .append("feGaussianBlur")
+  .attr("stdDeviation", 3)
+  .attr("result", "coloredBlur")
+  .select(function() { return this.parentNode; })
+  .append("feMerge")
+  .append("feMergeNode")
+  .attr("in", "coloredBlur")
+  .select(function() { return this.parentNode; })
+  .append("feMergeNode")
+  .attr("in", "SourceGraphic");
 
 // Adding labels
 g.append("text")
@@ -538,7 +563,7 @@ g.append("text")
   .attr("x", d => d.radius + 20)
   .attr("y", 5)
   .attr("fill", "#fff")
-  .attr("font-size", "16px");
+  .attr("font-size", "18px");
 
 // ==================================================
 // Jacquelyn's Code END
