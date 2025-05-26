@@ -576,21 +576,20 @@ g.append("text")
 //function initNghiSection() {
   //console.log(" Nghi section initialized");
   //let validSystemToDraw = Array.from(d3.group(
-  ExoplanetData.onDataLoaded((data) => {
-    let validSystemToDraw = Array.from(d3.group(
-      data,
-      d => d.system_id
-    )).filter(([_, planets]) => {
-      return planets.every(planet =>
-              planet.pl_eqt !== '' && // planet temperature
-              planet.pl_orbper !== '' && // planet orbital period
-              planet.pl_rade !== '' && // planet radius in earth
-              (planet.pl_bmasse !== '' || planet.pl_dens !== '') && // planet mass in earth
-              planet.st_rad !== '' && // star radius
-              planet.pl_orbsmax !== '' && // planet distance from star in au
-              (planet.st_spectype !== '' || planet.st_teff !== '') // star color
-          );
-      });
+ExoplanetData.onDataLoaded((data) => {
+  let validSystemToDraw = Array.from(d3.group(
+    data,
+    d => d.system_id
+  )).filter(([_, planets]) => {
+    return planets.every(planet =>
+          planet.pl_eqt !== '' && // planet temperature
+          planet.pl_orbper !== '' && // planet orbital period
+          planet.pl_rade !== '' && // planet radius in earth            (planet.pl_bmasse !== '' || planet.pl_dens !== '') && // planet mass in earth
+          planet.st_rad !== '' && // star radius
+          planet.pl_orbsmax !== '' && // planet distance from star in au
+          (planet.st_spectype !== '' || planet.st_teff !== '') // star color
+    );
+  });
 
   validSystemToDraw = validSystemToDraw.map(([systemId, planets]) => ({
       systemId,
@@ -608,16 +607,28 @@ g.append("text")
           density: p.pl_dens,
           inclination: p.pl_orbincl
       }))
-  }));
+  })).sort((a, b) => a.systemId.localeCompare(b.systemId));
 
   const dropdownSolar = document.getElementById('solarDropdown');
-  validSystemToDraw.sort((a, b) => a.systemId.localeCompare(b.systemId)).forEach(system => {
-      const option = document.createElement("option");
-      option.value = system.systemId;
-      option.textContent = system.systemId;
-      dropdownSolar.appendChild(option);
-  });
+  const searchBar = document.querySelector('.searchSolar');
+  function createDropdown(filters = '', currentValue = ''){
+    dropdownSolar.innerHTML = '';
 
+    validSystemToDraw.forEach(system => {
+      if (system.systemId.toLowerCase().startsWith(filters)){
+        const option = document.createElement("option");
+        option.value = system.systemId;
+        option.textContent = system.systemId;
+        dropdownSolar.appendChild(option);
+      }
+      if ((currentValue !== '') & (system.systemId === currentValue)){
+        dropdownSolar.value = currentValue;
+      }
+    });
+  }
+
+  createDropdown();
+  let currentValue = dropdownSolar.value;
   // First letter in st_spectype
   const starColorMap = {'O':'rgb(86, 104, 203)', 'B':'rgb(129, 163, 252)', 'A':'rgb(151, 177, 236)', 'F':'rgb(255, 244, 243)', 'G':'rgb(255, 229, 207)', 'K':'rgb(255, 199, 142)', 'M':'rgb(255, 166, 81)'}
   // Planet color from planet density
@@ -686,11 +697,6 @@ g.append("text")
               ));
               scene.add(planetsSystem.at(-1));
 
-            //   planetOrbitRing.push(new THREE.Mesh(
-            //       new THREE.TorusGeometry(planetDistance[i], 0.15, 64),
-            //       new THREE.MeshBasicMaterial({color: 0xffffff})
-            //   ));
-            //  planetOrbitRing.at(-1).rotation.x = planetIncline[i];
               planetOrbitRing.push(createEllipticalOrbit(planetDistance[i], planetEcc[i], planetIncline[i]));
               scene.add(planetOrbitRing.at(-1));
           }
@@ -715,7 +721,7 @@ g.append("text")
         geometry.setFromPoints(points);
         const material = new THREE.LineBasicMaterial({ color: 0xffffff });
         return new THREE.LineLoop(geometry, material);
-     }
+      }
 
       function createAnimator(orbitalPeriod, planetDistance, planetIncline, planetEcc, speedUpTimes = 1){
           function animate(time) {
@@ -748,7 +754,8 @@ g.append("text")
       }
 
       function calculateParameters(){
-          const system = validSystemToDraw.find(system => system.systemId === dropdownSolar.value);
+          currentValue = dropdownSolar.value;
+          const system = validSystemToDraw.find(system => system.systemId === currentValue);
           const planets = system.planets;
           let starColor = null;
           if (system.systType !== null){
@@ -840,18 +847,26 @@ g.append("text")
   // SET WIDTH OF CANVAS
   container.style.height = `${container.clientWidth}px`;
   window.addEventListener('resize', () => {
-      const width = container.clientWidth;
-      const height = container.clientWidth;
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-      container.style.height = `${container.clientWidth}px`;
+    const width = container.clientWidth;
+    const height = container.clientWidth;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+    container.style.height = `${container.clientWidth}px`;
   });
 
   dropdownSolar.addEventListener('change', (event) => {
-      drawThreeDimension();
+    drawThreeDimension();
   });
+
+  searchBar.addEventListener('input', (event) => {
+    createDropdown(event.target.value.toLowerCase(), currentValue.toLowerCase());
   });
+
+  searchBar.addEventListener('change', (event) => {
+    drawThreeDimension();
+  });
+});
 //}
 // ===========================
 // Nghi's Code 
