@@ -907,6 +907,49 @@ html, body {
   width: 100%;
 }
 
+/* Intro section layout */
+#section-intro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.intro-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  padding: 2.5rem;
+  max-width: 800px;
+  width: 100%;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Headings */
+.intro-card h1 {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+.intro-subsections h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Paragraphs */
+.intro-card p {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+
 /* ============================ */
 /* Jacquelyn's style.css  END   */
 /* ============================ */
