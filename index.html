@@ -15,6 +15,7 @@
     }
   </script>
     <script type="module" src="global.js"></script>
+    <script type="module" src="./camilleExtreme.js"></script>
     <title>Exploring the Universe Beyond</title>
 </head>
 <body>
@@ -85,8 +86,10 @@
   <!-- Camille Section 4: Orbit Systems START -->
   <!-- ============================= -->
 <section class="scroll-section" id="section-systems">
-  <!--Story-capsules Selector  -->
+  <center><h2 class="section-title">Strange New Worlds</h2></center>
+   <!-- Story-capsules Selector -->
    <div id="overview" class="flex-capsules">
+     <!-- Orbit Systems -->
     <div class="capsule" data-system="kepler" style="--glow:#FFA500;">
       <svg class="mini-orbit" id="mini-kepler"></svg>
       <div class="label">Kepler-90</div>
@@ -101,6 +104,31 @@
       <svg class="mini-orbit" id="mini-gj"></svg>
       <div class="label">GJ 667C</div>
       <p class="subtext">Multiple potentially habitable planets</p>
+    </div>
+    </div>
+    <!-- Extreme Worlds Capsules -->
+    <div class="flex-capsules">
+      <div class="capsule" id="capsule-wasp" style="--glow:#f75c4c;">
+        <div class="planet-image-container">
+          <img src="svg/WASP-76b.jpg" alt="WASP-76b planet" class="planet-image" />
+        </div>
+        <div class="label">WASP-76b</div>
+        <p class="subtext">Iron rain and twilight storms</p>
+      </div>
+    <div class="capsule" id="capsule-kelt" style="--glow:#ff6600;">
+        <div class="planet-image-container">
+          <img src="svg/KELT-9b.jpg" alt="KELT-9b planet" class="planet-image" />
+        </div>
+        <div class="label">KELT-9b</div>
+        <p class="subtext">Hotter than 75% of stars</p>
+      </div>
+    <div class="capsule" id="capsule-kepler80" style="--glow:#aaa;">
+        <div class="planet-image-container">
+          <img src="svg/KEPLER-80F.jpg" alt="Kepler-80f planet" class="planet-image" />
+        </div>
+        <div class="label">Kepler-80f</div>
+        <p class="subtext">Possibly denser than diamonds</p>
+      </div>
     </div>
   </div>
 </section>
@@ -165,8 +193,7 @@
       </div>
     </div>
   </div>
-  
-  <!-- NEW: Animation Controls -->
+  <!-- Animation Controls -->
   <div class="animation-controls-section">
     <div class="control-group">
       <h3>Animation Controls</h3>

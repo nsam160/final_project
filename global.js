@@ -6,15 +6,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // =========================================
 // GLOBAL DATA USAGE loading main csv file 
 // ==========================================
-//async function loadData() {
-    //const data = await d3.csv('exoplanet.csv', (row) => ({
-       //...row
-    //}));
-    //return data;
-//}
-
-//let data = await loadData();
-
 let allExoplanets = [];
 let dataLoadedCallbacks = [];
 let isDataLoaded = false;
@@ -401,6 +392,11 @@ function enhanceCapsules() {
       el.classList.add("visited");
       visitedSystems.add(id);
       overview.style.opacity = 0;
+      
+      //  HIDE ENTIRE CAPSULE SECTION
+      const section = document.getElementById("section-systems");
+      if (section) section.style.display = "none";
+
       setTimeout(() => {
         overview.style.display = "none";
         showDetailedSystem(id);
@@ -424,6 +420,9 @@ function enhanceCapsules() {
     ["system1", "system2", "system3"].forEach(id => {
       document.getElementById(id).style.display = "none";
     });
+
+    const section = document.getElementById("section-systems");
+    if (section) section.style.display = "block";
     
       overview.style.display = "flex";
       overview.style.opacity = 1;
