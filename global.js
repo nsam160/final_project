@@ -811,7 +811,12 @@ ExoplanetData.onDataLoaded((data) => {
 
   const dropdownSolar = document.getElementById('solarDropdown');
   const searchBar = document.querySelector('.searchSolar');
-  function createDropdown(filters = '', currentValue = ''){
+  const speedSelector = document.querySelector('#speedSelector');
+  const icon = document.querySelector('#playPauseIcon');
+  const playButton = document.querySelector('#pausePlayButton');
+  let isPlaying = true;
+
+  function createDropdown(time, filters = '', currentValue = ''){
     dropdownSolar.innerHTML = '';
 
     validSystemToDraw.forEach(system => {
@@ -856,7 +861,7 @@ ExoplanetData.onDataLoaded((data) => {
   let planetsSystem = [];
   let planetOrbitRing = [];
 
-  function drawThreeDimension(speed = 1){
+  function drawThreeDimension(){
       function updateSystemDrawing(starRadius, starFeature, planetsRadius, planetsFeature, planetDistance, planetIncline, planetEcc){
           scene.remove(starsSystem);
           if (starsSystem.geometry){
@@ -921,36 +926,6 @@ ExoplanetData.onDataLoaded((data) => {
         geometry.setFromPoints(points);
         const material = new THREE.LineBasicMaterial({ color: 0xffffff });
         return new THREE.LineLoop(geometry, material);
-      }
-
-      function createAnimator(orbitalPeriod, planetDistance, planetIncline, planetEcc, speedUpTimes = 1){
-          function animate(time) {
-              requestAnimationFrame(animate);
-              control.update();
-              const t = time / (1000) * speedUpTimes; // time in days * speed, 1 sec = 1 day
-              for (let i = 0; i < planetsSystem.length; i++){
-                let a = planetDistance[i]; 
-                let e = planetEcc[i];
-                let iRad = planetIncline[i];
-
-                let M = 2 * Math.PI * ((t % orbitalPeriod[i]) / orbitalPeriod[i]);
-                let E = M;
-                for (let j = 0; j < 5; j++) {
-                    E = M + e * Math.sin(E);
-                }
-
-                let x_orb = a * (Math.cos(E) - e);
-                let y_orb = a * Math.sqrt(1 - e * e) * Math.sin(E);
-
-                let x = x_orb;
-                let y = y_orb * Math.cos(iRad);
-                let z = y_orb * Math.sin(iRad);
-
-                planetsSystem[i].position.set(x, y, z);
-              }
-              renderer.render(scene, camera);
-          }
-          animate();
       }
 
       function calculateParameters(){
@@ -1020,6 +995,23 @@ ExoplanetData.onDataLoaded((data) => {
           return [starRadius, starMaterial, planetRadius, planetMaterial, planetOrbit, planetDistance, planetIncline, planetEcc];
       }
 
+      function calculateDisplaySpeed(){
+        if (speedSelector.value === '1-Second')
+          return 1/86400
+        else if (speedSelector.value === '1-Minute')
+          return 1/1440
+        else if (speedSelector.value === '1-Hour')
+          return 1/24
+        else if (speedSelector.value === '1-Day')
+          return 1
+        else if (speedSelector.value === '1-Week')
+          return 7
+        else if (speedSelector.value === '1-Month')
+          return 30.417
+        else
+          return 365
+      }
+
       function rockyOrGas(massEarth, radiusEarth, density){
           if (density === '')
             density = (massEarth / (radiusEarth ** 3)) * 5.51;
@@ -1037,9 +1029,49 @@ ExoplanetData.onDataLoaded((data) => {
           }
       }
 
+      let currentTime = 0;
+      let localTime = 0;
+      function createAnimator(orbitalPeriod, planetDistance, planetIncline, planetEcc, speedUpTimes = 1){
+          function animate(time) {
+              requestAnimationFrame(animate);
+              control.update();
+              if (time === 0 || isPlaying){
+                const t = currentTime / (1000) * speedUpTimes; // time in days * speed, 1 sec = 1 day
+                for (let i = 0; i < planetsSystem.length; i++){
+                  let a = planetDistance[i]; 
+                  let e = planetEcc[i];
+                  let iRad = planetIncline[i];
+
+                  let M = 2 * Math.PI * ((t % orbitalPeriod[i]) / orbitalPeriod[i]);
+                  let E = M;
+                  for (let j = 0; j < 5; j++) {
+                      E = M + e * Math.sin(E);
+                  }
+
+                  let x_orb = a * (Math.cos(E) - e);
+                  let y_orb = a * Math.sqrt(1 - e * e) * Math.sin(E);
+
+                  let x = x_orb;
+                  let y = y_orb * Math.cos(iRad);
+                  let z = y_orb * Math.sin(iRad);
+
+                  planetsSystem[i].position.set(x, y, z);
+                }
+                renderer.render(scene, camera);
+                currentTime += (time - localTime);
+              }
+              localTime = time;
+          }
+          animate(currentTime);
+      }
+
       let canvasSystem = calculateParameters();
       updateSystemDrawing(canvasSystem[0], canvasSystem[1], canvasSystem[2], canvasSystem[3], canvasSystem[5], canvasSystem[6], canvasSystem[7]);
-      createAnimator(canvasSystem[4], canvasSystem[5], canvasSystem[6], canvasSystem[7], speed);
+      createAnimator(canvasSystem[4], canvasSystem[5], canvasSystem[6], canvasSystem[7], calculateDisplaySpeed());
+
+      speedSelector.addEventListener('input', (event) => {
+        createAnimator(canvasSystem[4], canvasSystem[5], canvasSystem[6], canvasSystem[7], calculateDisplaySpeed());
+      });
   }
 
   drawThreeDimension();
@@ -1056,6 +1088,7 @@ ExoplanetData.onDataLoaded((data) => {
   });
 
   dropdownSolar.addEventListener('change', (event) => {
+    isPlaying = true;
     drawThreeDimension();
   });
 
@@ -1064,7 +1097,13 @@ ExoplanetData.onDataLoaded((data) => {
   });
 
   searchBar.addEventListener('change', (event) => {
+    isPlaying = true;
     drawThreeDimension();
+  });
+
+  playButton.addEventListener('click', (event) => {
+    isPlaying = !isPlaying;
+    icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
   });
 });
 //}
