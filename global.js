@@ -783,10 +783,9 @@ ExoplanetData.onDataLoaded((data) => {
     d => d.system_id
   )).filter(([_, planets]) => {
     return planets.every(planet =>
-          planet.pl_eqt !== '' && // planet temperature
           planet.pl_orbper !== '' && // planet orbital period
-          planet.pl_rade !== '' && // planet radius in earth            (planet.pl_bmasse !== '' || planet.pl_dens !== '') && // planet mass in earth
-          planet.st_rad !== '' && // star radius
+          planet.pl_rade !== '' && // planet radius in earth            
+          (planet.pl_bmasse !== '' || planet.pl_dens !== '') && // planet mass in earth
           planet.pl_orbsmax !== '' && // planet distance from star in au
           (planet.st_spectype !== '' || planet.st_teff !== '') // star color
     );
@@ -794,6 +793,9 @@ ExoplanetData.onDataLoaded((data) => {
 
   validSystemToDraw = validSystemToDraw.map(([systemId, planets]) => ({
       systemId,
+      rightAscension: planets[0].ra,
+      decline: planets[0].dec,
+      distance: planets[0].sy_dist,
       starRadius: planets[0].st_rad, // assuming all same star
       starType: planets[0].st_spectype,
       starTemp: planets[0].st_teff,
@@ -806,18 +808,21 @@ ExoplanetData.onDataLoaded((data) => {
           eccentricity: p.pl_orbeccen,
           distanceAU: p.pl_orbsmax,
           density: p.pl_dens,
-          inclination: p.pl_orbincl
+          inclination: p.pl_orbincl,
+          year: p.disc_year,
+          method: p.discoverymethod, 
+          facility: p.disc_facility
       }))
   })).sort((a, b) => a.systemId.localeCompare(b.systemId));
 
   const dropdownSolar = document.getElementById('solarDropdown');
-  const searchBar = document.querySelector('.searchSolar');
+  const searchBar = document.querySelector('#searchSolar');
   const speedSelector = document.querySelector('#speedSelector');
   const icon = document.querySelector('#playPauseIcon');
   const playButton = document.querySelector('#pausePlayButton');
   let isPlaying = true;
 
-  function createDropdown(time, filters = '', currentValue = ''){
+  function createDropdown(filters = '', currentValue = ''){
     dropdownSolar.innerHTML = '';
 
     validSystemToDraw.forEach(system => {
@@ -850,6 +855,8 @@ ExoplanetData.onDataLoaded((data) => {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientWidth, 0.1, 1000);
   const renderer = new THREE.WebGLRenderer({alpha: true});
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
   renderer.setSize(container.clientWidth, container.clientWidth);
   container.appendChild(renderer.domElement);
 
@@ -862,8 +869,16 @@ ExoplanetData.onDataLoaded((data) => {
   let planetsSystem = [];
   let planetOrbitRing = [];
 
+  window.addEventListener('mousemove', onMouseMove, false);
+
+  function onMouseMove(event) {
+    const rect = container.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+  }
+
   function drawThreeDimension(){
-      function updateSystemDrawing(starRadius, starFeature, planetsRadius, planetsFeature, planetDistance, planetIncline, planetEcc){
+      function updateSystemDrawing(starRadius, starFeature, planetsRadius, planetsFeature, planetDistance, planetIncline, planetEcc, systemInfo){
           scene.remove(starsSystem);
           if (starsSystem.geometry){
               starsSystem.geometry.dispose();
@@ -894,16 +909,51 @@ ExoplanetData.onDataLoaded((data) => {
               new THREE.SphereGeometry(starRadius, longLatCut, longLatCut),
               new THREE.MeshBasicMaterial(starFeature)
           );
+          starsSystem.userData = {
+            type: 'star'
+          };
           scene.add(starsSystem);
 
           for (let i = 0; i < planetsRadius.length; i++){
-              planetsSystem.push(new THREE.Mesh(
+              let planet = new THREE.Mesh(
                   new THREE.SphereGeometry(planetsRadius[i], longLatCut, longLatCut),
                   new THREE.MeshBasicMaterial(planetsFeature[i])
-              ));
+              );
+              planet.userData = {
+                type: 'planet',
+                name: systemInfo.planets[i].name,
+                radius: systemInfo.planets[i].radius,
+                mass: systemInfo.planets[i].mass,
+                temperature: systemInfo.planets[i].temp,
+                orbit: systemInfo.planets[i].orbitDays,
+                ecc: systemInfo.planets[i].eccentricity,
+                distance: systemInfo.planets[i].distanceAU,
+                density: systemInfo.planets[i].density,
+                inclination: systemInfo.planets[i].inclination,
+                discoveryYear: systemInfo.planets[i].year,
+                discoveryMethod: systemInfo.planets[i].method,
+                discoverFac: systemInfo.planets[i].facility
+              }
+              planetsSystem.push(planet);
               scene.add(planetsSystem.at(-1));
 
-              planetOrbitRing.push(createEllipticalOrbit(planetDistance[i], planetEcc[i], planetIncline[i]));
+              let ring = createEllipticalOrbit(planetDistance[i], planetEcc[i], planetIncline[i])
+              ring.userData = {
+                type: 'planet',
+                name: systemInfo.planets[i].name,
+                radius: systemInfo.planets[i].radius,
+                mass: systemInfo.planets[i].mass,
+                temperature: systemInfo.planets[i].temp,
+                orbit: systemInfo.planets[i].orbitDays,
+                ecc: systemInfo.planets[i].eccentricity,
+                distance: systemInfo.planets[i].distanceAU,
+                density: systemInfo.planets[i].density,
+                inclination: systemInfo.planets[i].inclination,
+                discoveryYear: systemInfo.planets[i].year,
+                discoveryMethod: systemInfo.planets[i].method,
+                discoverFac: systemInfo.planets[i].facility
+              }
+              planetOrbitRing.push(ring);
               scene.add(planetOrbitRing.at(-1));
           }
 
@@ -961,7 +1011,6 @@ ExoplanetData.onDataLoaded((data) => {
               }
           }
           starColor = new THREE.Color(starColor);
-          let starRadius = (Math.log10(+system.starRadius * 109 * 6378))  // In earth radius
           let starTexture = new THREE.TextureLoader().load('basic_texture/sun.jpg');
           let starMaterial = {map: starTexture, color: starColor};
 
@@ -981,7 +1030,6 @@ ExoplanetData.onDataLoaded((data) => {
                   planetDistance.push(Math.log(+p.distanceAU * 149680000));
               else
                   planetDistance.push(planetDistance.at(-1) + Math.log(+p.distanceAU * 149680000));
-              
               if (p.inclination === '')
                   planetIncline.push(0);
               else 
@@ -992,8 +1040,13 @@ ExoplanetData.onDataLoaded((data) => {
               else 
                   planetEcc.push(+p.eccentricity);
           });
+          let starRadius = null;
+          if (system.starRadius === '')
+            starRadius = d3.min([d3.max(planetRadius), planetDistance.at(0)]);
+          else
+            starRadius = (Math.log10(+system.starRadius * 109 * 6378))  // In earth radius
 
-          return [starRadius, starMaterial, planetRadius, planetMaterial, planetOrbit, planetDistance, planetIncline, planetEcc];
+          return [starRadius, starMaterial, planetRadius, planetMaterial, planetOrbit, planetDistance, planetIncline, planetEcc, system];
       }
 
       function calculateDisplaySpeed(){
@@ -1032,46 +1085,88 @@ ExoplanetData.onDataLoaded((data) => {
 
       let currentTime = 0;
       let localTime = 0;
-      function createAnimator(orbitalPeriod, planetDistance, planetIncline, planetEcc, speedUpTimes = 1){
+      let speedUpTimes = calculateDisplaySpeed();
+      function createAnimator(orbitalPeriod, planetDistance, planetIncline, planetEcc, system){
           function animate(time) {
               requestAnimationFrame(animate);
-              control.update();
-              if (time === 0 || isPlaying){
-                const t = currentTime / (1000) * speedUpTimes; // time in days * speed, 1 sec = 1 day
-                for (let i = 0; i < planetsSystem.length; i++){
-                  let a = planetDistance[i]; 
-                  let e = planetEcc[i];
-                  let iRad = planetIncline[i];
 
-                  let M = 2 * Math.PI * ((t % orbitalPeriod[i]) / orbitalPeriod[i]);
-                  let E = M;
-                  for (let j = 0; j < 5; j++) {
-                      E = M + e * Math.sin(E);
-                  }
+              raycaster.setFromCamera(mouse, camera);
+              const objectToTest = planetsSystem.concat(planetOrbitRing).concat([starsSystem]);
+              const intersects = raycaster.intersectObjects(scene.children, true); // true = recursive
 
-                  let x_orb = a * (Math.cos(E) - e);
-                  let y_orb = a * Math.sqrt(1 - e * e) * Math.sin(E);
-
-                  let x = x_orb;
-                  let y = y_orb * Math.cos(iRad);
-                  let z = y_orb * Math.sin(iRad);
-
-                  planetsSystem[i].position.set(x, y, z);
+              const tooltip = document.getElementById('nghi-tooltip');
+              if (intersects.length > 0) {
+                const intersected = intersects[0].object;
+                if (intersected.userData.type === 'star'){
+                  tooltip.innerHTML = '';
+                  console.log('star');
                 }
-                renderer.render(scene, camera);
-                currentTime += (time - localTime);
+                else if (intersected.userData.type === 'planet'){
+                  tooltip.innerHTML = `
+                                        <b>Planet Name: </b>${intersected.userData.name}<br>
+                                        <b>Discovery Year: </b>${intersected.userData.discoveryYear || 'Unknown'}<br>
+                                        <b>Discovery Method: </b>${intersected.userData.discoveryMethod || 'Unknown'}<br>
+                                        <b>Discovery Facility: </b>${intersected.userData.discoverFac || 'Unknown'}<br>
+                                        <b>Radius (in Earth Radius): </b>${intersected.userData.radius || 'Unknown'}<br>
+                                        <b>Mass (in Earth Mass): </b>${intersected.userData.mass || 'Unknown'}<br>
+                                        <b>Temperature (in Kelvin): </b>${intersected.userData.temperature || 'Unknown'}<br>
+                                        <b>Orbital Days: </b>${intersected.userData.orbit || 'Unknown'}<br>
+                                        <b>Eccentricity: </b>${intersected.userData.ecc || 'Unknown'}<br>
+                                        <b>Density (in g/cm³): </b>${intersected.userData.density || 'Unknown'}<br>
+                                        <b>Inclination: </b>${intersected.userData.inclination || 'Unknown'}<br>
+                                        <b>Longest Distance From Star (in AU): </b>${intersected.userData.distance || 'Unknown'}
+                                      `;
+                }
               }
+              else {
+                tooltip.innerHTML = `
+                                      <b>Solar System: </b>${system.systemId}<br>
+                                      <b>Right Ascension: </b> ${`${system.rightAscension}°` || 'Unknown'}<br>
+                                      <b>Declination: </b> ${`${system.decline}°` || 'Unknown'}<br>
+                                      <b>Distance (in parsecs): </b> ${`${system.distance}°` || 'Unknown'}
+                                    `;
+              }
+
+              control.update();
+              const delta = time - localTime;
+              if (isPlaying){
+                currentTime += (delta / 1000) * speedUpTimes // time in days * speed, 1 sec = 1 day
+              }
+
+              for (let i = 0; i < planetsSystem.length; i++){
+                let a = planetDistance[i]; 
+                let e = planetEcc[i];
+                let iRad = planetIncline[i];
+
+                let M = 2 * Math.PI * ((currentTime % orbitalPeriod[i]) / orbitalPeriod[i]);
+                let E = M;
+                for (let j = 0; j < 5; j++) {
+                  E = M + e * Math.sin(E);
+                }
+
+                let x_orb = a * (Math.cos(E) - e);
+                let y_orb = a * Math.sqrt(1 - e * e) * Math.sin(E);
+
+                let x = x_orb;
+                let y = y_orb * Math.cos(iRad);
+                let z = y_orb * Math.sin(iRad);
+
+                planetsSystem[i].position.set(x, y, z);
+              }
+  
+              renderer.render(scene, camera);
               localTime = time;
           }
-          animate(currentTime);
+          
+          requestAnimationFrame(animate);
       }
 
       let canvasSystem = calculateParameters();
-      updateSystemDrawing(canvasSystem[0], canvasSystem[1], canvasSystem[2], canvasSystem[3], canvasSystem[5], canvasSystem[6], canvasSystem[7]);
-      createAnimator(canvasSystem[4], canvasSystem[5], canvasSystem[6], canvasSystem[7], calculateDisplaySpeed());
+      updateSystemDrawing(canvasSystem[0], canvasSystem[1], canvasSystem[2], canvasSystem[3], canvasSystem[5], canvasSystem[6], canvasSystem[7], canvasSystem[8]);
+      createAnimator(canvasSystem[4], canvasSystem[5], canvasSystem[6], canvasSystem[7], canvasSystem[8]);
 
-      speedSelector.addEventListener('input', (event) => {
-        createAnimator(canvasSystem[4], canvasSystem[5], canvasSystem[6], canvasSystem[7], calculateDisplaySpeed());
+      speedSelector.addEventListener('input', () => {
+        speedUpTimes = calculateDisplaySpeed();
       });
   }
 
@@ -1090,6 +1185,7 @@ ExoplanetData.onDataLoaded((data) => {
 
   dropdownSolar.addEventListener('change', (event) => {
     isPlaying = true;
+    icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
     drawThreeDimension();
   });
 
@@ -1099,6 +1195,7 @@ ExoplanetData.onDataLoaded((data) => {
 
   searchBar.addEventListener('change', (event) => {
     isPlaying = true;
+    icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
     drawThreeDimension();
   });
 
