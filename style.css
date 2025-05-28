@@ -413,6 +413,60 @@ body {
   opacity: 0.7;
 }
 
+/* Planet Image Styling for Extreme Worlds */
+.planet-image-container {
+  width: 100%;
+  height: 80px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.planet-image {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.capsule:hover .planet-image {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px var(--glow, #fff);
+  border-color: var(--glow, #fff);
+}
+
+/* Add glow effect to match the capsule's glow color */
+.capsule[style*="--glow:#f75c4c"] .planet-image {
+  box-shadow: 0 0 15px rgba(247, 92, 76, 0.3);
+}
+
+.capsule[style*="--glow:#ff6600"] .planet-image {
+  box-shadow: 0 0 15px rgba(255, 102, 0, 0.3);
+}
+
+.capsule[style*="--glow:#aaa"] .planet-image {
+  box-shadow: 0 0 15px rgba(170, 170, 170, 0.3);
+}
+
+.capsule[style*="--glow:#f75c4c"]:hover .planet-image {
+  box-shadow: 0 0 25px rgba(247, 92, 76, 0.6);
+}
+
+.capsule[style*="--glow:#ff6600"]:hover .planet-image {
+  box-shadow: 0 0 25px rgba(255, 102, 0, 0.6);
+}
+
+.capsule[style*="--glow:#aaa"]:hover .planet-image {
+  box-shadow: 0 0 25px rgba(170, 170, 170, 0.6);
+}
+
+
 /* Connection descriptions */
 .connection-description {
   position: absolute;
