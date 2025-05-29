@@ -292,23 +292,33 @@
 <section class="scroll-section" id="section-search">
 
   <!-- insert code here  -->
-  <div id="earth-compare" class="scroll-section" data-index="5">
-  <h2 class="mb-2 text-xl font-semibold">Compare to Earth</h2>
-
-  <div class="flex flex-wrap gap-4 items-center mb-3">
-    <label>X-axis:
-      <select id="xMetric"></select>
+  <center><h2 class="section-title">Earth-Like Worlds</h2></center>
+  <div class = 'search-container'>
+    <label>Features To Compare:
+      <select id="features"></select>
     </label>
 
-    <label>Y-axis:
-      <select id="yMetric"></select>
+    <label>Habitable?
+      <select id="habitable">
+        <option value="all">All</option>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
     </label>
   </div>
 
-  <svg id="scatter" width="680" height="480"></svg>
-  <p class="text-sm text-gray-500 mt-2">
-    Teal dots are within ±10 % of Earth for both selected metrics.
-  </p>
+
+  <div class="chart-wrapper">
+  <div class="bar-chart"></div>          <!-- your SVG lives here -->
+
+  <div id="top3">
+    <h3 id="top3-title"></h3>
+    <ol id="top3-list"></ol>
+  </div>
+
+  <div class = "top3chart">
+    
+  </div>
 </div>
 
 
