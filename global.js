@@ -1276,97 +1276,244 @@ ExoplanetData.onDataLoaded((data) => {
 // Royce's Code 
 // ===========================
 
-// Load exoplanet data 
-const numericCols = [
-  { key: "pl_rade",   label: "Radius [R⊕]"           },
-  { key: "pl_bmasse", label: "Mass [M⊕]"             },
-  { key: "pl_insol",  label: "Insolation [S⊕]"       },
-  { key: "pl_eqt",    label: "Equilibrium Temp [K]"  },
-  { key: "pl_orbeccen", label: "Eccentricity"        },
-  { key: "st_teff",   label: "Stellar T_eff [K]"     },
+
+
+const FEATURES = [
+  { key: "pl_rade",    label: "Radius",         unit: "km",    factor: 6371,    earth: 6371     },
+  { key: "pl_bmasse",  label: "Mass",           unit: "kg",    factor: 5.972e24,earth: 5.972e24 },
+  { key: "pl_insol",   label: "Insolation",     unit: "W m⁻²", factor: 1361,    earth: 1361     },
+  { key: "pl_eqt",     label: "Equilibrium T",  unit: "K",     factor: 1,       earth: 255      },
+  { key: "pl_orbeccen",label: "Eccentricity",   unit: "",      factor: 1,       earth: 0.0167   },
+  { key: "st_teff",    label: "Stellar T_eff",  unit: "K",     factor: 1,       earth: 5772     }
 ];
 
-numericCols.forEach(c => {
-  d3.select("#xMetric").append("option")
-    .attr("value", c.key).text(c.label);
-  d3.select("#yMetric").append("option")
-    .attr("value", c.key).text(c.label);
-});
-d3.select("#xMetric").property("value", "pl_rade");
-d3.select("#yMetric").property("value", "pl_insol");
+/* ── 2.  Dropdown population ───────────────────────────────────── */
+const dropdown = d3.select("#features");
+FEATURES.forEach(f =>
+  dropdown.append("option")
+    .attr("value", f.key)
+    .text(`${f.label} [${f.unit || "raw"}]`)
+);
+dropdown.property("value", "pl_rade");
 
 
-ExoplanetData.onDataLoaded((raw) => {
-  // Inject Earth
-  raw = raw.concat([{
-    pl_name: "Earth", hostname: "Sun", habitable: true,
-    pl_rade: 1, pl_bmasse: 1, pl_insol: 1,
-    pl_eqt: 255, pl_orbeccen: 0.0167, st_teff: 5772
-  }]);
+/* ── 3.  SVG scaffold (unique names) ───────────────────────────── */
+const margin = { top: 20, right: 110, bottom: 44, left: 220 };
+const WIDTH  = 960;
+const ROW_H  = 20;                      // per-planet vertical space
 
-  // ------------- build the scatter SVG once ----------------
-  const svg    = d3.select("#scatter");
-  const margin = { top: 20, right: 18, bottom: 46, left: 60 };
-  const width  = +svg.attr("width")  - margin.left - margin.right;
-  const height = +svg.attr("height") - margin.top  - margin.bottom;
-  const g      = svg.append("g").attr("transform",
-                                      `translate(${margin.left},${margin.top})`);
+const chartSvg = d3.select(".bar-chart")
+  .append("svg")
+  .attr("id", "exoCompareSvg")
+  .attr("width", WIDTH);
 
-  g.append("g").attr("class","x-axis")
-    .attr("transform",`translate(0,${height})`);
-  g.append("g").attr("class","y-axis");
-  g.append("text").attr("class","x-label")
-    .attr("x",width/2).attr("y",height+36).attr("text-anchor","middle");
-  g.append("text").attr("class","y-label")
-    .attr("x",-height/2).attr("y",-44)
-    .attr("transform","rotate(-90)").attr("text-anchor","middle");
+const chartGroup = chartSvg.append("g")
+  .attr("id", "exoCompareGroup")
+  .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  const circles = g.selectAll("circle")
-      .data(raw).enter().append("circle")
-      .attr("r", d => d.pl_name==="Earth" ? 6 : 4)
-      .attr("stroke-width", d => d.pl_name==="Earth" ? 1.4 : 0.6)
-      .attr("stroke", d => d.pl_name==="Earth" ? "#000" : "#ccc")
-      .attr("opacity", 0.9);
+chartGroup.append("g").attr("class", "axis-x");
+chartGroup.append("g").attr("class", "axis-y");
 
-  // ------------- update function ---------------------------
-  function updatePlot() {
-    const xKey = d3.select("#xMetric").property("value");
-    const yKey = d3.select("#yMetric").property("value");
+chartGroup.append("line")
+  .attr("class", "earth-line")
+  .attr("stroke", "#e11d48")
+  .attr("stroke-width", 2)
+  .attr("stroke-dasharray", "4 4");
 
+chartGroup.append("text").attr("class", "axis-x-title")
+  .attr("fill", "#fff").attr("font-size", 14)
+  .attr("text-anchor", "end");
+
+chartGroup.append("text").attr("class", "axis-y-title")
+  .attr("fill", "#fff").attr("font-size", 14)
+  .attr("text-anchor", "middle")
+  .attr("transform", "rotate(-90)");
+
+const habDD = d3.select("#habitable");
+
+
+
+/* ── 4.  Main redraw routine ──────────────────────────────────── */
+ExoplanetData.onDataLoaded(rows => {
+
+  function draw(colKey, habFilter = "all") {
+    const cfg = FEATURES.find(f => f.key === colKey);
+    const raw = d => +d[colKey] * cfg.factor;
+
+
+
+    const candidates = rows.filter(d => {
+    if (!Number.isFinite(raw(d))) return false;            // skip NaN
+    if (habFilter === "yes") return +d.is_habitable === 1;
+    if (habFilter === "no")  return +d.is_habitable === 0;
+    return true;                                           // 'all'
+  });
+    
+
+
+
+
+
+    const planets = candidates
+    .map(d => ({ ...d, delta: Math.abs(raw(d) - cfg.earth) }))
+    .sort((a,b)=>d3.ascending(a.delta,b.delta))
+    .slice(0,50)
+    .sort((a,b)=>d3.descending(raw(a),raw(b)))
+
+  const metrics = FEATURES;                        // 6 columns
+
+   const top3 = [...planets]                /* top three */
+    .sort((a, b) => d3.ascending(a.delta, b.delta))
+  . slice(0, 3); 
+    d3.select("#top3-list")
+      .selectAll("li")
+      .data(top3, d => d.pl_name)
+      .join(
+        enter => enter.append("li"),
+        update => update
+      )
+    .text((d,i) =>
+    `${d.pl_name}  —  ${d3.format(".3~g")(raw(d))} ${cfg.unit}`);
+
+    const cellSize = 24, gap = 4;
+const hmW = metrics.length * (cellSize+gap);
+const hmH = top3.length * (cellSize+gap);
+
+const hmSvg = d3.select(".top3chart")
+  .selectAll("svg").data([null]).join("svg")
+  .attr("width", hmW).attr("height", hmH);
+
+const cells = hmSvg.selectAll("rect")
+  .data(
+    top3.flatMap((p,row) =>
+      metrics.map((m,col) => ({
+        row, col,
+        diff: Math.abs((+p[m.key]*m.factor - m.earth)/m.earth)  // relative
+      }))
+    )
+  );
+
+const color = d3.scaleLinear()
+  .domain([0,.05,.15])            // 0-5-15 % diff
+  .range(["#10b981","#84e1bc","#444"]);   // green → grey
+
+cells.join("rect")
+  .attr("x", d => d.col*(cellSize+gap))
+  .attr("y", d => d.row*(cellSize+gap))
+  .attr("width",cellSize).attr("height",cellSize)
+  .attr("fill", d => color(d.diff));
+
+hmSvg.selectAll("text.colLab")
+  .data(metrics).join("text")
+  .attr("class","colLab")
+  .attr("x", (d,i)=> i*(cellSize+gap)+cellSize/2)
+  .attr("y", -6)
+  .attr("text-anchor","middle")
+  .attr("fill","#fff")
+  .attr("font-size",9)
+  .text(d=>d.label.replace(/\s.*$/,""));     // first word
+
+hmSvg.selectAll("text.rowLab")
+  .data(top3).join("text")
+  .attr("class","rowLab")
+  .attr("x", -4)
+  .attr("y", (d,i)=> i*(cellSize+gap)+cellSize/2+4)
+  .attr("text-anchor","end")
+  .attr("fill","#fff")
+  .attr("font-size",9)
+  .text(d=>d.pl_name);
+
+    d3.select("#top3-title")
+    .text(`Top 3 Most Similar to Earth in ${cfg.label}`);
+    const innerH = planets.length * ROW_H;
+    chartSvg.attr("height", innerH + margin.top + margin.bottom);
+
+    const y = d3.scaleBand()
+      .domain(planets.map(d => d.pl_name))
+      .range([0, innerH])
+      .paddingInner(0.2);
+
+    const values = planets.map(raw).concat(cfg.earth);
+    const [lo, hi] = d3.extent(values);
+    const pad = (hi - lo || 1) * 0.10;
     const x = d3.scaleLinear()
-      .domain(d3.extent(raw, d => +d[xKey])).nice()
-      .range([0, width]);
+      .domain([lo - pad, hi + pad]).nice()
+      .range([0, WIDTH - margin.left - margin.right]);
 
-    const y = d3.scaleLinear()
-      .domain(d3.extent(raw, d => +d[yKey])).nice()
-      .range([height, 0]);
+    /* ---- Earth guide ---- */
+    chartGroup.select(".earth-line")
+      .attr("x1", x(cfg.earth)).attr("x2", x(cfg.earth))
+      .attr("y1", 0).attr("y2", innerH);
 
-    const ex = (xKey === "pl_eqt") ? 255 : 1;   // Earth reference
-    const ey = (yKey === "pl_eqt") ? 255 : 1;
+    /* ---- dots ---- */
+    chartGroup.selectAll("circle.dot")
+      .data(planets, d => d.pl_name)
+      .join(
+        enter => enter.append("circle")
+          .attr("class", "dot")
+          .attr("r", 6).attr("fill", "none")
+          .attr("stroke", "#10b981").attr("stroke-width", 2)
+          .attr("cx", d => x(raw(d)))
+          .attr("cy", d => y(d.pl_name) + y.bandwidth()/2),
+        update => update.transition().duration(400)
+          .attr("cx", d => x(raw(d)))
+          .attr("cy", d => y(d.pl_name) + y.bandwidth()/2)
+      );
 
-    circles
-      .attr("cx", d => x(+d[xKey]))
-      .attr("cy", d => y(+d[yKey]))
-      .attr("fill", d => {
-        if (d.pl_name === "Earth") return "#ff7f0e";
-        const near = Math.abs(+d[xKey]-ex)/ex < 0.10 &&
-                     Math.abs(+d[yKey]-ey)/ey < 0.10;
-        return near ? "#0ea5e9" : "#cbd5e1";
-      });
+    /* ---- labels (flip side if needed) ---- */
+    chartGroup.selectAll("text.pl-label")
+      .data(planets, d => d.pl_name)
+      .join(
+        enter => enter.append("text")
+          .attr("class", "pl-label")
+          .attr("fill", "#fff")
+          .attr("font-size", 11)
+          .attr("y", d => y(d.pl_name) + y.bandwidth()/2 + 4)
+          .text(d => d.pl_name),
+        update => update
+          .attr("y", d => y(d.pl_name) + y.bandwidth()/2 + 4)
+          .text(d => d.pl_name)
+      )
+      .attr("text-anchor", d => x(raw(d)) < x(cfg.earth) ? "end" : "start")
 
-    g.select(".x-axis").call(d3.axisBottom(x));
-    g.select(".y-axis").call(d3.axisLeft(y));
-    g.select(".x-label").text(numericCols.find(c=>c.key===xKey).label);
-    g.select(".y-label").text(numericCols.find(c=>c.key===yKey).label);
+      .attr("x", d => x(raw(d)) + (x(raw(d)) < x(cfg.earth) ? -8 : 8));
+
+    /* ---- axes ---- */
+    chartGroup.select(".axis-y")
+      .call(d3.axisLeft(y).tickSize(0))
+      .selectAll("text").remove();             // we draw custom labels
+
+    const formatMass = d => (d / 1e24).toFixed(2) + " ×10²⁴";
+
+    chartGroup.select(".axis-x")
+      .attr("transform", `translate(0,${innerH})`)
+      .call(
+    d3.axisBottom(x)
+      .ticks(6)
+      .tickFormat(cfg.unit === "kg" ? formatMass : d3.format("~g"))
+      )
+      .selectAll("text").style("font-size", "11px").style("fill", "#fff");
+
+    /* ---- titles ---- */
+    chartGroup.select(".axis-x-title")
+      .attr("x", WIDTH - margin.left - margin.right)
+      .attr("y", innerH + 32)
+      .text(`${cfg.label} (${cfg.unit || "raw"})`);
+
+    chartGroup.select(".axis-y-title")
+      .attr("x", -innerH / 2)
+      .attr("y", -margin.left + 70)
+      .text("Top 50 Earth-Similar Exoplanets");
   }
 
-  updatePlot();                              // first draw
-  d3.select("#xMetric").on("change", updatePlot);
-  d3.select("#yMetric").on("change", updatePlot);
+  /* first draw + listener */
+  draw(dropdown.property("value"), habDD.property("value"));
+  habDD  .on("change", () => draw(dropdown.property("value"), habDD.property("value")));
+  dropdown.on("change", () => draw(dropdown.property("value"), habDD.property("value")));
 });
 
 // ===========================
-// Royce's Code 
+// Royce's Code END
 // ===========================
 
 // ================================

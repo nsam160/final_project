@@ -1113,3 +1113,28 @@ select {
 /* ============================ */
 /* Jacquelyn's style.css  END   */
 /* ============================ */
+
+
+/* ============================ */
+/* Royces's style.css  END   */
+/* ============================ */
+
+.chart-wrapper{
+  display:flex;
+  gap:10px;              /* space between chart and list   */
+  align-items:flex-start;/* top-align the two blocks        */
+}
+
+/* 3️⃣  Make the sidebar hug the right edge */
+#top3{
+  /*  margin-left:auto;   ←  REMOVE or comment out */
+  color:#fff;
+  font-family:sans-serif;
+  /* optional: fixed width if you don't want it too wide */
+  /* width:180px; */
+}
+
+
+/* ============================ */
+/* Royces's style.css  END   */
+/* ============================ */
