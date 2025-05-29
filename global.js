@@ -773,13 +773,11 @@ document.addEventListener('DOMContentLoaded', createExoplanetMap);
 // Nghi's Code 
 // ===========================
 
-//function initNghiSection() {
-  //console.log(" Nghi section initialized");
-  //let validSystemToDraw = Array.from(d3.group(
 ExoplanetData.onDataLoaded((data) => {
+  // Load and filter data by missingness according to some column conditions
   let validSystemToDraw = Array.from(d3.group(
     data,
-    d => d.system_id
+    d => d.hostname
   )).filter(([_, planets]) => {
     return planets.every(planet =>
           planet.pl_orbper !== '' && // planet orbital period
@@ -790,8 +788,12 @@ ExoplanetData.onDataLoaded((data) => {
     );
   });
 
-  validSystemToDraw = validSystemToDraw.map(([systemId, planets]) => ({
-      systemId,
+  // map out data to variable names that are necessary for plotting and tooltip info
+  validSystemToDraw = validSystemToDraw.map(([star, planets]) => ({
+      star,
+      starNum: +planets[0].sy_snum,
+      planetNum: +planets[0].sy_pnum,
+      systemId: planets[0].system_id,
       rightAscension: planets[0].ra,
       decline: planets[0].dec,
       distance: planets[0].sy_dist,
@@ -800,6 +802,7 @@ ExoplanetData.onDataLoaded((data) => {
       starTemp: planets[0].st_teff,
       planets: planets.sort((a, b) => a.pl_orbsmax - b.pl_orbsmax).map(p => ({
           name: p.pl_name,
+          host: p.hostname,
           temp: p.pl_eqt,
           radius: p.pl_rade,
           mass: p.pl_bmasse,
@@ -812,35 +815,38 @@ ExoplanetData.onDataLoaded((data) => {
           method: p.discoverymethod, 
           facility: p.disc_facility
       }))
-  })).sort((a, b) => a.systemId.localeCompare(b.systemId));
+  })).sort((a, b) => a.star.localeCompare(b.star));
 
   const dropdownSolar = document.getElementById('solarDropdown');
   const searchBar = document.querySelector('#searchSolar');
   const speedSelector = document.querySelector('#speedSelector');
   const icon = document.querySelector('#playPauseIcon');
   const playButton = document.querySelector('#pausePlayButton');
+  const tooltip = document.getElementById('nghi-tooltip');
   let isPlaying = true;
+  let isClick = false;
 
+  // Create dropdown based on search bar input
   function createDropdown(filters = '', currentValue = ''){
     dropdownSolar.innerHTML = '';
 
     validSystemToDraw.forEach(system => {
-      if (system.systemId.toLowerCase().startsWith(filters)){
+      if (system.star.toLowerCase().startsWith(filters)){
         const option = document.createElement("option");
-        option.value = system.systemId;
-        option.textContent = system.systemId;
+        option.value = system.star;
+        option.textContent = system.star;
         dropdownSolar.appendChild(option);
       }
-      if ((currentValue !== '') & (system.systemId === currentValue)){
+      if ((currentValue !== '') & (system.star === currentValue)){
         dropdownSolar.value = currentValue;
       }
     });
   }
-
   createDropdown();
+
   let currentValue = dropdownSolar.value;
   // First letter in st_spectype
-  const starColorMap = {'O':'rgb(86, 104, 203)', 'B':'rgb(129, 163, 252)', 'A':'rgb(151, 177, 236)', 'F':'rgb(255, 244, 243)', 'G':'rgb(255, 229, 207)', 'K':'rgb(255, 199, 142)', 'M':'rgb(255, 166, 81)'}
+  const starColorMap = {'O':'rgb(86, 104, 203)', 'B':'rgb(129, 163, 252)', 'A':'rgb(151, 177, 236)', 'F':'rgb(255, 244, 243)', 'G':'rgb(255, 229, 207)', 'K':'rgb(255, 199, 142)', 'M':'rgb(255, 166, 81)', 'W': 'rgb(255, 255, 255)'}
   // Planet color from planet density
   const customPlanetColor = d3.scaleLinear()
                               .domain([0, 1.5, 2.5, 3.5, 5, 15000]) 
@@ -856,6 +862,20 @@ ExoplanetData.onDataLoaded((data) => {
   const renderer = new THREE.WebGLRenderer({alpha: true});
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
+  const textures = {
+    'gas_1': new THREE.TextureLoader().load('basic_texture/gas_1.jpg'),
+    'gas_2': new THREE.TextureLoader().load('basic_texture/gas_2.jpg'),
+    'gas_3': new THREE.TextureLoader().load('basic_texture/gas_3.jpg'),
+    'gas_4': new THREE.TextureLoader().load('basic_texture/gas_4.jpg'),
+    'sun': new THREE.TextureLoader().load('basic_texture/sun.jpg'),
+    'rocky_1': new THREE.TextureLoader().load('basic_texture/rocky_1.jpg'),
+    'rocky_2': new THREE.TextureLoader().load('basic_texture/rocky_2.jpg'),
+    'rocky_3': new THREE.TextureLoader().load('basic_texture/rocky_3.jpg'),
+    'rocky_4': new THREE.TextureLoader().load('basic_texture/rocky_4.jpg'),
+    'rocky_5': new THREE.TextureLoader().load('basic_texture/rocky_5.jpg'),
+    'rocky_6': new THREE.TextureLoader().load('basic_texture/rocky_6.jpg'),
+    'rocky_7': new THREE.TextureLoader().load('basic_texture/rocky_7.jpg')
+  }
   renderer.setSize(container.clientWidth, container.clientWidth);
   container.appendChild(renderer.domElement);
 
@@ -868,15 +888,18 @@ ExoplanetData.onDataLoaded((data) => {
   let planetsSystem = [];
   let planetOrbitRing = [];
 
-  window.addEventListener('mousemove', onMouseMove, false);
+  window.addEventListener('click', getMousePosition, false);
 
-  function onMouseMove(event) {
+  function getMousePosition(event) {
+    isClick = true;
     const rect = container.getBoundingClientRect();
     mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
   }
 
+  // Draws the solar system based on all the conditions in filtering and searching, automated, just call drawThreeDimension()
   function drawThreeDimension(){
+      // Change planets and stars
       function updateSystemDrawing(starRadius, starFeature, planetsRadius, planetsFeature, planetDistance, planetIncline, planetEcc, systemInfo){
           scene.remove(starsSystem);
           if (starsSystem.geometry){
@@ -909,8 +932,37 @@ ExoplanetData.onDataLoaded((data) => {
               new THREE.MeshBasicMaterial(starFeature)
           );
           starsSystem.userData = {
-            type: 'star'
+            type: 'star',
+            system_name: systemInfo.systemId,
+            star_name: systemInfo.star,
+            star_type: systemInfo.starType,
+            star_temp: systemInfo.starTemp,
+            star_radius: systemInfo.starRadius,
+            total_planets: systemInfo.planetNum,
+            total_star: systemInfo.starNum,
+            planet_num: planetsRadius.length,
+            system_decline: systemInfo.decline,
+            system_ascend: systemInfo.rightAscension,
+            system_distance: systemInfo.distance,
           };
+
+          if (starsSystem.userData.total_star === 1)
+            tooltip.innerHTML = `This planetary system is a singular star system named, <b> ${starsSystem.userData.system_name}</b>, containing a total of <b> ${starsSystem.userData.planet_num}</b> planet(s). `;
+          else {
+            tooltip.innerHTML = `This planetary system is apart of a ${starsSystem.userData.total_star === 2 ? 'binary' : 'multiple'} star system named, <b> ${starsSystem.userData.system_name}</b>, with a total of ${starsSystem.userData.total_planets} planet(s) across the ${starsSystem.userData.total_star} stars. `
+            if (starsSystem.userData.total_planets !== starsSystem.userData.planet_num){
+              tooltip.innerHTML += `Make sure to check out the remaining ${starsSystem.userData.total_planets - starsSystem.userData.planet_num} planet(s) in the other host star.`
+            }
+          }
+          tooltip.innerHTML += `
+                                <br>
+                                <b class='sep'>Right Ascension: </b> ${`${starsSystem.userData.system_ascend}°` || 'Unknown'}<br>
+                                <b class='sep'>Declination: </b> ${`${starsSystem.userData.system_decline}°` || 'Unknown'}<br>
+                                <b class='sep'>Distance (in parsecs): </b> ${`${starsSystem.userData.system_distance}` || 'Unknown'}<br>
+                                <b class='sep'>Star Type: </b> ${`${starsSystem.userData.star_type}` || 'Unknown'}<br>
+                                <b class='sep'>Star Radius (in Solar Redius): </b> ${`${starsSystem.userData.star_radius}` || 'Unknown'}<br>
+                                <b class='sep'>Star Temperature (in Kelvin): </b> ${`${starsSystem.userData.star_temp}°` || 'Unknown'}
+                              `
           scene.add(starsSystem);
 
           for (let i = 0; i < planetsRadius.length; i++){
@@ -959,6 +1011,7 @@ ExoplanetData.onDataLoaded((data) => {
           camera.position.z = planetDistance.at(-1) + (planetsRadius.at(-1) * 10);
       }
 
+      // Create the orbital ring
       function createEllipticalOrbit(radius, ecc, incline, segments = 256) {
         const geometry = new THREE.BufferGeometry();
         const points = [];
@@ -978,9 +1031,10 @@ ExoplanetData.onDataLoaded((data) => {
         return new THREE.LineLoop(geometry, material);
       }
 
+      // Calculate information needed for drawing the stars and planets
       function calculateParameters(){
           currentValue = dropdownSolar.value;
-          const system = validSystemToDraw.find(system => system.systemId === currentValue);
+          const system = validSystemToDraw.find(system => system.star === currentValue);
           const planets = system.planets;
           let starColor = null;
           if (system.systType !== null){
@@ -1010,7 +1064,7 @@ ExoplanetData.onDataLoaded((data) => {
               }
           }
           starColor = new THREE.Color(starColor);
-          let starTexture = new THREE.TextureLoader().load('basic_texture/sun.jpg');
+          let starTexture = textures['sun'];
           let starMaterial = {map: starTexture, color: starColor};
 
           let planetRadius = [];
@@ -1021,7 +1075,7 @@ ExoplanetData.onDataLoaded((data) => {
           let planetEcc = [];
           planets.forEach(p => {
               let pColor = starColor.clone().multiply(rockyOrGas(+p.mass, +p.radius, p.density)[1]);
-              let pTexture = new THREE.TextureLoader().load(rockyOrGas(+p.mass, +p.radius, p.density)[0]);
+              let pTexture = rockyOrGas(+p.mass, +p.radius, p.density)[0];
               planetMaterial.push({map: pTexture, color: pColor});
               planetRadius.push(Math.log10(+p.radius * 6378));
               planetOrbit.push(+p.orbitDays);
@@ -1048,6 +1102,7 @@ ExoplanetData.onDataLoaded((data) => {
           return [starRadius, starMaterial, planetRadius, planetMaterial, planetOrbit, planetDistance, planetIncline, planetEcc, system];
       }
 
+      // Calculate the speedup in terms of day
       function calculateDisplaySpeed(){
         if (speedSelector.value === '1-Second')
           return 1/86400
@@ -1065,6 +1120,7 @@ ExoplanetData.onDataLoaded((data) => {
           return 365
       }
 
+      // Determine of the planet should be rocky or gas or neptune-like base on its density or mass/rad^3
       function rockyOrGas(massEarth, radiusEarth, density){
           if (density === '')
             density = (massEarth / (radiusEarth ** 3)) * 5.51;
@@ -1072,58 +1128,66 @@ ExoplanetData.onDataLoaded((data) => {
             density = +density;
 
           if (density >= 3.5){
-            return [`basic_texture/rocky_${(Math.floor(density) % 7) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
+            return [textures[`rocky_${(Math.floor(density) % 7) + 1}`], new THREE.Color(customPlanetColor(density))];
           }
           else if (density >= 1.5){
-            return [`basic_texture/gas_${(Math.floor(density) % 4) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
+            return [textures[`gas_${(Math.floor(density) % 4) + 1}`], new THREE.Color(customPlanetColor(density))];
           }
           else {
-            return [`basic_texture/gas_${(Math.floor(density) % 4) + 1}.jpg`, new THREE.Color(customPlanetColor(density))];
+            return [textures[`gas_${(Math.floor(density) % 4) + 1}`], new THREE.Color(customPlanetColor(density))];
           }
       }
 
       let currentTime = 0;
       let localTime = 0;
       let speedUpTimes = calculateDisplaySpeed();
-      function createAnimator(orbitalPeriod, planetDistance, planetIncline, planetEcc, system){
+
+      // Animate the whole solar system
+      function createAnimator(orbitalPeriod, planetDistance, planetIncline, planetEcc){
           function animate(time) {
               requestAnimationFrame(animate);
 
               raycaster.setFromCamera(mouse, camera);
-              const objectToTest = planetsSystem.concat(planetOrbitRing).concat([starsSystem]);
-              const intersects = raycaster.intersectObjects(scene.children, true); // true = recursive
+              const intersects = raycaster.intersectObjects(scene.children, true);
 
-              const tooltip = document.getElementById('nghi-tooltip');
-              if (intersects.length > 0) {
+              if ((isClick) && (intersects.length > 0)) {
                 const intersected = intersects[0].object;
                 if (intersected.userData.type === 'star'){
-                  tooltip.innerHTML = '';
-                  console.log('star');
+                  if (intersected.userData.total_star === 1)
+                    tooltip.innerHTML = `This planetary system is a singular star system named, <b> ${intersected.userData.system_name}</b>, containing a total of <b> ${intersected.userData.planet_num}</b> planet(s). `;
+                  else {
+                    tooltip.innerHTML = `This planetary system is apart of a ${intersected.userData.total_star === 2 ? 'binary' : 'multiple'} star system named, <b> ${intersected.userData.system_name}</b>, with a total of ${intersected.userData.total_planets} planet(s) across the ${intersected.userData.total_star} stars. `
+                    if (intersected.userData.total_planets !== intersected.userData.planet_num){
+                      tooltip.innerHTML += `Make sure to check out the remaining ${intersected.userData.total_planets - intersected.userData.planet_num} planet(s) in the other host star.`
+                    }
+                  }
+                  tooltip.innerHTML += `
+                                        <br>
+                                        <b class='sep'>Right Ascension: </b> ${`${intersected.userData.system_ascend}°` || 'Unknown'}<br>
+                                        <b class='sep'>Declination: </b> ${`${intersected.userData.system_decline}°` || 'Unknown'}<br>
+                                        <b class='sep'>Distance (in parsecs): </b> ${`${intersected.userData.system_distance}` || 'Unknown'}<br>
+                                        <b class='sep'>Star Type: </b> ${`${intersected.userData.star_type}` || 'Unknown'}<br>
+                                        <b class='sep'>Star Radius (in Solar Redius): </b> ${`${intersected.userData.star_radius}` || 'Unknown'}<br>
+                                        <b class='sep'>Star Temperature (in Kelvin): </b> ${`${intersected.userData.star_temp}°` || 'Unknown'}
+                                      `
                 }
                 else if (intersected.userData.type === 'planet'){
                   tooltip.innerHTML = `
-                                        <b>Planet Name: </b>${intersected.userData.name}<br>
-                                        <b>Discovery Year: </b>${intersected.userData.discoveryYear || 'Unknown'}<br>
-                                        <b>Discovery Method: </b>${intersected.userData.discoveryMethod || 'Unknown'}<br>
-                                        <b>Discovery Facility: </b>${intersected.userData.discoverFac || 'Unknown'}<br>
-                                        <b>Radius (in Earth Radius): </b>${intersected.userData.radius || 'Unknown'}<br>
-                                        <b>Mass (in Earth Mass): </b>${intersected.userData.mass || 'Unknown'}<br>
-                                        <b>Temperature (in Kelvin): </b>${intersected.userData.temperature || 'Unknown'}<br>
-                                        <b>Orbital Days: </b>${intersected.userData.orbit || 'Unknown'}<br>
-                                        <b>Eccentricity: </b>${intersected.userData.ecc || 'Unknown'}<br>
-                                        <b>Density (in g/cm³): </b>${intersected.userData.density || 'Unknown'}<br>
-                                        <b>Inclination: </b>${intersected.userData.inclination || 'Unknown'}<br>
-                                        <b>Longest Distance From Star (in AU): </b>${intersected.userData.distance || 'Unknown'}
+                                        <b class='sep'>Planet Name: </b> ${intersected.userData.name}<br>
+                                        <b class='sep'>Discovery Year: </b> ${intersected.userData.discoveryYear || 'Unknown'}<br>
+                                        <b class='sep'>Discovery Method: </b> ${intersected.userData.discoveryMethod || 'Unknown'}<br>
+                                        <b class='sep'>Discovery Facility: </b> ${intersected.userData.discoverFac || 'Unknown'}<br>
+                                        <b class='sep'>Radius (in Earth Radius): </b> ${intersected.userData.radius || 'Unknown'}<br>
+                                        <b class='sep'>Mass (in Earth Mass): </b> ${intersected.userData.mass || 'Unknown'}<br>
+                                        <b class='sep'>Temperature (in Kelvin): </b> ${intersected.userData.temperature || 'Unknown'}<br>
+                                        <b class='sep'>Orbital Days: </b> ${intersected.userData.orbit || 'Unknown'}<br>
+                                        <b class='sep'>Eccentricity: </b> ${intersected.userData.ecc || 'Unknown'}<br>
+                                        <b class='sep'>Density (in g/cm³): </b> ${intersected.userData.density || 'Unknown'}<br>
+                                        <b class='sep'>Inclination: </b> ${intersected.userData.inclination || 'Unknown'}<br>
+                                        <b class='sep'>Longest Distance From Star (in AU): </b> ${intersected.userData.distance || 'Unknown'}
                                       `;
                 }
-              }
-              else {
-                tooltip.innerHTML = `
-                                      <b>Solar System: </b>${system.systemId}<br>
-                                      <b>Right Ascension: </b> ${`${system.rightAscension}°` || 'Unknown'}<br>
-                                      <b>Declination: </b> ${`${system.decline}°` || 'Unknown'}<br>
-                                      <b>Distance (in parsecs): </b> ${`${system.distance}°` || 'Unknown'}
-                                    `;
+                isClick = false;
               }
 
               control.update();
@@ -1162,7 +1226,7 @@ ExoplanetData.onDataLoaded((data) => {
 
       let canvasSystem = calculateParameters();
       updateSystemDrawing(canvasSystem[0], canvasSystem[1], canvasSystem[2], canvasSystem[3], canvasSystem[5], canvasSystem[6], canvasSystem[7], canvasSystem[8]);
-      createAnimator(canvasSystem[4], canvasSystem[5], canvasSystem[6], canvasSystem[7], canvasSystem[8]);
+      createAnimator(canvasSystem[4], canvasSystem[5], canvasSystem[6], canvasSystem[7]);
 
       speedSelector.addEventListener('input', () => {
         speedUpTimes = calculateDisplaySpeed();
@@ -1203,7 +1267,7 @@ ExoplanetData.onDataLoaded((data) => {
     icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
   });
 });
-//}
+
 // ===========================
 // Nghi's Code 
 // ===========================

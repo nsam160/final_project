@@ -860,6 +860,22 @@ html, body {
 }
 
 #filterSolarSystem {
+  width: 250px;
+  font-size: 12px;
+  height: min-content;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  margin: 1rem;
+  background-color: #1e1e2f;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+#infoSolarSystem {
   width: 300px;
   font-size: 12px;
   height: min-content;
@@ -896,7 +912,6 @@ html, body {
   height: 100%;
   margin-top: 1em;
   margin-bottom: 1em;
-  margin-right: 1em;
   max-width: 600px;
   position: relative;
   background: transparent; /* or none */
@@ -959,6 +974,21 @@ select {
   font-size: 0.875rem;
   z-index: 10;
   display: block;
+}
+
+.sep {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  display: inline-block;
+}
+
+#solarExplorer label {
+  font-size: 14px;
+}
+
+.b-label {
+  margin-bottom: 2px;
+  display: inline-block;
 }
 
 /* ============================ */

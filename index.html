@@ -14,7 +14,7 @@
         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
       }
     }
-  </script>
+    </script>
     <script type="module" src="global.js"></script>
     <script type="module" src="./camilleExtreme.js"></script>
     <title>Exploring the Universe Beyond</title>
@@ -70,7 +70,7 @@
   <!-- Jacquelyn Section 2: SOLAR TIMELINE -->
   <!-- =================================== -->
   <section class="scroll-section" id="section-timeline">
-    <center><h2 class="section-title">Solar System Timeline</h2></center>
+    <h2 class="section-title">Solar System Timeline</h2>
     <div id="timeline"></div>
   </section>
   
@@ -78,7 +78,7 @@
   <!-- Jacquelyn Section 3:EXOPLANETS DISCOVERIES -->
   <!-- =================================== -->
 <section class="scroll-section" id="section-discoveries">
-  <center><h2 class="section-title">Earth-like Exoplanets in the Sky</h2></center>
+  <h2 class="section-title">Earth-like Exoplanets in the Sky</h2>
   <div id="exoplanet-map-container">
       </div>
 </section>
@@ -87,7 +87,7 @@
   <!-- Camille Section 4: Orbit Systems START -->
   <!-- ============================= -->
 <section class="scroll-section" id="section-systems">
-  <center><h2 class="section-title">Strange New Worlds</h2></center>
+  <h2 class="section-title">Strange New Worlds</h2>
    <!-- Story-capsules Selector -->
    <div id="overview" class="flex-capsules">
      <!-- Orbit Systems -->
@@ -292,6 +292,7 @@
 <section class="scroll-section" id="section-search">
 
   <!-- insert code here  -->
+  <h2 class="section-title">Earth-like Worlds</h2>
   <div id="earth-compare" class="scroll-section" data-index="5">
   <h2 class="mb-2 text-xl font-semibold">Compare to Earth</h2>
 
@@ -319,33 +320,48 @@
   <!-- ================================ -->
 <section class="scroll-section" id="section-explorer">
   <!-- insert code here  -->
+   <h2 class="section-title">Universe Explorer</h2>
    <div id="solarExplorer">
     <div id="filterSolarSystem">
-      <input
-        id="searchSolar"
-        type="search"
-        aria-label="Search solar system"
-        placeholder="🔍 Search solar system"
-      />
-      <select id="solarDropdown"></select>
-      <select id="speedSelector">
-        <option value="1-Second">1 Second</option>
-        <option value="1-Minute">1 Minute</option>
-        <option value="1-Hour">1 Hour</option>
-        <option value="1-Day" selected>1 Day</option>
-        <option value="1-Week">1 Week</option>
-        <option value="1-Month">1 Month</option>
-        <option value="1-Year">1 Year</option>
-      </select>
-      <button id="pausePlayButton">
-        <i id="playPauseIcon" class="fas fa-pause"></i>
-      </button>
-      <div id="nghi-tooltip"></div>
+      <label><b class="b-label">Search Host Star: </b>
+        <input
+          id="searchSolar"
+          type="search"
+          aria-label="Search Host Star"
+          placeholder="🔍 Search Host Star"
+        />
+      </label>
+      <label><b class="b-label">Select Host Star: </b>
+        <select id="solarDropdown"></select>
+      </label>
+      <label><b class="b-label">Select Speed (1 Second = ...): </b>
+        <select id="speedSelector">
+          <option value="1-Second">1 Second</option>
+          <option value="1-Minute">1 Minute</option>
+          <option value="1-Hour">1 Hour</option>
+          <option value="1-Day" selected>1 Day</option>
+          <option value="1-Week">1 Week</option>
+          <option value="1-Month">1 Month</option>
+          <option value="1-Year">1 Year</option>
+        </select>
+      </label>
+      <label><b class="b-label">Animation Control</b>
+        <button id="pausePlayButton">
+          <i id="playPauseIcon" class="fas fa-pause"></i>
+        </button>
+      </label>
     </div>
     <div id="lastCanvas"></div>
+    <div id="infoSolarSystem">
+    <label>
+      <b class="b-label">System Profile:</b>
+      <div id="nghi-tooltip"></div>
+    </label>
+    </div>
    </div>
 </section>
 
-
+<h1 class="title">Glossary</h1>
+<b></b>
 </body>
 </html>
