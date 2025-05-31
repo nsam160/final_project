@@ -34,12 +34,12 @@
     </div>
   </header>
 
-<section class="storytelling-container">
+
   <!-- =============================== -->
   <!-- Camille Section 1: INTRO (TODO) -->
   <!-- =============================== -->
   <section class="scroll-section" id="section-intro">
-    <div class="intro-card">
+    <div class="intro-card frosted-glass">
       <h1>Welcome to the World of Exoplanets</h1>
       <p>
         Exoplanets are planets that orbit stars outside of our own solar system. Using powerful telescopes and space missions like Kepler and TESS, we've been able to discover thousands of these distant worlds. Some of them even have the potential to be Earth-like while others are completely alien.
@@ -65,19 +65,44 @@
   <!-- =================================== -->
   <!-- Jacquelyn Section 2: SOLAR TIMELINE -->
   <!-- =================================== -->
-  <section class="scroll-section" id="section-timeline">
-    <h2 class="section-title">Solar System Timeline</h2>
-    <div id="timeline"></div>
+  <section class="scroll-section frosted-glass" id="section-timeline">
+    <div id="timeline-container">
+      <div id="timeline"></div>
+    </div>
+    <div id="timeline-text">
+      <!-- Your fixed text content here -->
+      <h2>Solar System History</h2>
+      <p><strong>Let's start off with the planets we know and their history.</strong></p>
+      <p>Since Earth, Mercury, Mars, Venus, Jupiter, and Saturn were all visible to the human eye, we have always known since the beginning of time that they exist, even when we did not understand the concept of planets. None of these planets have a specific discovery date, but the first recorded observation of them was made around 1000 BCE by the ancient Babylonians.</p>
+      <p>Though records were made, it was not until Ancient Greece that civilization began to wonder what stars and planets were. Originally, we thought all planets and the sun itself revolved around Earth, but some Greeks made doubtful claims that it was the sun that was at the center and Earth along with the rest of the planets revolved around the sun. This claim was not accepted until the Renaissance period.</p>
+      <p>We have already been able to discover so much with our eyes alone, with the addition of the telescope later invented in the 1600s, imagine the new possibilities astronomers have now with new discoveries.</p>
+      <p>Galileo Galilei in 1610 discovered that Jupiter is orbited by four moons, which is proof of the heliocentric models, but this discovery was rejected initially. People thought he was crazy and arrested him, until humanity awakened to the fact we live in a far grander universe than we initially thought.</p>
+      <p>The first planet to be truly discovered after the initial six was Uranus in 1781 by William Herschel. However, when he first discovered it, he thought he discovered a comet, but in 1783, he realized this object was a planet, making it the first planet to be discovered by a telescope. Interestingly though, people in Ancient Greece were able to see Uranus visible with their eyes alone, but they thought of it as a star.</p>
+      <p>The discovery of Uranus ultimately led to the direct discovery of Neptune in 1845. Astronomers noticed the weird deviation of Uranus from its orbit and predicted that there must be a planet that orbits the sun beyond Uranus. Through mathematics, rather than observation, Neptune was discovered by Urbain Le Verrier.</p>
+    </div>
   </section>
   
   <!-- =================================== -->
   <!-- Jacquelyn Section 3:EXOPLANETS DISCOVERIES -->
   <!-- =================================== -->
-<section class="scroll-section" id="section-discoveries">
-  <h2 class="section-title">Earth-like Exoplanets in the Sky</h2>
-  <div id="exoplanet-map-container">
+  <section class="scroll-section frosted-glass" id="section-discoveries">
+    <h2 class="section-title">Earth-like Exoplanets in the Sky</h2>
+    
+    <div class="side-by-side-container">
+      <!-- LEFT SIDE: Plot -->
+      <div class="left-side">
+        <div id="exoplanet-map-container"></div>
       </div>
-</section>
+      
+      <!-- RIGHT SIDE: Text or other info -->
+      <div class="right-side">
+        <p>
+          Discover exoplanets that closely resemble Earth by their atmospheric conditions and potential habitability. This interactive map highlights key features and top candidates for future exploration.
+        </p>
+        <!-- Add more descriptive text or subsections here -->
+      </div>
+    </div>
+  </section>
   
   <!-- ============================= -->
   <!-- Camille Section 4: Orbit Systems START -->
@@ -409,6 +434,5 @@
   <li><b>Transit:</b> An exoplanet detection method that involves observing a star's brightness over time, looking for periodic dips that indicate a planet transiting (passing in front of) its host star</li>
   <li><b>Transit Timing Variations:</b> A method of exoplanet discovery that relies on detecting subtle variations in the timing of a planet's transit across its host star</li>
 </ul>
-</section>
 </body>
 </html>
