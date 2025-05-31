@@ -774,6 +774,152 @@ document.addEventListener('DOMContentLoaded', createExoplanetMap);
 // ===========================
 
 ExoplanetData.onDataLoaded((data) => {
+  let countPlanet = d3.rollups(
+    data,
+    (v) => v.length,
+    (d) => +d.disc_year
+  ).sort((a, b) => a[0] - b[0]);
+  
+  function renderLinePlot(){
+    const width = 500;
+    const height = 500;
+    const margin = { top: 75, right: 25, bottom: 50, left: 65 };
+    const usableArea = {
+        top: margin.top,
+        right: width - margin.right,
+        bottom: height - margin.bottom,
+        left: margin.left,
+        width: width - margin.left - margin.right,
+        height: height - margin.top - margin.bottom,
+    };
+    
+    let svg = d3
+        .select('#increaseExoplanet')
+        .append('svg')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .style('overflow', 'visible');
+
+    let xScale = d3
+      .scaleLinear()
+      .domain(d3.extent(countPlanet, d => d[0]))
+      .range([usableArea.left, usableArea.right]);
+    let yScale = d3
+      .scaleLinear()
+      .domain([0, d3.max(countPlanet, d => d[1])])
+      .range([usableArea.bottom, usableArea.top]);
+
+    const line = d3.line()
+      .x(d => xScale(d[0]))
+      .y(d => yScale(d[1]));
+
+    svg.append("path")
+        .datum(countPlanet)
+        .attr("fill", "none")
+        .attr("stroke", 'lightblue')
+        .attr("opacity", '0.7')
+        .attr("stroke-width", 2)
+        .attr("d", line);
+    svg.append('g')
+        .attr('transform', `translate(0, ${usableArea.bottom})`)
+        .call(xScale);
+    svg.append('g')
+        .attr('transform', `translate(${usableArea.left}, 0)`)
+        .call(yScale);
+    svg.append("g")
+        .attr("class", "Exogrid")
+        .attr("transform", `translate(0, ${usableArea.bottom})`)
+        .attr("stroke", "rgba(0, 0, 0, 0.1)")
+        .attr("stroke-width", 1)
+        .call(d3.axisBottom(xScale)
+          .tickSize(-(usableArea.bottom - usableArea.top))  // vertical size
+          .tickFormat(''));
+    svg.append("g")
+        .attr("class", "Exogrid")
+        .attr("transform", `translate(${usableArea.left}, 0)`)
+        .attr("stroke", "rgba(0, 0, 0, 0.1)")
+        .attr("stroke-width", 1)
+        .call(d3.axisLeft(yScale)
+        .tickSize(-(usableArea.right - usableArea.left))  // horizontal size
+        .tickFormat(''));
+    svg.append("g")
+       .attr("transform", `translate(0,${usableArea.bottom})`)
+       .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+    svg.append("g")
+       .attr("transform", `translate(${usableArea.left},0)`)
+       .call(d3.axisLeft(yScale));
+    const hoverLine = svg.append("line")
+        .attr("stroke", "white")
+        .attr("stroke-width", 1)
+        .attr("y1", usableArea.top)
+        .attr("y2", usableArea.bottom)
+        .style("display", "none");
+    const tooltip = svg.append("text")
+        .attr("fill", "white")
+        .style("font-size", "12px")
+        .style("display", "none");
+    svg.append("rect")
+        .attr("fill", "none")
+        .attr("pointer-events", "all")
+        .attr("x", usableArea.left)
+        .attr("y", usableArea.top)
+        .attr("width", usableArea.width)
+        .attr("height", usableArea.bottom - usableArea.top)
+        .on("mousemove", onMouseMove)
+        .on("mouseenter", () => {
+          hoverLine.style("display", null);
+          tooltip.style("display", null);
+        })
+        .on("mouseleave", () => {
+          hoverLine.style("display", "none");
+          tooltip.style("display", "none");
+        });
+    svg.append("text")
+       .attr("text-anchor", "middle")
+       .attr("x", usableArea.left + usableArea.width / 2)
+       .attr("y", height - 13)
+       .style("fill", 'white')
+       .text("Discovery Year");
+    svg.append("text")
+       .attr("text-anchor", "middle")
+       .attr("transform", `rotate(-90)`)
+       .attr("x", -height/2)
+       .attr("y", 25) 
+       .style("fill", 'white')
+       .text("Number of New Exoplanet Discovered");
+    svg.append("text")
+        .attr("text-anchor", "middle")
+        .attr("x", usableArea.left + usableArea.width / 2)
+        .attr("y", usableArea.top / 2)
+        .style("font-size", "25px")
+        .style("font-weight", "bold")
+        .style("fill", 'white')
+        .text("New Exoplanet Discovered by Year");
+
+    function onMouseMove(event) {
+      const [mouseX] = d3.pointer(event);
+      const x0 = xScale.invert(mouseX); // get x value
+      const bisect = d3.bisector(d => d[0]).left;
+      const i = bisect(countPlanet, x0);
+      const d = countPlanet[i];
+
+      const x = xScale(d[0]);
+      const y = yScale(d[1]); // adjust if you want tooltip closer to line
+
+      hoverLine
+        .attr("x1", x)
+        .attr("x2", x);
+
+      tooltip
+        .attr("x", x + 10)
+        .attr("y", y)
+        .text(`${d[1]} Found In ${d[0]}`);
+    }
+  }
+
+  renderLinePlot();
+});
+
+ExoplanetData.onDataLoaded((data) => {
   // Load and filter data by missingness according to some column conditions
   let validSystemToDraw = Array.from(d3.group(
     data,
