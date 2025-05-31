@@ -1364,6 +1364,8 @@ ExoplanetData.onDataLoaded(rows => {
     .slice(0,50)
     .sort((a,b)=>d3.descending(raw(a),raw(b)))
 
+
+
   const metrics = FEATURES;                        // 6 columns
 
    const top3 = [...planets]                /* top three */
@@ -1379,53 +1381,7 @@ ExoplanetData.onDataLoaded(rows => {
     .text((d,i) =>
     `${d.pl_name}  —  ${d3.format(".3~g")(raw(d))} ${cfg.unit}`);
 
-    const cellSize = 24, gap = 4;
-const hmW = metrics.length * (cellSize+gap);
-const hmH = top3.length * (cellSize+gap);
 
-const hmSvg = d3.select(".top3chart")
-  .selectAll("svg").data([null]).join("svg")
-  .attr("width", hmW).attr("height", hmH);
-
-const cells = hmSvg.selectAll("rect")
-  .data(
-    top3.flatMap((p,row) =>
-      metrics.map((m,col) => ({
-        row, col,
-        diff: Math.abs((+p[m.key]*m.factor - m.earth)/m.earth)  // relative
-      }))
-    )
-  );
-
-const color = d3.scaleLinear()
-  .domain([0,.05,.15])            // 0-5-15 % diff
-  .range(["#10b981","#84e1bc","#444"]);   // green → grey
-
-cells.join("rect")
-  .attr("x", d => d.col*(cellSize+gap))
-  .attr("y", d => d.row*(cellSize+gap))
-  .attr("width",cellSize).attr("height",cellSize)
-  .attr("fill", d => color(d.diff));
-
-hmSvg.selectAll("text.colLab")
-  .data(metrics).join("text")
-  .attr("class","colLab")
-  .attr("x", (d,i)=> i*(cellSize+gap)+cellSize/2)
-  .attr("y", -6)
-  .attr("text-anchor","middle")
-  .attr("fill","#fff")
-  .attr("font-size",9)
-  .text(d=>d.label.replace(/\s.*$/,""));     // first word
-
-hmSvg.selectAll("text.rowLab")
-  .data(top3).join("text")
-  .attr("class","rowLab")
-  .attr("x", -4)
-  .attr("y", (d,i)=> i*(cellSize+gap)+cellSize/2+4)
-  .attr("text-anchor","end")
-  .attr("fill","#fff")
-  .attr("font-size",9)
-  .text(d=>d.pl_name);
 
     d3.select("#top3-title")
     .text(`Top 3 Most Similar to Earth in ${cfg.label}`);
@@ -1508,6 +1464,98 @@ hmSvg.selectAll("text.rowLab")
       .attr("x", -innerH / 2)
       .attr("y", -margin.left + 70)
       .text("Top 50 Earth-Similar Exoplanets");
+
+    /* ──  HEAT-MAP  (rows = top-3, cols = 6 metrics)  ────────────────── */
+
+const hmCell = 60;        // square size     – tweak as you like
+const hmGap  = 15;         // gap between cells
+const hmW    = FEATURES.length * (hmCell + hmGap);
+const hmH    = top3.length   * (hmCell + hmGap);
+const hmOffsetY = innerH + 50;   // 50-px breathing room under bars
+
+// resize overall SVG so there’s room for the heat-map
+chartSvg.attr(
+  "height",
+  innerH + hmH + hmOffsetY + margin.top + margin.bottom
+);
+
+// parent <g> – one per redraw
+const hmGroup = chartSvg.selectAll("g.heatmap")
+  .data([null])
+  .join("g")
+    .attr("class", "heatmap")
+    .attr("transform",
+      `translate(${margin.left},${margin.top + hmOffsetY})`);
+const limePalette = [
+  "#fcffe6", "#f4ffb8", "#eaff8f", "#d3f261",
+  "#bae637", "#a0d911", "#7cb305", "#5b8c00",
+  "#3f6600", "#254000"
+];
+
+// reverse the array so index 0 is darkest (best match)
+const reversedLime = limePalette.slice().reverse();
+
+const hmColor = d3.scaleQuantize()
+  .domain([0, 0.15])       // 0 → perfect, 0.15+ → worst
+  .range(reversedLime);
+
+// flatten planet × metric grid, flag missing values
+const hmData = top3.flatMap((p, row) =>
+  FEATURES.map((f, col) => {
+    const raw = +p[f.key] * f.factor;
+    const diff = Number.isFinite(raw)
+      ? Math.abs((raw - f.earth) / f.earth)
+      : null;                       // «missing»
+    return { row, col, diff, pname: p.pl_name };
+  })
+);
+
+// === cells ========================================================
+hmGroup.selectAll("rect")
+  .data(hmData)
+  .join("rect")
+    .attr("x", d => d.col * (hmCell + hmGap))
+    .attr("y", d => d.row * (hmCell + hmGap))
+    .attr("width",  hmCell)
+    .attr("height", hmCell)
+    .attr("fill", d => d.diff === null ? "#666" : hmColor(d.diff));
+
+// === column labels (metrics) ======================================
+hmGroup.selectAll("text.colLab")
+  .data(FEATURES)
+  .join("text")
+    .attr("class", "colLab")
+    .attr("x", (_, i) => i * (hmCell + hmGap) + hmCell / 2)
+    .attr("y", -6)
+    .attr("text-anchor", "middle")
+    .attr("font-size", 9)
+    .attr("fill", "#fff")
+    .text(d => d.label.split(/\s/)[0]);   // first word
+
+// === row labels (planet names) ====================================
+hmGroup.selectAll("text.rowLab")
+  .data(top3)
+  .join("text")
+    .attr("class", "rowLab")
+    .attr("x", -4)
+    .attr("y", (_, i) => i * (hmCell + hmGap) + hmCell / 2 + 4)
+    .attr("text-anchor", "end")
+    .attr("font-size", 9)
+    .attr("fill", "#fff")
+    .text(d => d.pl_name);
+
+// (legend, if you want)
+/*
+legend:
+  green  → 0-5 % diff
+  pale   → 5-15 %
+  dark   → >15 %
+  gray   → no data
+*/
+
+    /* SPIDER  */
+    
+
   }
 
   /* first draw + listener */
