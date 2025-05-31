@@ -860,7 +860,7 @@ html, body {
 }
 
 #filterSolarSystem {
-  width: 250px;
+  width: 300px;
   font-size: 12px;
   height: min-content;
   display: flex;

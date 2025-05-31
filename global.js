@@ -506,13 +506,13 @@ const verticalSpacing = 200;
 // Load planet and respective pictures
 const planets = [
   { name: "Mercury", discovered: "Prehistoric", color: "#b1b1b1", radius: 45, imageUrl: "images/mercury.png" },
-  { name: "Venus", discovered: "Prehistoric", color: "#f5deb3", radius: 50, imageUrl: "images/venus.jpeg" },
+  { name: "Venus", discovered: "Prehistoric", color: "#f5deb3", radius: 50, imageUrl: "images/venus.png" },
   { name: "Earth", discovered: "Prehistoric", color: "#2e8b57", radius: 55, imageUrl: "images/earth.png" },
   { name: "Mars", discovered: "Prehistoric", color: "#b22222", radius: 55, imageUrl: "images/mars.png" },
   { name: "Jupiter", discovered: "Prehistoric", color: "#d2b48c", radius: 80, imageUrl: "images/jupiter.png" },
-  { name: "Saturn", discovered: "Prehistoric", color: "#deb887", radius: 80, imageUrl: "images/saturn.jpg" },
-  { name: "Uranus", discovered: "1781", color: "#afeeee", radius: 60, imageUrl: "images/uranus.jpg" },
-  { name: "Neptune", discovered: "1846", color: "#4169e1", radius: 60, imageUrl: "images/neptune.jpg" }
+  { name: "Saturn", discovered: "Prehistoric", color: "#deb887", radius: 80, imageUrl: "images/saturn.png" },
+  { name: "Uranus", discovered: "1781", color: "#afeeee", radius: 60, imageUrl: "images/uranus.png" },
+  { name: "Neptune", discovered: "1846", color: "#4169e1", radius: 60, imageUrl: "images/neptune.png" }
 ];
 
 // SVG Container
@@ -800,6 +800,7 @@ ExoplanetData.onDataLoaded((data) => {
       starRadius: planets[0].st_rad, // assuming all same star
       starType: planets[0].st_spectype,
       starTemp: planets[0].st_teff,
+      starAge: planets[0].st_age,
       planets: planets.sort((a, b) => a.pl_orbsmax - b.pl_orbsmax).map(p => ({
           name: p.pl_name,
           host: p.hostname,
@@ -937,6 +938,7 @@ ExoplanetData.onDataLoaded((data) => {
             star_name: systemInfo.star,
             star_type: systemInfo.starType,
             star_temp: systemInfo.starTemp,
+            star_age: systemInfo.starAge,
             star_radius: systemInfo.starRadius,
             total_planets: systemInfo.planetNum,
             total_star: systemInfo.starNum,
@@ -959,9 +961,10 @@ ExoplanetData.onDataLoaded((data) => {
                                 <b class='sep'>Right Ascension: </b> ${`${starsSystem.userData.system_ascend}°` || 'Unknown'}<br>
                                 <b class='sep'>Declination: </b> ${`${starsSystem.userData.system_decline}°` || 'Unknown'}<br>
                                 <b class='sep'>Distance (in parsecs): </b> ${`${starsSystem.userData.system_distance}` || 'Unknown'}<br>
-                                <b class='sep'>Star Type: </b> ${`${starsSystem.userData.star_type}` || 'Unknown'}<br>
-                                <b class='sep'>Star Radius (in Solar Redius): </b> ${`${starsSystem.userData.star_radius}` || 'Unknown'}<br>
-                                <b class='sep'>Star Temperature (in Kelvin): </b> ${`${starsSystem.userData.star_temp}°` || 'Unknown'}
+                                <b class='sep'>Stellar Type: </b> ${`${starsSystem.userData.star_type}` || 'Unknown'}<br>
+                                <b class='sep'>Stellar Age (Giga-Year): </b> ${`${starsSystem.userData.star_age}` || 'Unknown'}<br>
+                                <b class='sep'>Stellar Radius (in Solar Redius): </b> ${`${starsSystem.userData.star_radius}` || 'Unknown'}<br>
+                                <b class='sep'>Stellar Temperature (in Kelvin): </b> ${`${starsSystem.userData.star_temp}°` || 'Unknown'}
                               `
           scene.add(starsSystem);
 
@@ -1166,9 +1169,10 @@ ExoplanetData.onDataLoaded((data) => {
                                         <b class='sep'>Right Ascension: </b> ${`${intersected.userData.system_ascend}°` || 'Unknown'}<br>
                                         <b class='sep'>Declination: </b> ${`${intersected.userData.system_decline}°` || 'Unknown'}<br>
                                         <b class='sep'>Distance (in parsecs): </b> ${`${intersected.userData.system_distance}` || 'Unknown'}<br>
-                                        <b class='sep'>Star Type: </b> ${`${intersected.userData.star_type}` || 'Unknown'}<br>
-                                        <b class='sep'>Star Radius (in Solar Redius): </b> ${`${intersected.userData.star_radius}` || 'Unknown'}<br>
-                                        <b class='sep'>Star Temperature (in Kelvin): </b> ${`${intersected.userData.star_temp}°` || 'Unknown'}
+                                        <b class='sep'>Stellar Type: </b> ${`${intersected.userData.star_type}` || 'Unknown'}<br>
+                                        <b class='sep'>Stellar Age (Giga-Year): </b> ${`${intersected.userData.star_age}` || 'Unknown'}<br>
+                                        <b class='sep'>Stellar Radius (in Solar Redius): </b> ${`${intersected.userData.star_radius}` || 'Unknown'}<br>
+                                        <b class='sep'>Stellar Temperature (in Kelvin): </b> ${`${intersected.userData.star_temp}°` || 'Unknown'}
                                       `
                 }
                 else if (intersected.userData.type === 'planet'){
