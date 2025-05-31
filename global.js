@@ -220,6 +220,37 @@ window.addEventListener('scroll', () => {
   console.log('Progress Bar System Initialized');
 }
 
+
+// Code for Intro Quiz
+const hookButtons = document.querySelectorAll('.hook-options button');
+const hookAnswer = document.getElementById('hook-answer');
+
+  hookButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const value = button.getAttribute('data-value');
+      let answer = '';
+
+      switch (value) {
+        case 'less-than-8':
+          answer = "Hmm doesn’t seem quite right, there are already 8 planets in our solar system.";
+          break;
+        case 'equals-8':
+          answer = "Yes, but those are planets that exist within our solar system.";
+          break;
+        case 'between-8-and-5000':
+          answer = "More than that!";
+          break;
+        case 'greater-than-5000':
+          answer = "Possibly, we are discovering more as we speak.";
+          break;
+        default:
+          answer = "Interesting guess!";
+      }
+
+      hookAnswer.textContent = answer;
+    });
+  });
+
 // ==================================================
 // D3 ORBIT STORIES Global Code: Camille's Code START
 // END at line:279
@@ -567,6 +598,16 @@ g.append("text")
   .attr("y", 5)
   .attr("fill", "#fff")
   .attr("font-size", "18px");
+
+// Scrolly telly for planet timeline
+window.addEventListener('scroll', () => {
+  const labels = document.querySelector('.progress-labels');
+  if (window.scrollY > 50) {
+    labels.classList.add('scrolled');
+  } else {
+    labels.classList.remove('scrolled');
+  }
+});
 
 // ==================================================
 // Jacquelyn's Code: SOLAR TIMELINE END
