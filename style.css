@@ -1065,26 +1065,25 @@ select {
 .side-by-side-container {
   display: flex;
   flex-direction: row;
-  gap: 2rem; /* space between left and right */
+  gap: 2rem;
   align-items: flex-start;
 }
 
 /* Left side: plot or images */
 .left-side {
-  flex: 1 1 60%; /* about 60% width */
-  min-width: 300px; /* avoid too narrow */
+  flex: 1 1 60%;
+  min-width: 300px;
 }
 
 /* Right side: text */
 .right-side {
-  flex: 1 1 40%; /* about 40% width */
+  flex: 1 1 40%;
   color: #fff;
   font-size: 1.1rem;
   line-height: 1.5;
   padding-left: 1rem;
 }
 
-/* Responsive: stack on small screens */
 @media (max-width: 768px) {
   .side-by-side-container {
     flex-direction: column;
@@ -1144,4 +1143,29 @@ select {
   background-color: hsl(238, 97%, 45%);
 }
 
+.intro-hook {
+  margin-bottom: 20px;
+}
+
+.hook-options button {
+  background-color: #1a1a1a;
+  color: white;
+  border: 1px solid #3f4d40;
+  border-radius: 5px;
+  margin: 5px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 16px;
+  user-select: none;
+}
+
+.hook-options button:hover {
+  background-color: #3f4d40;
+}
+
+.hook-answer {
+  margin-top: 15px;
+  font-style: italic;
+  color: #81c784;
+}
 
