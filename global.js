@@ -96,6 +96,131 @@ function loadExoplanetData() {
   });
 }
 
+// ===========================
+// PROGRESS BAR SYSTEM: Line 128 END
+// ===========================
+// Initialize enhanced progress bar functionality
+function initEnhancedProgressBar() {
+  const progressBar = d3.select('#progress-bar');
+  const progressPercentage = d3.select('#progress-percentage');
+  const header = d3.select('#main-header');
+  const progressLabels = d3.selectAll('.progress-labels span');
+  const navLinks = d3.selectAll('.nav-link');
+  
+  // Calculate scroll progress with enhanced features
+  function updateProgress() {
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Calculate progress percentage
+    const scrollableHeight = documentHeight - windowHeight;
+    const progress = Math.min(Math.max(scrollTop / scrollableHeight, 0), 1);
+    const percentage = Math.round(progress * 100);
+    
+    // Update progress bar with smooth D3 transition
+    progressBar
+      .transition()
+      .duration(50)
+      .style('width', `${percentage}%`);
+    
+    // Update percentage display
+    progressPercentage.text(`${percentage}%`);
+
+    // Enhanced header background opacity based on scroll
+    const headerOpacity = Math.min(0.95, 0.7 + (progress * 0.25));
+    header
+      .transition()
+      .duration(100)
+      .style('background', `rgba(0, 0, 0, ${headerOpacity})`);
+    
+    // Update active section highlighting
+    updateActiveSections();
+  }
+  
+  // Update active sections and navigation
+  function updateActiveSections() {
+  const sections = document.querySelectorAll('.scroll-section');
+  const scrollPosition = window.pageYOffset + window.innerHeight * 0.3;
+
+  let activeSectionId = null;
+
+  sections.forEach((section) => {
+    const sectionTop = section.offsetTop;
+    const sectionBottom = sectionTop + section.offsetHeight;
+
+    if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+      activeSectionId = section.id;
+    }
+  });
+
+  document.querySelectorAll('.progress-labels a').forEach((link) => {
+    if (link.getAttribute('href') === `#${activeSectionId}`) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
+}
+window.addEventListener('scroll', () => {
+  requestAnimationFrame(updateActiveSections);
+});
+  // Enhanced smooth scroll navigation
+  function setupSmoothNavigation() {
+    navLinks.on('click', function(event) {
+      event.preventDefault();
+      
+      const target = d3.select(this).attr('href');
+      const targetElement = document.querySelector(target);
+      
+      if (targetElement) {
+        // Add click animation
+        d3.select(this)
+          .transition()
+          .duration(150)
+          .style('transform', 'scale(0.95)')
+          .transition()
+          .duration(150)
+          .style('transform', 'scale(1)');
+        
+        // Smooth scroll with custom easing
+        const targetPosition = targetElement.offsetTop - 120; // Account for fixed header
+        const startPosition = window.pageYOffset;
+        const distance = targetPosition - startPosition;
+        const duration = 800;
+        let startTime = null;
+        
+        function animation(currentTime) {
+          if (startTime === null) startTime = currentTime;
+          const timeElapsed = currentTime - startTime;
+          const progress = Math.min(timeElapsed / duration, 1);
+          
+          // Easing function (ease-in-out-cubic)
+          const ease = progress < 0.5 
+            ? 4 * progress * progress * progress 
+            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+          
+          window.scrollTo(0, startPosition + distance * ease);
+          
+          if (timeElapsed < duration) {
+            requestAnimationFrame(animation);
+          }
+        }
+        
+        requestAnimationFrame(animation);
+      }
+    });
+  }
+  // Setup navigation
+  setupSmoothNavigation();
+  
+  // Initial progress calculation
+  updateProgress();
+  
+  console.log('Progress Bar System Initialized');
+}
+
+
 // Code for Intro Quiz
 const hookButtons = document.querySelectorAll('.hook-options button');
 const hookAnswer = document.getElementById('hook-answer');
