@@ -930,6 +930,19 @@ select {
   display: block;
 }
 
+.glossary {
+  list-style-type: none;  
+  padding: 0; 
+  margin: 0;
+}
+
+.glossary li {
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
 .sep {
   margin-top: 5px;
   margin-bottom: 5px;
@@ -1062,7 +1075,7 @@ select {
 .section-title {
   font-size: 2.5em;
   color: #fff;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   text-align: center;
   width: 100%;
 }
