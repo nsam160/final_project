@@ -220,37 +220,6 @@ window.addEventListener('scroll', () => {
   console.log('Progress Bar System Initialized');
 }
 
-
-// Code for Intro Quiz
-const hookButtons = document.querySelectorAll('.hook-options button');
-const hookAnswer = document.getElementById('hook-answer');
-
-  hookButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const value = button.getAttribute('data-value');
-      let answer = '';
-
-      switch (value) {
-        case 'less-than-8':
-          answer = "Hmm doesn’t seem quite right, there are already 8 planets in our solar system.";
-          break;
-        case 'equals-8':
-          answer = "Yes, but those are planets that exist within our solar system.";
-          break;
-        case 'between-8-and-5000':
-          answer = "More than that!";
-          break;
-        case 'greater-than-5000':
-          answer = "Possibly, we are discovering more as we speak.";
-          break;
-        default:
-          answer = "Interesting guess!";
-      }
-
-      hookAnswer.textContent = answer;
-    });
-  });
-
 // ==================================================
 // D3 ORBIT STORIES Global Code: Camille's Code START
 // END at line:279
@@ -599,16 +568,6 @@ g.append("text")
   .attr("fill", "#fff")
   .attr("font-size", "18px");
 
-// Scrolly telly for planet timeline
-window.addEventListener('scroll', () => {
-  const labels = document.querySelector('.progress-labels');
-  if (window.scrollY > 50) {
-    labels.classList.add('scrolled');
-  } else {
-    labels.classList.remove('scrolled');
-  }
-});
-
 // ==================================================
 // Jacquelyn's Code: SOLAR TIMELINE END
 // ==================================================
@@ -619,28 +578,39 @@ window.addEventListener('scroll', () => {
 
 // Function to create the Plotly map
 function createExoplanetMap() {
-  const containerElement = d3.select("#exoplanet-map-container").node();
+  const containerElement = d3.select(".left-side").node();
   if (!containerElement) {
-      console.error("Error: #exoplanet-map-container not found in the DOM.");
+      console.error("Error: .left-side not found in the DOM.");
       return;
   }
 
-  const containerWidth = containerElement.getBoundingClientRect().width;
-  const containerHeight = containerElement.getBoundingClientRect().height;
+  const width = 500;
+  const height = 400;
+  // const containerWidth = containerElement.getBoundingClientRect().width;
+  // const containerHeight = containerElement.getBoundingClientRect().height;
 
+  const mapMargin = { top: 60, right: 70, bottom: 40, left: 40 };
+  // const mapWidth = containerWidth - mapMargin.left - mapMargin.right;
+  // const mapHeight = containerHeight - mapMargin.top - mapMargin.bottom;
+  const usableArea = {
+      top: mapMargin.top,
+      right: width - mapMargin.right,
+      bottom: height - mapMargin.bottom,
+      left: mapMargin.left,
+      width: width - mapMargin.left - mapMargin.right,
+      height: height - mapMargin.top - mapMargin.bottom
+  };
 
-  const mapMargin = { top: 40, right: 100, bottom: 60, left: 80 };
-  const mapWidth = containerWidth - mapMargin.left - mapMargin.right;
-  const mapHeight = containerHeight - mapMargin.top - mapMargin.bottom;
-
-  const mapSvg = d3.select("#exoplanet-map-container")
+  const mapSvg = d3.select(".left-side")
       .append("svg")
-      .attr("width", containerWidth)
-      .attr("height", containerHeight)
-      .attr("viewBox", `0 0 ${containerWidth} ${containerHeight}`)
-      .attr("preserveAspectRatio", "xMidYMid meet")
-      .append("g")
-      .attr("transform", `translate(${mapMargin.left}, ${mapMargin.top})`);
+      .attr('viewBox', `0 0 ${width} ${height}`)
+      .style('overflow', 'visible')
+      // .attr("width", containerWidth)
+      // .attr("height", containerHeight)
+      // .attr("viewBox", `0 0 ${containerWidth} ${containerHeight}`)
+      // .attr("preserveAspectRatio", "xMidYMid meet")
+      // .append("g")
+      // .attr("transform", `translate(${mapMargin.left}, ${mapMargin.top})`);
 
   // Create a group for the main chart content
   const mapChartGroup = mapSvg.append("g");
@@ -658,11 +628,13 @@ function createExoplanetMap() {
       // Scales
       const xScale = d3.scaleLinear()
           .domain([360, 0])
-          .range([0, mapWidth]);
+          .range([usableArea.left, usableArea.right]);
+          // .range([usableArea.left, usableArea.right]);
 
       const yScale = d3.scaleLinear()
           .domain([-90, 90])
-          .range([mapHeight, 0]);
+          .range([usableArea.bottom, usableArea.top]);
+          // .range([mapHeight, 0]);
 
       // Size scale
       const sizeScale = d3.scaleSqrt()
@@ -682,36 +654,66 @@ function createExoplanetMap() {
           .tickFormat(d => `${d}°`);
 
       mapChartGroup.append("g")
-          .attr("class", "x axis")
-          .attr("transform", `translate(0, ${mapHeight})`)
+          .attr("transform", `translate(0, ${usableArea.bottom})`)
           .call(xAxis)
           .append("text")
           .attr("fill", "#fff")
-          .attr("x", mapWidth / 2)
+          .attr("x", usableArea.left + usableArea.width / 2)
           .attr("y", 35)
           .attr("text-anchor", "middle")
           .text("Right Ascension (°)");
+          // .attr("class", "x axis")
+          // .attr("transform", `translate(0, ${height})`)
+          // .call(xAxis)
+          // .append("text")
+          // .attr("fill", "#fff")
+          // .attr("x", width / 2)
+          // .attr("y", 35)
+          // .attr("text-anchor", "middle")
+          // .text("Right Ascension (°)");
 
       mapChartGroup.append("g")
-          .attr("class", "y axis")
+          .attr("transform", `translate(${usableArea.left},0)`)
           .call(yAxis)
           .append("text")
           .attr("fill", "#fff")
           .attr("transform", "rotate(-90)")
-          .attr("y", -60)
-          .attr("x", -mapHeight / 2)
+          .attr("x", -height/2)
+          .attr("y", -27) 
           .attr("text-anchor", "middle")
           .text("Declination (°)");
+          // .attr("class", "y axis")
+          // .call(yAxis)
+          // .append("text")
+          // .attr("fill", "#fff")
+          // .attr("transform", "rotate(-90)")
+          // .attr("y", -60)
+          // .attr("x", -mapHeight / 2)
+          // .attr("text-anchor", "middle")
+          // .text("Declination (°)");
+        
+      mapChartGroup.append("text")
+        .attr("text-anchor", "middle")
+        .attr("x", usableArea.left + usableArea.width / 2)
+        .attr("y", usableArea.top / 2)
+        .style("font-size", "20px")
+        .style("font-weight", "bold")
+        .style("fill", 'white')
+        .text("Exoplanet's Location in the Celestial Universe"); // Change title
 
       // Gridlines
       mapChartGroup.append("g")
           .attr("class", "grid")
-          .attr("transform", `translate(0, ${mapHeight})`)
-          .call(xAxis.tickSize(-mapHeight).tickFormat(""));
+          // .attr("transform", `translate(0, ${mapHeight})`)
+          // .call(xAxis.tickSize(-mapHeight).tickFormat(""));
+          .attr("transform", `translate(0, ${usableArea.bottom})`)
+          .call(xAxis.tickSize(-usableArea.height).tickFormat(""));
 
       mapChartGroup.append("g")
           .attr("class", "grid")
-          .call(yAxis.tickSize(-mapWidth).tickFormat(""));
+          // .call(yAxis.tickSize(-mapWidth).tickFormat(""));
+          .attr("transform", `translate(${usableArea.left},0)`)
+          .call(yAxis.tickSize(-usableArea.width).tickFormat(""));
 
       // Scatter Plot Points
       mapChartGroup.selectAll(".exoplanet-point")
@@ -748,8 +750,10 @@ function createExoplanetMap() {
           .text(d => d.pl_name);
 
       // COLOR BAR (D3.js implementation)
-      const colorbarWidth = 20;
-      const colorbarHeight = mapHeight;
+      // const colorbarWidth = 20;
+      const colorbarWidth = 10;
+      // const colorbarHeight = mapHeight;
+      const colorbarHeight = usableArea.height;
 
       const mapDefs = mapSvg.append("defs");
 
@@ -779,7 +783,8 @@ function createExoplanetMap() {
           .tickFormat(d3.format(".0f"));
 
       const colorbar = mapSvg.append("g")
-          .attr("transform", `translate(${mapWidth + mapMargin.left + 20}, ${mapMargin.top})`);
+          // .attr("transform", `translate(${mapWidth + mapMargin.left + 20}, ${mapMargin.top})`);
+          .attr("transform", `translate(${usableArea.width + usableArea.left + 20}, ${usableArea.top})`);
 
       colorbar.append("rect")
           .attr("width", colorbarWidth)
@@ -794,7 +799,8 @@ function createExoplanetMap() {
       colorbar.append("text")
           .attr("class", "colorbar-label")
           .attr("transform", "rotate(-90)")
-          .attr("y", -mapMargin.left + 5)
+          // .attr("y", -mapMargin.left + 5)
+          .attr("y", -usableArea.left + 25)
           .attr("x", -(colorbarHeight / 2))
           .attr("text-anchor", "middle")
           .text("Equilibrium Temperature (K)");
@@ -1489,18 +1495,33 @@ dropdown.property("value", "pl_rade");
 
 
 /* ── 3.  SVG scaffold (unique names) ───────────────────────────── */
-const margin = { top: 20, right: 110, bottom: 44, left: 220 };
+// const margin = { top: 20, right: 110, bottom: 44, left: 220 };
+const margin = { top: 20, right: 20, bottom: 20, left: 20 };
 const WIDTH  = 960;
 const ROW_H  = 20;                      // per-planet vertical space
+const HEIGHT = ROW_H * 50;
 
+const top50UsableArea = {
+  top: margin.top,
+  right: WIDTH - margin.right,
+  bottom: HEIGHT - margin.bottom,
+  left: margin.left,
+  width: WIDTH - margin.left - margin.right,
+  height: HEIGHT - margin.top - margin.bottom,
+}
+
+// const chartSvg = d3.select(".bar-chart")
 const chartSvg = d3.select(".bar-chart")
   .append("svg")
-  .attr("id", "exoCompareSvg")
-  .attr("width", WIDTH);
+  // .attr("id", "exoCompareSvg")
+  .attr('viewBox', `0 0 ${WIDTH} ${HEIGHT}`)
+  .style('overflow', 'visible');
+  // .attr("width", WIDTH);
 
 const chartGroup = chartSvg.append("g")
-  .attr("id", "exoCompareGroup")
-  .attr("transform", `translate(${margin.left},${margin.top})`);
+    .attr("transform", `translate(${top50UsableArea.left},${top50UsableArea.top})`);
+  // .attr("id", "exoCompareGroup")
+  // .attr("transform", `translate(${margin.left},${margin.top})`);
 
 chartGroup.append("g").attr("class", "axis-x");
 chartGroup.append("g").attr("class", "axis-y");
@@ -1511,14 +1532,22 @@ chartGroup.append("line")
   .attr("stroke-width", 2)
   .attr("stroke-dasharray", "4 4");
 
-chartGroup.append("text").attr("class", "axis-x-title")
-  .attr("fill", "#fff").attr("font-size", 14)
-  .attr("text-anchor", "end");
-
-chartGroup.append("text").attr("class", "axis-y-title")
-  .attr("fill", "#fff").attr("font-size", 14)
+chartGroup.append("text")
+  .attr("class", "axis-x-title")
+  .attr("fill", "#fff")
+  .attr("font-size", 14)
   .attr("text-anchor", "middle")
-  .attr("transform", "rotate(-90)");
+  .attr("x", top50UsableArea.left + top50UsableArea.width / 2)
+  .attr("y", HEIGHT + 15);
+
+chartGroup.append("text")
+  .attr("class", "axis-y-title")
+  .attr("fill", "#fff")
+  .attr("font-size", 14)
+  .attr("text-anchor", "middle")
+  .attr("transform", "rotate(-90)")
+  .attr("x", -HEIGHT/2)
+  .attr("y", 0);
 
 const habDD = d3.select("#habitable");
 
@@ -1531,33 +1560,24 @@ ExoplanetData.onDataLoaded(rows => {
     const cfg = FEATURES.find(f => f.key === colKey);
     const raw = d => +d[colKey] * cfg.factor;
 
-
-
     const candidates = rows.filter(d => {
-    if (!Number.isFinite(raw(d))) return false;            // skip NaN
-    if (habFilter === "yes") return +d.is_habitable === 1;
-    if (habFilter === "no")  return +d.is_habitable === 0;
-    return true;                                           // 'all'
-  });
-    
-
-
-
-
+      if (!Number.isFinite(raw(d))) return false;            // skip NaN
+      if (habFilter === "yes") return +d.is_habitable === 1;
+      if (habFilter === "no")  return +d.is_habitable === 0;
+      return true;                                           // 'all'
+    });
 
     const planets = candidates
-    .map(d => ({ ...d, delta: Math.abs(raw(d) - cfg.earth) }))
-    .sort((a,b)=>d3.ascending(a.delta,b.delta))
-    .slice(0,50)
-    .sort((a,b)=>d3.descending(raw(a),raw(b)))
+      .map(d => ({ ...d, delta: Math.abs(raw(d) - cfg.earth) }))
+      .sort((a,b)=>d3.ascending(a.delta,b.delta))
+      .slice(0,50)
+      .sort((a,b)=>d3.descending(raw(a),raw(b)));
 
+    const metrics = FEATURES;                        // 6 columns
 
-
-  const metrics = FEATURES;                        // 6 columns
-
-   const top3 = [...planets]                /* top three */
-    .sort((a, b) => d3.ascending(a.delta, b.delta))
-  . slice(0, 3); 
+    const top3 = [...planets]                /* top three */
+      .sort((a, b) => d3.ascending(a.delta, b.delta))
+      .slice(0, 3); 
     d3.select("#top3-list")
       .selectAll("li")
       .data(top3, d => d.pl_name)
@@ -1565,47 +1585,47 @@ ExoplanetData.onDataLoaded(rows => {
         enter => enter.append("li"),
         update => update
       )
-    .text((d,i) =>
-    `${d.pl_name}  —  ${d3.format(".3~g")(raw(d))} ${cfg.unit}`);
+      .text((d,i) => `${d.pl_name}  —  ${d3.format(".3~g")(raw(d))} ${cfg.unit}`);
 
+      d3.select("#top3-title")
+        .text(`Top 3 Most Similar to Earth in ${cfg.label}`);
+      // const innerH = planets.length * ROW_H;
+      // chartSvg.attr("height", innerH + margin.top + margin.bottom);
 
+      const y = d3.scaleBand()
+        .domain(planets.map(d => d.pl_name))
+        // .range([0, innerH])
+        .range([top50UsableArea.top, top50UsableArea.bottom])
+        .paddingInner(0.2);
 
-    d3.select("#top3-title")
-    .text(`Top 3 Most Similar to Earth in ${cfg.label}`);
-    const innerH = planets.length * ROW_H;
-    chartSvg.attr("height", innerH + margin.top + margin.bottom);
+      const values = planets.map(raw).concat(cfg.earth);
+      const [lo, hi] = d3.extent(values);
+      const pad = (hi - lo || 1) * 0.10;
+      const x = d3.scaleLinear()
+        .domain([lo - pad, hi + pad]).nice()
+        .range([top50UsableArea.left, top50UsableArea.right])
+        // .range([0, WIDTH - margin.left - margin.right]);
 
-    const y = d3.scaleBand()
-      .domain(planets.map(d => d.pl_name))
-      .range([0, innerH])
-      .paddingInner(0.2);
+      /* ---- Earth guide ---- */
+      chartGroup.select(".earth-line")
+        .attr("x1", x(cfg.earth)).attr("x2", x(cfg.earth))
+        .attr("y1", top50UsableArea.bottom).attr("y2", top50UsableArea.top);
+        // .attr("y1", 0).attr("y2", innerH);
 
-    const values = planets.map(raw).concat(cfg.earth);
-    const [lo, hi] = d3.extent(values);
-    const pad = (hi - lo || 1) * 0.10;
-    const x = d3.scaleLinear()
-      .domain([lo - pad, hi + pad]).nice()
-      .range([0, WIDTH - margin.left - margin.right]);
-
-    /* ---- Earth guide ---- */
-    chartGroup.select(".earth-line")
-      .attr("x1", x(cfg.earth)).attr("x2", x(cfg.earth))
-      .attr("y1", 0).attr("y2", innerH);
-
-    /* ---- dots ---- */
-    chartGroup.selectAll("circle.dot")
-      .data(planets, d => d.pl_name)
-      .join(
-        enter => enter.append("circle")
-          .attr("class", "dot")
-          .attr("r", 6).attr("fill", "none")
-          .attr("stroke", "#10b981").attr("stroke-width", 2)
-          .attr("cx", d => x(raw(d)))
-          .attr("cy", d => y(d.pl_name) + y.bandwidth()/2),
-        update => update.transition().duration(400)
-          .attr("cx", d => x(raw(d)))
-          .attr("cy", d => y(d.pl_name) + y.bandwidth()/2)
-      );
+      /* ---- dots ---- */
+      chartGroup.selectAll("circle.dot")
+        .data(planets, d => d.pl_name)
+        .join(
+          enter => enter.append("circle")
+            .attr("class", "dot")
+            .attr("r", 6).attr("fill", "none")
+            .attr("stroke", "#10b981").attr("stroke-width", 2)
+            .attr("cx", d => x(raw(d)))
+            .attr("cy", d => y(d.pl_name) + y.bandwidth()/2),
+          update => update.transition().duration(400)
+            .attr("cx", d => x(raw(d)))
+            .attr("cy", d => y(d.pl_name) + y.bandwidth()/2)
+        );
 
     /* ---- labels (flip side if needed) ---- */
     chartGroup.selectAll("text.pl-label")
@@ -1622,132 +1642,144 @@ ExoplanetData.onDataLoaded(rows => {
           .text(d => d.pl_name)
       )
       .attr("text-anchor", d => x(raw(d)) < x(cfg.earth) ? "end" : "start")
-
       .attr("x", d => x(raw(d)) + (x(raw(d)) < x(cfg.earth) ? -8 : 8));
 
     /* ---- axes ---- */
     chartGroup.select(".axis-y")
+      .attr("transform", `translate(${top50UsableArea.left},0)`)
       .call(d3.axisLeft(y).tickSize(0))
       .selectAll("text").remove();             // we draw custom labels
 
     const formatMass = d => (d / 1e24).toFixed(2) + " ×10²⁴";
 
     chartGroup.select(".axis-x")
-      .attr("transform", `translate(0,${innerH})`)
+      .attr("transform", `translate(0,${top50UsableArea.bottom})`)
+      // .attr("transform", `translate(0,${innerH})`)
       .call(
-    d3.axisBottom(x)
-      .ticks(6)
-      .tickFormat(cfg.unit === "kg" ? formatMass : d3.format("~g"))
+        d3.axisBottom(x)
+          .ticks(6)
+          .tickFormat(cfg.unit === "kg" ? formatMass : d3.format("~g"))
       )
       .selectAll("text").style("font-size", "11px").style("fill", "#fff");
 
     /* ---- titles ---- */
     chartGroup.select(".axis-x-title")
-      .attr("x", WIDTH - margin.left - margin.right)
-      .attr("y", innerH + 32)
+      // .attr("x", WIDTH - margin.left - margin.right)
+      // .attr("y", innerH + 32)
       .text(`${cfg.label} (${cfg.unit || "raw"})`);
 
     chartGroup.select(".axis-y-title")
-      .attr("x", -innerH / 2)
-      .attr("y", -margin.left + 70)
+      // .attr("x", -innerH / 2)
+      // .attr("y", -margin.left + 70)
       .text("Top 50 Earth-Similar Exoplanets");
 
     /* ──  HEAT-MAP  (rows = top-3, cols = 6 metrics)  ────────────────── */
 
-const hmCell = 60;        // square size     – tweak as you like
-const hmGap  = 15;         // gap between cells
-const hmW    = FEATURES.length * (hmCell + hmGap);
-const hmH    = top3.length   * (hmCell + hmGap);
-const hmOffsetY = innerH + 50;   // 50-px breathing room under bars
+    const hmCell = 60;        // square size     – tweak as you like
+    const hmGap  = 15;         // gap between cells
+    // const hmW    = FEATURES.length * (hmCell + hmGap);
+    // const hmH    = top3.length   * (hmCell + hmGap);
+    // const hmOffsetY = innerH + 50;   // 50-px breathing room under bars
+    const WIDTH2 = FEATURES.length * (hmCell + hmGap) + 50;
+    const HEIGHT2 = top3.length   * (hmCell + hmGap);
+    const margin2 = { top: 20, right: 20, bottom: 20, left: 70 };
+    const top3UsableArea = {
+      top: margin2.top,
+      right: WIDTH2 - margin2.right,
+      bottom: HEIGHT2 - margin2.bottom,
+      left: margin2.left,
+      width: WIDTH2 - margin2.left - margin2.right,
+      height: HEIGHT2 - margin2.top - margin2.bottom,
+    }
 
-// resize overall SVG so there’s room for the heat-map
-chartSvg.attr(
-  "height",
-  innerH + hmH + hmOffsetY + margin.top + margin.bottom
-);
+    // resize overall SVG so there’s room for the heat-map
+    d3.select(".top3chart").html('');
+    const top3svg = d3.select(".top3chart")
+      .append("svg")
+      .attr('viewBox', `0 0 ${WIDTH2} ${HEIGHT2}`)
+      .style('overflow', 'visible');
 
-// parent <g> – one per redraw
-const hmGroup = chartSvg.selectAll("g.heatmap")
-  .data([null])
-  .join("g")
-    .attr("class", "heatmap")
-    .attr("transform",
-      `translate(${margin.left},${margin.top + hmOffsetY})`);
-const limePalette = [
-  "#fcffe6", "#f4ffb8", "#eaff8f", "#d3f261",
-  "#bae637", "#a0d911", "#7cb305", "#5b8c00",
-  "#3f6600", "#254000"
-];
+    // parent <g> – one per redraw
+    const hmGroup = top3svg.selectAll("g.heatmap")
+      .data([null])
+      .join("g")
+      .attr("class", "heatmap")
+      .attr("transform", `translate(${top3UsableArea.left},${top3UsableArea.top})`);
+    const limePalette = [
+      "#fcffe6", "#f4ffb8", "#eaff8f", "#d3f261",
+      "#bae637", "#a0d911", "#7cb305", "#5b8c00",
+      "#3f6600", "#254000"
+    ];
 
-// reverse the array so index 0 is darkest (best match)
-const reversedLime = limePalette.slice().reverse();
+    // reverse the array so index 0 is darkest (best match)
+    const reversedLime = limePalette.slice().reverse();
 
-const hmColor = d3.scaleQuantize()
-  .domain([0, 0.15])       // 0 → perfect, 0.15+ → worst
-  .range(reversedLime);
+    const hmColor = d3.scaleQuantize()
+      .domain([0, 0.15])       // 0 → perfect, 0.15+ → worst
+      .range(reversedLime);
 
-// flatten planet × metric grid, flag missing values
-const hmData = top3.flatMap((p, row) =>
-  FEATURES.map((f, col) => {
-    const raw = +p[f.key] * f.factor;
-    const diff = Number.isFinite(raw)
-      ? Math.abs((raw - f.earth) / f.earth)
-      : null;                       // «missing»
-    return { row, col, diff, pname: p.pl_name };
-  })
-);
+    // flatten planet × metric grid, flag missing values
+    const hmData = top3.flatMap((p, row) =>
+      FEATURES.map((f, col) => {
+        const raw = +p[f.key] * f.factor;
+        const diff = Number.isFinite(raw)
+          ? Math.abs((raw - f.earth) / f.earth)
+          : null;                       // «missing»
+        return { row, col, diff, pname: p.pl_name };
+      })
+    );
 
-// === cells ========================================================
-hmGroup.selectAll("rect")
-  .data(hmData)
-  .join("rect")
-    .attr("x", d => d.col * (hmCell + hmGap))
-    .attr("y", d => d.row * (hmCell + hmGap))
-    .attr("width",  hmCell)
-    .attr("height", hmCell)
-    .attr("fill", d => d.diff === null ? "#666" : hmColor(d.diff));
+    // === cells ========================================================
+    hmGroup.selectAll("rect")
+      .data(hmData)
+      .join("rect")
+        .attr("x", d => d.col * (hmCell + hmGap))
+        .attr("y", d => d.row * (hmCell + hmGap))
+        .attr("width",  hmCell)
+        .attr("height", hmCell)
+        .attr("fill", d => d.diff === null ? "#666" : hmColor(d.diff));
 
-// === column labels (metrics) ======================================
-hmGroup.selectAll("text.colLab")
-  .data(FEATURES)
-  .join("text")
-    .attr("class", "colLab")
-    .attr("x", (_, i) => i * (hmCell + hmGap) + hmCell / 2)
-    .attr("y", -6)
-    .attr("text-anchor", "middle")
-    .attr("font-size", 9)
-    .attr("fill", "#fff")
-    .text(d => d.label.split(/\s/)[0]);   // first word
+    // === column labels (metrics) ======================================
+    hmGroup.selectAll("text.colLab")
+      .data(FEATURES)
+      .join("text")
+        .attr("class", "colLab")
+        .attr("x", (_, i) => i * (hmCell + hmGap) + hmCell / 2)
+        .attr("y", -6)
+        .attr("text-anchor", "middle")
+        .attr("font-size", 9)
+        .attr("fill", "#fff")
+        .text(d => d.label.split(/\s/)[0]);   // first word
 
-// === row labels (planet names) ====================================
-hmGroup.selectAll("text.rowLab")
-  .data(top3)
-  .join("text")
-    .attr("class", "rowLab")
-    .attr("x", -4)
-    .attr("y", (_, i) => i * (hmCell + hmGap) + hmCell / 2 + 4)
-    .attr("text-anchor", "end")
-    .attr("font-size", 9)
-    .attr("fill", "#fff")
-    .text(d => d.pl_name);
+    // === row labels (planet names) ====================================
+    hmGroup.selectAll("text.rowLab")
+      .data(top3)
+      .join("text")
+        .attr("class", "rowLab")
+        .attr("x", -4)
+        .attr("y", (_, i) => i * (hmCell + hmGap) + hmCell / 2 + 4)
+        .attr("text-anchor", "end")
+        .attr("font-size", 9)
+        .attr("fill", "#fff")
+        .text(d => d.pl_name);
 
-// (legend, if you want)
-/*
-legend:
-  green  → 0-5 % diff
-  pale   → 5-15 %
-  dark   → >15 %
-  gray   → no data
-*/
+      // (legend, if you want)
+      /*
+      legend:
+        green  → 0-5 % diff
+        pale   → 5-15 %
+        dark   → >15 %
+        gray   → no data
+      */
 
-    /* SPIDER  */
-    
+          /* SPIDER  */
+          
 
   }
 
   /* first draw + listener */
   draw(dropdown.property("value"), habDD.property("value"));
-  habDD  .on("change", () => draw(dropdown.property("value"), habDD.property("value")));
+  habDD.on("change", () => draw(dropdown.property("value"), habDD.property("value")));
   dropdown.on("change", () => draw(dropdown.property("value"), habDD.property("value")));
 });
 

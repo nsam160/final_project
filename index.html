@@ -51,12 +51,11 @@
       <div id="hook-answer" class="hook-answer"></div>
     </div>
 
-    <h1>Welcome to the World of Exoplanets</h1>
-    <p>
-      Exoplanets are planets that orbit stars outside of our own solar system. Using powerful telescopes and space missions like Kepler and TESS, we've been able to discover thousands of these distant worlds. Some of them even have the potential to be Earth-like while others are completely alien.
-    </p>
-
     <div class="intro-subsections">
+      <h1>Welcome to the World of Exoplanets</h1>
+      <p>
+        Exoplanets are planets that orbit stars outside of our own solar system. Using powerful telescopes and space missions like Kepler and TESS, we've been able to discover thousands of these distant worlds. Some of them even have the potential to be Earth-like while others are completely alien.
+      </p>
       <div>
         <h2>🪐 What Are They?</h2>
         <p>Exoplanets can have multiple terrains including rocky, gaseous, or icy. Some are relatively the same size as Earth while others can be compared to gas giants larger than Jupiter.</p>
@@ -94,33 +93,62 @@
     </div>
   </section>
 
-  <!-- New Section with timeline beyond solar system -->
+  <!-- Nghi - New Section with timeline beyond solar system -->
   <section class="scroll-section">
     <h2 class="section-title">Exoplanet Discoveries</h2>
-    <div id="increaseExoplanet"></div>
-  </section>
-  
-  <!-- =================================== -->
-  <!-- Jacquelyn Section 3:EXOPLANETS DISCOVERIES -->
-  <!-- =================================== -->
-  <section class="scroll-section frosted-glass" id="section-discoveries">
-    <h2 class="section-title">Earth-like Exoplanets in the Sky</h2>
-    
-    <div class="side-by-side-container">
-      <!-- LEFT SIDE: Plot -->
-      <div class="left-side">
-        <div id="exoplanet-map-container"></div>
-      </div>
-      
-      <!-- RIGHT SIDE: Text or other info -->
-      <div class="right-side">
+    <div id="increaseDiscovery">
+      <div id="increaseExoplanet"></div>
+      <div id="increaseExoplanetText">
         <p>
-          Discover exoplanets that closely resemble Earth by their atmospheric conditions and potential habitability. This interactive map highlights key features and top candidates for future exploration.
+          After the discovery of Uranus, Pluto was discovered in 1930 as a planet, 
+          but it was later reclassified as a Dwarf planet later on. However, our 
+          solar system of 8 planets is not the only solar system that exists in 
+          the Universe. Learning from history, our universe is always larger than 
+          we might expect it to be. That’s when we discovered the first planet, 
+          that rotates around another star besides the sun in 1992, to which are
+          called ‘exoplanets’.
         </p>
-        <!-- Add more descriptive text or subsections here -->
+        Important Years:
+        <ul>
+          <li><b>2014:</b> 
+            In 2013, due to a failure in the reaction wheel of the spacecraft 
+            NASA used in their Kepler mission (2009 - 2013), they repurposed the mission and 
+            launched the K2 mission (2014 - 2018) in 2014. With a better spacecraft that is 
+            more resistance against solar radiation pressure, along with a new 
+            automated planet validation technique called the 'multiplicity 
+            validation' that they created by processing backlog data of planet 
+            candidates, we were able to see the initial surge of 870 newly 
+            discovered planets.
+          </li>
+          <li><b>2016:</b> 
+            In 2016, a new algorithm called 'Validation of Exoplanet Signals 
+            using a Probabilistic Algorithm (VESPA)' was used by NASA to comfirm
+            a record breaking amount of 1496 Exoplanets in one year. This algorithm
+            is calculates the statistical significant probability that a detected 
+            signal is caused by a true planet rather than a false positive, but it
+            requires complete and clean dataset on Exoplanets, so while this was written
+            before 2016, it was not until 2016 were they able to successfully confirm planets.
+          </li>
+          <li><b>2018:</b>
+            Successing Kepler, the Transiting Exoplanet Survey Satellite (TESS) was launched for the
+            first time in 2018. It was designed to scan nearly the entire sky for
+            exoplanets around the brightest and nearest stars. Unlike Kelper, which
+            focuses on one small patch, TESS divides the sky into sectors and rotates its gaze 
+            every 27 days, which is how it was able to discover 312 more planets,
+            the ones Kepler missed.
+          </li>
+          <li><b>2021:</b>
+            Though the peak in 2021 was not as significant as 2016 and 2014, 
+            this peak here came from many missions working in parallel. A combination of 
+            COVID maturity across missions and method, along with the resolved in 
+            confirmation of Exoplanets due to the pandemic in 2019, allowed for 555 new
+            planet discoveries.
+          </li>
+        </ul>
       </div>
     </div>
   </section>
+  <!-- Nghi's Section End -->
   
   <!-- ============================= -->
   <!-- Camille Section 4: Orbit Systems START -->
@@ -325,6 +353,28 @@
   <!-- Camille's Orbit Systems END -->
   <!-- =========================== -->
 
+  <!-- =================================== -->
+  <!-- Jacquelyn Section 3:EXOPLANETS DISCOVERIES -->
+  <!-- =================================== -->
+  <section class="scroll-section frosted-glass" id="section-discoveries">
+    <h2 class="section-title">Earth-like Exoplanets in the Sky</h2>
+    
+    <div class="side-by-side-container">
+      <!-- LEFT SIDE: Plot -->
+      <div class="left-side">
+        <!-- <div id="exoplanet-map-container"></div> -->
+      </div>
+      
+      <!-- RIGHT SIDE: Text or other info -->
+      <div class="right-side">
+        <p>
+          Discover exoplanets that closely resemble Earth by their atmospheric conditions and potential habitability. This interactive map highlights key features and top candidates for future exploration.
+        </p>
+        <!-- Add more descriptive text or subsections here -->
+      </div>
+    </div>
+  </section>
+
   <!-- ================================ -->
   <!-- Royce Section 5: EARTH SEARCH (TODO)  -->
   <!-- ================================ -->
@@ -346,22 +396,15 @@
     </label>
   </div>
 
-
   <div class="chart-wrapper">
-  <div class="bar-chart"></div>          <!-- your SVG lives here -->
+    <div class="bar-chart"></div>          <!-- your SVG lives here -->
 
-  <div id="top3">
-    <h3 id="top3-title"></h3>
-    <ol id="top3-list"></ol>
+    <div id="top3">
+      <h3 id="top3-title"></h3>
+      <ol id="top3-list"></ol>
+    </div>
   </div>
-
-  <div class = "top3chart">
-    
-  </div>
-  
-  </div>
-
-
+  <div class = "top3chart"></div>
 </section>
 
   <!-- ================================ -->

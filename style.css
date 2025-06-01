@@ -950,10 +950,15 @@ select {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 1rem;
-  margin: 1rem;
   color: white;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   max-width: 500px;
+  flex: 1;
+  max-height: fit-content;
+}
+
+#increaseExoplanetText {
+  flex: 1;
 }
 
 .Exogrid .tick line {
@@ -966,6 +971,26 @@ select {
   display: none; 
 }
 
+#increaseDiscovery {
+  display: flex;
+  padding: 1em;
+  gap: 1em;
+}
+
+.intro-subsections {
+  max-width: 80%;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
 /* ============================ */
 /* Nghi's style.css  END        */
 /* ============================ */
@@ -975,7 +1000,8 @@ select {
 /* ============================ */
 
 #section-discoveries {
-  min-height: 100vh;
+  /* min-height: 100vh; */
+
 }
 
 #exoplanet-map-container {
@@ -1059,11 +1085,40 @@ select {
   align-items:flex-start;/* top-align the two blocks        */
 }
 
+.bar-chart {
+  width: 50%;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.top3chart {
+  width: 50%;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
 /* 3️⃣  Make the sidebar hug the right edge */
 #top3{
   /*  margin-left:auto;   ←  REMOVE or comment out */
   color:#fff;
   font-family:sans-serif;
+  flex: 1;
   /* optional: fixed width if you don't want it too wide */
   /* width:180px; */
 }
@@ -1085,27 +1140,43 @@ select {
 /* Container that holds left and right side */
 .side-by-side-container {
   display: flex;
-  flex-direction: row;
-  gap: 2rem;
-  align-items: flex-start;
+  width: 100%;
+  height: min-content;
+  /* flex-direction: column; */
+  /* gap: 2rem; */
+  /* align-items: flex-start; */
+  padding: 2rem;
+
 }
 
 /* Left side: plot or images */
 .left-side {
-  flex: 1 1 60%;
-  min-width: 300px;
+  /* flex: 1 1 60%;
+  min-width: 300px; */
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  max-height: fit-content;
 }
 
 /* Right side: text */
 .right-side {
-  flex: 1 1 40%;
+  /* flex: 1 1 40%;
   color: #fff;
   font-size: 1.1rem;
   line-height: 1.5;
+  padding-left: 1rem; */
+  flex: 1;
+  height: min-content;
   padding-left: 1rem;
+  padding-right: 3rem;
 }
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .side-by-side-container {
     flex-direction: column;
   }
@@ -1114,12 +1185,12 @@ select {
     width: 100%;
     padding-left: 0;
   }
-}
+} */
 
 #section-timeline {
   display: flex;
   gap: 40px;
-  height: 650px;
+  /* height: 650px; */
   color: white;
   font-family: Arial, sans-serif;
   padding: 20px;
