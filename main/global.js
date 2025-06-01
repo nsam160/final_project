@@ -505,28 +505,28 @@ const verticalSpacing = 200;
 
 // Load planet and respective pictures
 const planets = [
-  { name: "Mercury", discovered: "Prehistoric", color: "#b1b1b1", radius: 45, imageUrl: "images/mercury.png" },
-  { name: "Venus", discovered: "Prehistoric", color: "#f5deb3", radius: 50, imageUrl: "images/venus.png" },
-  { name: "Earth", discovered: "Prehistoric", color: "#2e8b57", radius: 55, imageUrl: "images/earth.png" },
-  { name: "Mars", discovered: "Prehistoric", color: "#b22222", radius: 55, imageUrl: "images/mars.png" },
-  { name: "Jupiter", discovered: "Prehistoric", color: "#d2b48c", radius: 80, imageUrl: "images/jupiter.png" },
-  { name: "Saturn", discovered: "Prehistoric", color: "#deb887", radius: 80, imageUrl: "images/saturn.png" },
-  { name: "Uranus", discovered: "1781", color: "#afeeee", radius: 60, imageUrl: "images/uranus.png" },
-  { name: "Neptune", discovered: "1846", color: "#4169e1", radius: 60, imageUrl: "images/neptune.png" }
+  { name: "Mercury", discovered: "Prehistoric", color: "#b1b1b1", radius: 45, imageUrl: "../images/mercury.png" },
+  { name: "Venus", discovered: "Prehistoric", color: "#f5deb3", radius: 50, imageUrl: "../images/venus.png" },
+  { name: "Earth", discovered: "Prehistoric", color: "#2e8b57", radius: 55, imageUrl: "../images/earth.png" },
+  { name: "Mars", discovered: "Prehistoric", color: "#b22222", radius: 55, imageUrl: "../images/mars.png" },
+  { name: "Jupiter", discovered: "Prehistoric", color: "#d2b48c", radius: 80, imageUrl: "../images/jupiter.png" },
+  { name: "Saturn", discovered: "Prehistoric", color: "#deb887", radius: 80, imageUrl: "../images/saturn.png" },
+  { name: "Uranus", discovered: "1781", color: "#afeeee", radius: 60, imageUrl: "../images/uranus.png" },
+  { name: "Neptune", discovered: "1846", color: "#4169e1", radius: 60, imageUrl: "../images/neptune.png" }
 ];
 
 // SVG Container
 const svg = d3.select("#timeline")
   .append("svg")
   .attr("width", "100%")
-  .attr("height", planets.length * verticalSpacing)
+  .attr("height", planets.length * verticalSpacing);
 
 // Create a group for each planet
 const g = svg.selectAll("g")
   .data(planets)
   .enter()
   .append("g")
-  .attr("transform", (d, i) => `translate(200, ${i * verticalSpacing + (verticalSpacing / 2)})`);
+  .attr("transform", (d, i) => `translate(85, ${i * verticalSpacing + (verticalSpacing / 2)})`);
 
 // Append image for each planet
 g.append("image")
@@ -1057,18 +1057,18 @@ ExoplanetData.onDataLoaded((data) => {
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
   const textures = {
-    'gas_1': new THREE.TextureLoader().load('basic_texture/gas_1.jpg'),
-    'gas_2': new THREE.TextureLoader().load('basic_texture/gas_2.jpg'),
-    'gas_3': new THREE.TextureLoader().load('basic_texture/gas_3.jpg'),
-    'gas_4': new THREE.TextureLoader().load('basic_texture/gas_4.jpg'),
-    'sun': new THREE.TextureLoader().load('basic_texture/sun.jpg'),
-    'rocky_1': new THREE.TextureLoader().load('basic_texture/rocky_1.jpg'),
-    'rocky_2': new THREE.TextureLoader().load('basic_texture/rocky_2.jpg'),
-    'rocky_3': new THREE.TextureLoader().load('basic_texture/rocky_3.jpg'),
-    'rocky_4': new THREE.TextureLoader().load('basic_texture/rocky_4.jpg'),
-    'rocky_5': new THREE.TextureLoader().load('basic_texture/rocky_5.jpg'),
-    'rocky_6': new THREE.TextureLoader().load('basic_texture/rocky_6.jpg'),
-    'rocky_7': new THREE.TextureLoader().load('basic_texture/rocky_7.jpg')
+    'gas_1': new THREE.TextureLoader().load('../basic_texture/gas_1.jpg'),
+    'gas_2': new THREE.TextureLoader().load('../basic_texture/gas_2.jpg'),
+    'gas_3': new THREE.TextureLoader().load('../basic_texture/gas_3.jpg'),
+    'gas_4': new THREE.TextureLoader().load('../basic_texture/gas_4.jpg'),
+    'sun': new THREE.TextureLoader().load('../basic_texture/sun.jpg'),
+    'rocky_1': new THREE.TextureLoader().load('../basic_texture/rocky_1.jpg'),
+    'rocky_2': new THREE.TextureLoader().load('../basic_texture/rocky_2.jpg'),
+    'rocky_3': new THREE.TextureLoader().load('../basic_texture/rocky_3.jpg'),
+    'rocky_4': new THREE.TextureLoader().load('../basic_texture/rocky_4.jpg'),
+    'rocky_5': new THREE.TextureLoader().load('../basic_texture/rocky_5.jpg'),
+    'rocky_6': new THREE.TextureLoader().load('../basic_texture/rocky_6.jpg'),
+    'rocky_7': new THREE.TextureLoader().load('../basic_texture/rocky_7.jpg')
   }
   renderer.setSize(container.clientWidth, container.clientWidth);
   container.appendChild(renderer.domElement);

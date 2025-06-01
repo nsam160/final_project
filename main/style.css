@@ -8,7 +8,7 @@ html {
 }
 
 body {
-  background-image: url('svg/galaxy.jpg');
+  background-image: url('../svg/galaxy.jpg');
   background-repeat: repeat;
   background-size: auto;
   background-attachment: fixed;
@@ -999,10 +999,9 @@ select {
 /* Jacquelyn's style.css  START */
 /* ============================ */
 
-#section-discoveries {
+/* #section-discoveries { */
   /* min-height: 100vh; */
-
-}
+/* } */
 
 #exoplanet-map-container {
   width: 100%;
@@ -1081,12 +1080,14 @@ select {
 
 .chart-wrapper{
   display:flex;
-  gap:10px;              /* space between chart and list   */
-  align-items:flex-start;/* top-align the two blocks        */
+  gap:1em;              /* space between chart and list   */
+  /* align-items:flex-start; /* top-align the two blocks        */
+  margin: 1em;
+
 }
 
 .bar-chart {
-  width: 50%;
+  flex: 1;
   align-items: center;
   justify-content: center;
   padding: 2rem;
@@ -1101,8 +1102,6 @@ select {
 
 .top3chart {
   width: 50%;
-  align-items: center;
-  justify-content: center;
   padding: 2rem;
   margin: auto;
   background: rgba(255, 255, 255, 0.08);
@@ -1111,6 +1110,17 @@ select {
   border-radius: 1rem;
   color: white;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  flex: 1;
+}
+
+#heatmapTop3 {
+  display: flex;
+  margin: 1em;
+  gap: 1em;
+}
+
+#top3HeatText {
+  flex: 1;
 }
 
 /* 3️⃣  Make the sidebar hug the right edge */
@@ -1233,31 +1243,5 @@ select {
 
 #timeline-container::-webkit-scrollbar-thumb:hover {
   background-color: hsl(238, 97%, 45%);
-}
-
-.intro-hook {
-  margin-bottom: 20px;
-}
-
-.hook-options button {
-  background-color: #1a1a1a;
-  color: white;
-  border: 1px solid #3f4d40;
-  border-radius: 5px;
-  margin: 5px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 16px;
-  user-select: none;
-}
-
-.hook-options button:hover {
-  background-color: #3f4d40;
-}
-
-.hook-answer {
-  margin-top: 15px;
-  font-style: italic;
-  color: #81c784;
 }
 
