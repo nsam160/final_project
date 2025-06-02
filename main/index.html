@@ -38,39 +38,58 @@
   <!-- =============================== -->
   <!-- Camille Section 1: INTRO (TODO) -->
   <!-- =============================== -->
-<section class="scroll-section" id="section-intro">
-    <div class="intro-subsections">
-      <h1>Welcome to the World of Exoplanets</h1>
-      <p>
-        Exoplanets are planets that orbit stars outside of our own solar system. Using powerful telescopes and space missions like Kepler and TESS, we've been able to discover thousands of these distant worlds. Some of them even have the potential to be Earth-like while others are completely alien.
-        <img src="../images/bigbang.gif" alt="Big Bang animation">
-      </p>
-      <div>
-        <h2>🪐 What Are They?</h2>
-        <p>Exoplanets can have multiple terrains including rocky, gaseous, or icy. Some are relatively the same size as Earth while others can be compared to gas giants larger than Jupiter.</p>
+  <section id="section-intro" class="scroll-section hero">
+    <div class="hero-container">
+      <!-- Left Side (Text) -->
+      <div class="hero-text">
+        <h1>
+          Welcome to the World of <span class="highlight">Exoplanets</span><br>
+        </h1>
+        <p>
+          Unveiling the Secrets of Distant Worlds.
+        </p>
+        <div class="hero-buttons">
+          <a href="https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars" class="btn primary">Data</a>
+          <a href="#" class="btn secondary">Explore more</a>
+        </div>
       </div>
-      <div>
-        <h2>🔭 How Are They Found?</h2>
-        <p>Using methods like the transit technique and radial velocity, astronomers detect exoplanets by observing their star's light or motion.</p>
-      </div>
-      <div>
-        <h2>🌍 Could We Live There?</h2>
-        <p>Scientists look for exoplanets in the habitable zone which means they hold the potential to house liquid water.</p>
+      
+      <!-- Right Side (Image) -->
+      <div class="hero-image">
+        <img src="../images/bigbang.gif" alt="Colorful Hand Peace Sign">
       </div>
     </div>
+  </section>
+  
+<!-- =============================== -->
+<!-- Team Section: Our Team -->
+<!-- =============================== -->
+<section id="section-team" class="scroll-section frosted-glass">
+  <div class="hero-container">
+    <h2 class="section-title">Meet Our Team</h2>
+    <ul class="team-list">
+      <li>Camille</li>
+      <li>Nghi</li>
+      <li>Jacquelyn</li>
+      <li>Royce</li>
+      <!-- Add more team members here -->
+    </ul>
+  </div>
 </section>
 
 
   <!-- =================================== -->
   <!-- Jacquelyn Section 2: SOLAR TIMELINE -->
   <!-- =================================== -->
-  <section class="scroll-section frosted-glass" id="section-timeline">
-    <div id="timeline-container">
-      <div id="timeline"></div>
-    </div>
+    <section class="scroll-section" id="section-timeline">
+      <h1>Solar System History</h1>
+      <div class="timeline-container">
+        <div id="timeline-container">
+          <div id="timeline"></div>
+          <div class="tooltip" id="tooltip"></div>
+        </div><br>
     <div id="timeline-text">
       <!-- Your fixed text content here -->
-      <h2>Solar System History</h2>
       <p><strong>Let's start off with the planets we know and their history.</strong></p>
       <p>Since Earth, Mercury, Mars, Venus, Jupiter, and Saturn were all visible to the human eye, we have always known since the beginning of time that they exist, even when we did not understand the concept of planets. None of these planets have a specific discovery date, but the first recorded observation of them was made around 1000 BCE by the ancient Babylonians.</p>
       <p>Though records were made, it was not until Ancient Greece that civilization began to wonder what stars and planets were. Originally, we thought all planets and the sun itself revolved around Earth, but some Greeks made doubtful claims that it was the sun that was at the center and Earth along with the rest of the planets revolved around the sun. This claim was not accepted until the Renaissance period.</p>
@@ -80,9 +99,11 @@
       <p>The discovery of Uranus ultimately led to the direct discovery of Neptune in 1845. Astronomers noticed the weird deviation of Uranus from its orbit and predicted that there must be a planet that orbits the sun beyond Uranus. Through mathematics, rather than observation, Neptune was discovered by Urbain Le Verrier.</p>
     </div>
   </section>
+  <br><br>
 
   <!-- Nghi - New Section with timeline beyond solar system -->
   <section class="scroll-section">
+    <div class="hero-container">  <!-- reuse existing container styles -->
     <h2 class="section-title">Exoplanet Discoveries</h2>
     <div id="increaseDiscovery">
       <div id="increaseExoplanet"></div>
@@ -133,6 +154,7 @@
             planet discoveries.
           </li>
         </ul>
+      </div>
       </div>
     </div>
   </section>
@@ -344,7 +366,8 @@
   <!-- =================================== -->
   <!-- Jacquelyn Section 3:EXOPLANETS DISCOVERIES -->
   <!-- =================================== -->
-  <section class="scroll-section frosted-glass" id="section-discoveries">
+  <section class="scroll-section" id="section-discoveries">
+    <div class="hero-container">
     <h2 class="section-title">Earth-like Exoplanets in the Sky</h2>
     
     <div class="side-by-side-container">
@@ -359,6 +382,7 @@
           Discover exoplanets that closely resemble Earth by their atmospheric conditions and potential habitability. This interactive map highlights key features and top candidates for future exploration.
         </p>
         <!-- Add more descriptive text or subsections here -->
+      </div>
       </div>
     </div>
   </section>

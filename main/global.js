@@ -500,12 +500,8 @@ function getOrbitValue(p) {
   // use data
 //});
 
-// Current spacing value per planet
-const verticalSpacing = 200;
-
-// Load planet and respective pictures
 const planets = [
-  { name: "Mercury", discovered: "Prehistoric", color: "#b1b1b1", radius: 45, imageUrl: "../images/mercury.png" },
+  { name: "Mercury", discovered: "Prehistoric", color: "#b1b1b1", radius: 50, imageUrl: "../images/mercury.png" },
   { name: "Venus", discovered: "Prehistoric", color: "#f5deb3", radius: 50, imageUrl: "../images/venus.png" },
   { name: "Earth", discovered: "Prehistoric", color: "#2e8b57", radius: 55, imageUrl: "../images/earth.png" },
   { name: "Mars", discovered: "Prehistoric", color: "#b22222", radius: 55, imageUrl: "../images/mars.png" },
@@ -515,58 +511,66 @@ const planets = [
   { name: "Neptune", discovered: "1846", color: "#4169e1", radius: 60, imageUrl: "../images/neptune.png" }
 ];
 
-// SVG Container
+const svgHeight = 300;
+const padding = 30;
+let currentX = 100;
+const positions = planets.map((planet, i) => {
+  if (i === 0) return currentX;
+  currentX += planets[i - 1].radius + planet.radius + padding;
+  return currentX;
+});
+
+const timelineY = svgHeight / 2;
+
+const svgWidth = positions[positions.length - 1] + 100;
+
 const svg = d3.select("#timeline")
   .append("svg")
-  .attr("width", "100%")
-  .attr("height", planets.length * verticalSpacing);
+  .attr("width", svgWidth)
+  .attr("height", svgHeight);
 
-// Create a group for each planet
+// Horizontal line
+svg.append("line")
+  .attr("x1", 50)
+  .attr("y1", svgHeight / 2)
+  .attr("x2", svgWidth - 50)
+  .attr("y2", svgHeight / 2)
+  .attr("stroke", "#ccc")
+  .attr("stroke-width", 2);
+
 const g = svg.selectAll("g")
   .data(planets)
   .enter()
   .append("g")
-  .attr("transform", (d, i) => `translate(85, ${i * verticalSpacing + (verticalSpacing / 2)})`);
+  .attr("transform", (d, i) => `translate(${positions[i]}, ${svgHeight / 2})`);
 
-// Append image for each planet
+// Appending the planet images
 g.append("image")
   .attr("xlink:href", d => d.imageUrl)
   .attr("width", d => d.radius * 2)
   .attr("height", d => d.radius * 2)
   .attr("x", d => -d.radius)
-  .attr("y", d => -d.radius);
+  .attr("y", d => -d.radius)
+  .style("cursor", "pointer");
 
-// Subtle circle/glow behind the image for effect
-g.append("circle")
-  .attr("r", d => d.radius + 5)
-  .attr("fill", "none")
-  .attr("stroke", d => d.color)
-  .attr("stroke-width", 2)
-  .style("filter", "url(#glow)")
-  .lower();
 
-// Subtle glow filter to SVG
-svg.append("defs")
-  .append("filter")
-  .attr("id", "glow")
-  .append("feGaussianBlur")
-  .attr("stdDeviation", 3)
-  .attr("result", "coloredBlur")
-  .select(function() { return this.parentNode; })
-  .append("feMerge")
-  .append("feMergeNode")
-  .attr("in", "coloredBlur")
-  .select(function() { return this.parentNode; })
-  .append("feMergeNode")
-  .attr("in", "SourceGraphic");
+// Tooltip
+const tooltip = d3.select("#tooltip");
 
-// Adding labels
-g.append("text")
-  .text(d => `${d.name} — Discovered: ${d.discovered}`)
-  .attr("x", d => d.radius + 20)
-  .attr("y", 5)
-  .attr("fill", "#fff")
-  .attr("font-size", "18px");
+g.on("mouseover", (event, d) => {
+    tooltip.style("opacity", 1)
+      .html(`<strong>${d.name}</strong><br/>Discovered: ${d.discovered}`);
+})
+.on("mousemove", (event) => {
+  const tooltipX = event.pageX + 15;
+  const tooltipY = timelineY - 100;
+
+  tooltip.style("left", tooltipX + "px")
+         .style("top", tooltipY + "px");
+})
+.on("mouseout", () => {
+    tooltip.style("opacity", 0);
+});
 
 // ==================================================
 // Jacquelyn's Code: SOLAR TIMELINE END
