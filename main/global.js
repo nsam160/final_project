@@ -1,6 +1,8 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { initializeExtremePlanets } from './camilleExtreme.js';
+import { renderSystem, initializeEnhancedSystem, cleanupEnhancedSystem, setupKeyboardNavigation } from './camilleOrbit.js';
 
 
 // =========================================
@@ -67,6 +69,7 @@ window.ExoplanetData = {
 // functions for all sections
 function initAllSections() {
   initializeCamilleSection();
+  initializeExtremePlanets(); // Add this line
   //initJackieSection();
   //initRoyceSection();
   //initNghiSection();
@@ -88,7 +91,7 @@ function loadExoplanetData() {
     dataLoadedCallbacks.forEach(callback => callback(allExoplanets));
     dataLoadedCallbacks = []; // Clear callbacks after execution
     
-    // Initialize indvidual sections that depend on data
+    // Initialize individual sections that depend on data
     initAllSections();
 
   }).catch(error => {
@@ -224,12 +227,14 @@ window.addEventListener('scroll', () => {
 // D3 ORBIT STORIES Global Code: Camille's Code START
 // END at line:279
 // ==================================================
-import { renderSystem, initializeEnhancedSystem, cleanupEnhancedSystem, setupKeyboardNavigation } from './camilleOrbit.js';
+// COMMENT OUT OR REMOVE this problematic import line:
+//import { renderSystem, initializeEnhancedSystem, cleanupEnhancedSystem, setupKeyboardNavigation } from './camilleOrbit.js';
 
 const visitedSystems = new Set();
 // let allExoplanets = [];
 let showingConnections = false;
 
+// Use safe element selection to avoid null reference errors
 const overview = document.getElementById("overview");
 const detailedView = document.getElementById("detailed-view");
 const orbitContainer = document.getElementById("orbit-container");
@@ -276,7 +281,7 @@ function initializeCamilleSection() {
   setupConnectionLines();
   enhanceCapsules();
   
-  // ADD THIS LINE:
+  // Now we can call this since we imported it
   setupKeyboardNavigation();
 }
 
@@ -342,16 +347,28 @@ function drawMiniSystem(selector, planets) {
 function showDetailedSystem(systemKey) {
   const system = systemData.find(s => s.id === systemKey);
   
-  // Update the orbit section title
-  document.getElementById("system-title-orbit").textContent = system.title;
+  // Add null checks for DOM elements
+  const systemTitleElement = document.getElementById("system-title-orbit");
+  if (systemTitleElement) {
+    systemTitleElement.textContent = system.title;
+  }
   
-  // Keep existing system info for compatibility
-  document.getElementById("system-title").textContent = system.title;
-  document.getElementById("system-description").textContent = system.fullDesc;
+  const systemTitleLegacy = document.getElementById("system-title");
+  if (systemTitleLegacy) {
+    systemTitleLegacy.textContent = system.title;
+  }
+  
+  const systemDescElement = document.getElementById("system-description");
+  if (systemDescElement) {
+    systemDescElement.textContent = system.fullDesc;
+  }
   
   // Hide all system containers first
   ["system1", "system2", "system3"].forEach(id => {
-    document.getElementById(id).style.display = "none";
+    const element = document.getElementById(id);
+    if (element) {
+      element.style.display = "none";
+    }
   });
 
   // Show the correct system container
@@ -362,77 +379,97 @@ function showDetailedSystem(systemKey) {
   };
   const containerId = systemMap[systemKey];
   if (containerId) {
-    document.getElementById(containerId).style.display = "block";
+    const element = document.getElementById(containerId);
+    if (element) {
+      element.style.display = "block";
+    }
   }
 
   // Clear previous orbit container and cleanup
   cleanupEnhancedSystem();
-  orbitContainer.innerHTML = "";
-  
-  // Create new container for enhanced system
-  const container = document.createElement("div");
-  container.id = `container-${system.id}`;
-  orbitContainer.appendChild(container);
-  
-  // Initialize enhanced system with planet selection
-  //initializeEnhancedSystem(`container-${containerId.replace("system", "")}`, system.hostname);
-  initializeEnhancedSystem(`container-${system.id}`, system.hostname);
+  if (orbitContainer) {
+    orbitContainer.innerHTML = "";
+    
+    // Create new container for enhanced system
+    const container = document.createElement("div");
+    container.id = `container-${system.id}`;
+    container.style.width = "100%";
+    container.style.height = "500px";
+    orbitContainer.appendChild(container);
+    
+    // Initialize the enhanced system with proper timing
+    setTimeout(() => {
+      initializeEnhancedSystem(`container-${system.id}`, system.hostname);
+    }, 100);
+  }
 }
 
 // Capsule click + back
 function enhanceCapsules() {
   document.querySelectorAll(".capsule").forEach(el => {
     const id = el.dataset.system;
-    const marker = document.createElement("div");
-    marker.className = "visited-marker";
-    marker.textContent = "Visited";
-    el.appendChild(marker);
+    if (id) { // Only proceed if system ID exists
+      const marker = document.createElement("div");
+      marker.className = "visited-marker";
+      marker.textContent = "Visited";
+      el.appendChild(marker);
 
-    el.addEventListener("click", () => {
-      el.classList.add("visited");
-      visitedSystems.add(id);
-      overview.style.opacity = 0;
-      
-      //  HIDE ENTIRE CAPSULE SECTION
-      const section = document.getElementById("section-systems");
-      if (section) section.style.display = "none";
+      el.addEventListener("click", () => {
+        el.classList.add("visited");
+        visitedSystems.add(id);
+        if (overview) overview.style.opacity = 0;
+        
+        //  HIDE ENTIRE CAPSULE SECTION
+        const section = document.getElementById("section-systems");
+        if (section) section.style.display = "none";
 
+        setTimeout(() => {
+          if (overview) overview.style.display = "none";
+          showDetailedSystem(id);
+          if (detailedView) {
+            detailedView.style.display = "block";
+            detailedView.style.opacity = 1;
+          }
+        }, 400);
+        checkStoryProgression();
+      });
+    }
+  });
+
+  const backButton = document.getElementById("back-button");
+  if (backButton) {
+    backButton.addEventListener("click", () => {
+      if (detailedView) detailedView.style.opacity = 0;
       setTimeout(() => {
-        overview.style.display = "none";
-        showDetailedSystem(id);
-        detailedView.style.display = "block";
-        detailedView.style.opacity = 1;
+        if (detailedView) detailedView.style.display = "none";
+        if (orbitContainer) orbitContainer.innerHTML = "";
+     
+        // Comment out function from missing file:
+        // cleanupEnhancedSystem();
+
+        // Hide all system containers
+        ["system1", "system2", "system3"].forEach(id => {
+          const element = document.getElementById(id);
+          if (element) {
+            element.style.display = "none";
+          }
+        });
+
+        const section = document.getElementById("section-systems");
+        if (section) section.style.display = "block";
+        
+        if (overview) {
+          overview.style.display = "flex";
+          overview.style.opacity = 1;
+        }
       }, 400);
-      checkStoryProgression();
     });
-  });
-
-  document.getElementById("back-button").addEventListener("click", () => {
-    detailedView.style.opacity = 0;
-    setTimeout(() => {
-      detailedView.style.display = "none";
-      orbitContainer.innerHTML = "";
-   
-      // ADD THIS LINE:
-       cleanupEnhancedSystem();
-
-    // Hide all system containers
-    ["system1", "system2", "system3"].forEach(id => {
-      document.getElementById(id).style.display = "none";
-    });
-
-    const section = document.getElementById("section-systems");
-    if (section) section.style.display = "block";
-    
-      overview.style.display = "flex";
-      overview.style.opacity = 1;
-    }, 400);
-  });
+  }
 }
 
 // Connections
 function setupConnectionLines() {
-  if (document.getElementById("capsule-connections")) return;
+  if (document.getElementById("capsule-connections") || !overview) return;
   const container = document.createElement("svg");
   container.id = "capsule-connections";
   Object.assign(container.style, {
@@ -463,7 +500,9 @@ function checkStoryProgression() {
       document.querySelectorAll(".connection-line").forEach((line, i) => {
         setTimeout(() => line.classList.add("visible"), i * 500);
       });
-      setTimeout(() => synthesis.style.display = "block", 2000);
+      setTimeout(() => {
+        if (synthesis) synthesis.style.display = "block";
+      }, 2000);
     }, 500);
   }
 }
@@ -1328,9 +1367,9 @@ ExoplanetData.onDataLoaded((data) => {
                 distance: systemInfo.planets[i].distanceAU,
                 density: systemInfo.planets[i].density,
                 inclination: systemInfo.planets[i].inclination,
-                discoveryYear: systemInfo.planets[i].year,
-                discoveryMethod: systemInfo.planets[i].method,
-                discoverFac: systemInfo.planets[i].facility
+                year: systemInfo.planets[i].year,
+                method: systemInfo.planets[i].discoverymethod, 
+                facility: systemInfo.planets[i].disc_facility
               }
               planetsSystem.push(planet);
               scene.add(planetsSystem.at(-1));
@@ -1347,9 +1386,9 @@ ExoplanetData.onDataLoaded((data) => {
                 distance: systemInfo.planets[i].distanceAU,
                 density: systemInfo.planets[i].density,
                 inclination: systemInfo.planets[i].inclination,
-                discoveryYear: systemInfo.planets[i].year,
-                discoveryMethod: systemInfo.planets[i].method,
-                discoverFac: systemInfo.planets[i].facility
+                year: systemInfo.planets[i].year,
+                method: systemInfo.planets[i].discoverymethod, 
+                facility: systemInfo.planets[i].disc_facility
               }
               planetOrbitRing.push(ring);
               scene.add(planetOrbitRing.at(-1));
@@ -1665,7 +1704,7 @@ const top50UsableArea = {
 const chartSvg = d3.select(".bar-chart")
   .append("svg")
   // .attr("id", "exoCompareSvg")
-  .attr('viewBox', `0 0 ${WIDTH} ${HEIGHT}`)
+  .attr('viewBox', `0  0 ${WIDTH} ${HEIGHT}`)
   .style('overflow', 'visible');
   // .attr("width", WIDTH);
 

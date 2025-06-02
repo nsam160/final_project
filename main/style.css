@@ -1378,3 +1378,62 @@ body, h1, h2, p, ul, ol, li {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
+
+/* Extreme planet visualization styles */
+#extreme-visual, #kelt-visual, #kepler-visual {
+  background: radial-gradient(circle at center, #1a1a2e, #000);
+  border-radius: 15px;
+  overflow: hidden;
+  position: relative;
+}
+
+#toggle-daynight {
+  transition: all 0.3s ease;
+}
+
+#toggle-daynight:hover {
+  background: #5590C4 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(70, 130, 180, 0.4);
+}
+
+/* Animation for iron rain effect */
+.iron-rain {
+  animation: fall 3s linear infinite;
+}
+
+@keyframes fall {
+  from {
+    transform: translateY(-50px);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(500px);
+    opacity: 0;
+  }
+}
+
+/* Plasma pulsing effect for KELT-9b */
+.plasma-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+}
+
+/* Density grid animation for Kepler-80f */
+.density-grid rect {
+  transition: fill 0.5s ease;
+}
+
+.density-grid rect:hover {
+  fill: #white !important;
+}
