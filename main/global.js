@@ -2003,3 +2003,13 @@ if (document.readyState === 'loading') {
 } else {
   initializeApp();
 }
+
+// for scroll bar
+window.addEventListener('scroll', () => {
+  const labels = document.querySelector('.progress-labels');
+  if (window.scrollY > 50) {
+    labels.classList.add('scrolled');
+  } else {
+    labels.classList.remove('scrolled');
+  }
+});
