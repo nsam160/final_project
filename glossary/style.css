@@ -1,0 +1,77 @@
+/* Space Background */
+html {
+    width: 100%;
+    height: 100%;
+  }
+  
+  body {
+    background-image: url('../svg/galaxy.jpg');
+    background-repeat: repeat;
+    background-size: auto;
+    background-attachment: fixed;
+    background-position: top left;
+    color: white;
+    font-family: 'Outfit', sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .glossary {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    text-align: center;
+    max-width: 800px;  /* optional: to keep things readable */
+  }
+  
+  .glossary li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+
+  /*Main Header */
+#main-header {
+    position: fixed;
+    top: 6px;
+    left: 0;
+    width: 100%;
+    padding: 15px 0;
+    background: transparent; /* Completely transparent */
+    backdrop-filter: blur(5px); /* Subtle blur to maintain readability */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10000;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1); /* Very subtle shadow */
+  }
+  .site-title{
+    padding-left: 1em;
+  }
+
+  .section-title {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .back-button-container {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .back-button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: #2c2c3e;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    transition: background-color 0.3s ease;
+  }
+  
+  .back-button:hover {
+    background-color: #3d3d5c;
+  }
+  
