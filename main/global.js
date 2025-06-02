@@ -821,6 +821,153 @@ document.addEventListener('DOMContentLoaded', createExoplanetMap);
 // ===========================
 
 ExoplanetData.onDataLoaded((data) => {
+  const top3Overall = document.querySelector('#top3Overall');
+  const width = 600;
+  const height = 800;
+  const margin = { top: 25, right: 57, bottom: 50, left: 50 };
+  const usableArea = {
+    top: margin.top,
+    right: width - margin.right,
+    bottom: height - margin.bottom,
+    left: margin.left,
+    width: width - margin.left - margin.right,
+    height: height - margin.top - margin.bottom,
+  };
+
+  const earthData = {
+    radiusE: 1,
+    massE: 1,
+    tempK: 255,
+    eccentricityE: 0.0167,
+    semiAxisDistAU: 1.0167,
+    orbitalDay: 365.26
+  };
+
+  let validData = data.filter(p => 
+    p.pl_rade !== '' &&
+    p.pl_bmasse !== '' &&
+    p.pl_eqt !== '' &&
+    p.pl_orbeccen !== '' &&
+    p.pl_orbsmax !== '' &&
+    p.pl_orbper !== ''
+  );
+
+  const [minR, maxR] = d3.extent(validData, p => Math.abs(p.pl_rade - earthData.radiusE));
+  const [minM, maxM] = d3.extent(validData, p => Math.abs(p.pl_bmasse - earthData.massE));
+  const [minT, maxT] = d3.extent(validData, p => Math.abs(p.pl_eqt - earthData.tempK));
+  const [minE, maxE] = d3.extent(validData, p => Math.abs(p.pl_orbeccen - earthData.eccentricityE));
+  const [minD, maxD] = d3.extent(validData, p => Math.abs(p.pl_orbsmax - earthData.semiAxisDistAU));
+  const [minO, maxO] = d3.extent(validData, p => Math.abs(p.pl_orbper - earthData.orbitalDay));
+  console.log([minO, maxO]);
+
+  let mapped = validData.map(p => {
+    const rad = (Math.abs(p.pl_rade - earthData.radiusE) - minR) / (maxR - minR);
+    const mass = (Math.abs(p.pl_bmasse - earthData.massE) - minM) / (maxM - minM);
+    const temp = (Math.abs(p.pl_eqt - earthData.tempK) - minT) / (maxT - minT);
+    const ecc = (Math.abs(p.pl_orbeccen - earthData.eccentricityE) - minE) / (maxE - minE);
+    const dist = (Math.abs(p.pl_orbsmax - earthData.semiAxisDistAU) - minD) / (maxD - minD);
+    const orb = (Math.abs(p.pl_orbper - earthData.orbitalDay) - minO) / (maxO - minO);
+
+    return {
+      name: p.pl_name,
+      rad_m: Math.sign(p.pl_rade - earthData.radiusE) * rad,
+      mass_m: Math.sign(p.pl_bmasse - earthData.massE) * mass,
+      temp_m: Math.sign(p.pl_eqt - earthData.tempK) * temp,
+      ecc_m: Math.sign(p.pl_orbeccen - earthData.eccentricityE) * ecc,
+      dist_m: Math.sign(p.pl_orbsmax - earthData.semiAxisDistAU) * dist,
+      orb_m: Math.sign(p.pl_orbper - earthData.orbitalDay) * orb,
+      rad_mOri: p.pl_rade,
+      mass_mOri: p.pl_bmasse,
+      temp_mOri: p.pl_eqt,
+      ecc_mOri: p.pl_orbeccen,
+      dist_mOri: p.pl_orbsmax,
+      orb_mOri: p.pl_orbper,
+      avg: (rad + mass + temp + ecc + dist + orb) / 6
+    };
+  }).sort((a, b) => d3.ascending(a.avg, b.avg));
+
+  const xLabels = {
+    rad_m: 'Radius',
+    mass_m: 'Mass',
+    temp_m: 'Temperature',
+    ecc_m: 'Eccentricity',
+    dist_m: 'Distance',
+    orb_m: 'Orbital Period'
+  };
+  const yLabels = [];
+  const top3OverallData = [];
+  mapped.slice(0, 10).forEach(row => {
+    yLabels.push(row.name);
+    for (let key in xLabels){
+      top3OverallData.push({x: xLabels[key], y: row.name, value: row[key], trueValue: row[`${key}Ori`]});
+    }
+  });
+
+  console.log(top3OverallData);
+
+  const svg = d3.select("#top3Overall")
+    .append("svg")
+    .attr('viewBox', `0 0 ${width} ${height}`)
+    .style('overflow', 'visible');
+  const g = svg.append("g")
+    .attr("transform", `translate(${usableArea.left},${usableArea.top})`)
+
+  const xBand = d3.scaleBand()
+    .domain(Object.values(xLabels))
+    .range([usableArea.left, usableArea.right])
+    .padding(0.05);
+
+  const yBand = d3.scaleBand()
+    .domain(yLabels)
+    .range([usableArea.top, usableArea.bottom])
+    .padding(0.05);
+
+  const colorScale = d3.scaleDiverging()
+    .domain([-0.03, 0, 0.03])
+    .interpolator(d3.interpolateRdBu);
+
+  g.selectAll("rect")
+    .data(top3OverallData)
+    .enter()
+    .append("rect")
+    .attr("x", d => xBand(d.x))
+    .attr("y", d => yBand(d.y))
+    .attr("width", xBand.bandwidth())
+    .attr("height", yBand.bandwidth())
+    .attr("fill", d => colorScale(d.value))
+    .attr("class", "cell");
+
+    // Add text labels
+  g.selectAll("text.label")
+    .data(top3OverallData)
+    .enter()
+    .append("text")
+    .attr("x", d => xBand(d.x) + xBand.bandwidth() / 2)
+    .attr("y", d => yBand(d.y) + yBand.bandwidth() / 2 + 4)
+    .attr("text-anchor", "middle")
+    .text(d => (+d.trueValue).toFixed(3))
+    .attr("fill", "black");
+
+    // Axes
+  g.append("g")
+    .attr("transform", `translate(0,${usableArea.bottom})`)
+    .call(d3.axisBottom(xBand));
+
+  g.append("g")
+    .attr("transform", `translate(${usableArea.left},0)`)
+    .call(d3.axisLeft(yBand));
+
+  g.append("text")
+    .attr("text-anchor", "middle")
+    .attr("x", usableArea.left + usableArea.width / 2)
+    .attr("y", usableArea.top / 2)
+    .style("font-size", "25px")
+    .style("font-weight", "bold")
+    .style("fill", 'white')
+    .text("Top 10 Planets Similar to Earth");
+});
+
+ExoplanetData.onDataLoaded((data) => {
   let countPlanet = d3.rollups(
     data,
     (v) => v.length,

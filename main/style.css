@@ -805,6 +805,28 @@ html, body {
   height: 100%;
 }
 
+#nghiTop3 {
+  display: flex;
+  margin: 1em;
+  gap: 1em;
+}
+
+#top3TextNghi {
+  flex: 1;
+}
+
+#top3Overall {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  max-width: 500px;
+  flex: 1;
+  max-height: fit-content;
+}
+
 #solarExplorer {
   display: flex;
   width: 100%;
@@ -1114,7 +1136,7 @@ select {
 }
 
 .top3chart {
-  width: 50%;
+  width: 100;
   padding: 2rem;
   margin: auto;
   background: rgba(255, 255, 255, 0.08);
@@ -1123,7 +1145,6 @@ select {
   border-radius: 1rem;
   color: white;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  flex: 1;
 }
 
 #heatmapTop3 {
