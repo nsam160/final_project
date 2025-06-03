@@ -550,18 +550,18 @@ function getOrbitValue(p) {
 //});
 
 const planets = [
-  { name: "Mercury", discovered: "Prehistoric", color: "#b1b1b1", radius: 50, imageUrl: "../images/mercury.png" },
-  { name: "Venus", discovered: "Prehistoric", color: "#f5deb3", radius: 50, imageUrl: "../images/venus.png" },
-  { name: "Earth", discovered: "Prehistoric", color: "#2e8b57", radius: 55, imageUrl: "../images/earth.png" },
-  { name: "Mars", discovered: "Prehistoric", color: "#b22222", radius: 55, imageUrl: "../images/mars.png" },
-  { name: "Jupiter", discovered: "Prehistoric", color: "#d2b48c", radius: 80, imageUrl: "../images/jupiter.png" },
-  { name: "Saturn", discovered: "Prehistoric", color: "#deb887", radius: 80, imageUrl: "../images/saturn.png" },
-  { name: "Uranus", discovered: "1781", color: "#afeeee", radius: 60, imageUrl: "../images/uranus.png" },
-  { name: "Neptune", discovered: "1846", color: "#4169e1", radius: 60, imageUrl: "../images/neptune.png" }
+  { name: "Mercury", discovered: "Prehistoric", color: "#b1b1b1", radius: 20, imageUrl: "../images/mercury.png" },
+  { name: "Venus", discovered: "Prehistoric", color: "#f5deb3", radius: 28, imageUrl: "../images/venus.png" },
+  { name: "Earth", discovered: "Prehistoric", color: "#2e8b57", radius: 29, imageUrl: "../images/earth.png" },
+  { name: "Mars", discovered: "Prehistoric", color: "#b22222", radius: 23, imageUrl: "../images/mars.png" },
+  { name: "Jupiter", discovered: "Prehistoric", color: "#d2b48c", radius: 55, imageUrl: "../images/jupiter.png" },
+  { name: "Saturn", discovered: "Prehistoric", color: "#deb887", radius: 50, imageUrl: "../images/saturn.png" },
+  { name: "Uranus", discovered: "1781", color: "#afeeee", radius: 35, imageUrl: "../images/uranus.png" },
+  { name: "Neptune", discovered: "1846", color: "#4169e1", radius: 35, imageUrl: "../images/neptune.png" }
 ];
 
-const svgHeight = 200;
-const padding = 20;
+const svgHeight = 150;
+const padding = 30;
 let currentX = 100;
 const positions = planets.map((planet, i) => {
   if (i === 0) return currentX;
@@ -575,8 +575,8 @@ const svgWidth = positions[positions.length - 1] + 100;
 
 const svg = d3.select("#timeline")
   .append("svg")
-  .attr("width", svgWidth)
-  .attr("height", svgHeight);
+  .attr('viewBox', `0 0 ${svgWidth} ${svgHeight}`)
+  .style('overflow', 'visible');
 
 // Horizontal line
 svg.append("line")
@@ -608,31 +608,57 @@ const tooltip = d3.select("#tooltip");
 
 g.on("mouseover", (event, d) => {
     tooltip.style("opacity", 1)
-      .html(`<strong>${d.name}</strong><br/>Discovered: ${d.discovered}`);
+      .style("text-align", 'center')
+      .html(`<strong>${d.name}</strong>Discovered:<br>${d.discovered}`);
+
+    const text = document.querySelector('#timeline-text');
+
+    if (d.name === 'Mercury' || d.name === 'Venus'){
+      text.innerHTML = `
+                        <p><strong>Let's start off with the planets we know and their history.</strong></p>
+                        <p>Since Earth, Mercury, Mars, Venus, Jupiter, and Saturn were all visible to the human eye, we have always known since the beginning of time that they exist, even when we did not understand the concept of planets. None of these planets have a specific discovery date, but the first recorded observation of them was made around 1000 BCE by the ancient Babylonians.</p>
+                       `;
+    }
+    else if (d.name === 'Earth' || d.name === 'Mars'){
+      text.innerHTML = `
+                        <p>Though records were made, it was not until Ancient Greece that civilization began to wonder what stars and planets were. Originally, we thought all planets and the sun itself revolved around Earth, but some Greeks made doubtful claims that it was the sun that was at the center and Earth along with the rest of the planets revolved around the sun. This claim was not accepted until the Renaissance period.</p>
+                       `;
+    }
+    else if (d.name === 'Jupiter' || d.name === 'Saturn'){
+      text.innerHTML = `
+                        <p>We have already been able to discover so much with our eyes alone, with the addition of the telescope later invented in the 1600s, imagine the new possibilities astronomers have now with new discoveries. Galileo Galilei in 1610 discovered that Jupiter is orbited by four moons, which is proof of the heliocentric models, but this discovery was rejected initially. People thought he was crazy and arrested him, until humanity awakened to the fact we live in a far grander universe than we initially thought.</p>
+                       `;
+    }
+    else if (d.name === 'Uranus'){
+      text.innerHTML = `
+                        <p>The first planet to be truly discovered after the initial six was Uranus in 1781 by William Herschel. However, when he first discovered it, he thought he discovered a comet, but in 1783, he realized this object was a planet, making it the first planet to be discovered by a telescope. Interestingly though, people in Ancient Greece were able to see Uranus visible with their eyes alone, but they thought of it as a star.</p>
+                       `;
+    }
+    else if (d.name === 'Neptune'){
+      text.innerHTML = `
+                        <p>The discovery of Uranus ultimately led to the direct discovery of Neptune in 1845. Astronomers noticed the weird deviation of Uranus from its orbit and predicted that there must be a planet that orbits the sun beyond Uranus. Through mathematics, rather than observation, Neptune was discovered by Urbain Le Verrier.</p>
+                       `;
+    }
 })
 .on("mousemove", function(event, d) {
-const tooltipNode = tooltip.node();
-const tooltipWidth = tooltipNode.offsetWidth;
-const tooltipHeight = tooltipNode.offsetHeight;
+  // Get mouse position
+    // const mouseX = event.clientX;
+    // const mouseY = event.clientY;
 
-const svgElement = d3.select("#timeline svg").node();
-const svgRect = svgElement.getBoundingClientRect();
+    // // Get tooltip width dynamically
+    // const tooltipNode = tooltip.node();
+    // const tooltipWidth = tooltipNode.offsetWidth;
 
-const planetIndex = planets.indexOf(d);
-const planetX = positions[planetIndex];
+    // // Position tooltip so its center aligns with the mouse X
+    // const tooltipX = mouseX - tooltipWidth / 2;
+    // const tooltipY = mouseY - 50; // offset Y above the cursor
+    const tooltipX = event.clientX - tooltip.node().offsetWidth / 2;
+    const tooltipY = timelineY + 30;
 
-const absoluteX = svgRect.left + window.scrollX + planetX;
-const absoluteY = svgRect.top + window.scrollY + timelineY - d.radius;
-
-let tooltipX = absoluteX - (tooltipWidth / 2);
-const tooltipY = absoluteY - tooltipHeight - 500;
-const pageWidth = window.innerWidth;
-
-// Boundary checks
-if (tooltipX < 0) tooltipX = 5;
-if (tooltipX + tooltipWidth > pageWidth) {
-tooltipX = pageWidth - tooltipWidth - 5;
-}})
+    tooltip
+      .style("left", `${tooltipX}px`)
+      .style("top", `${tooltipY}px`);
+})
 .on("mouseout", () => {
     tooltip.style("opacity", 0);
 });
@@ -642,25 +668,14 @@ tooltipX = pageWidth - tooltipWidth - 5;
 // ==================================================
 
 // ==================================================
-// Jacquelyn's Code: EXOPLANETS DISCOVERIES
+// Nghi's Code: EXOPLANETS DISCOVERIES
 // ==================================================
 
 // Function to create the Plotly map
-function createExoplanetMap() {
-  const containerElement = d3.select(".left-side").node();
-  if (!containerElement) {
-      console.error("Error: .left-side not found in the DOM.");
-      return;
-  }
-
+ExoplanetData.onDataLoaded((data) => {
   const width = 500;
   const height = 400;
-  // const containerWidth = containerElement.getBoundingClientRect().width;
-  // const containerHeight = containerElement.getBoundingClientRect().height;
-
-  const mapMargin = { top: 60, right: 70, bottom: 40, left: 40 };
-  // const mapWidth = containerWidth - mapMargin.left - mapMargin.right;
-  // const mapHeight = containerHeight - mapMargin.top - mapMargin.bottom;
+  const mapMargin = { top: 60, right: 20, bottom: 40, left: 40 };
   const usableArea = {
       top: mapMargin.top,
       right: width - mapMargin.right,
@@ -670,219 +685,112 @@ function createExoplanetMap() {
       height: height - mapMargin.top - mapMargin.bottom
   };
 
+  let validData = data.filter(p => 
+    p.ra !== '' &&
+    p.dec !== '' &&
+    p.disc_facility !== '' && 
+    (p.disc_facility === 'Kepler' || p.disc_facility === 'K2' || p.disc_facility === 'Transiting Exoplanet Survey Satellite (TESS)')
+  ).sort((a, b) => b.disc_facility.localeCompare(a.disc_facility));
+
+  let mapColor = {
+    'TESS': 'yellow',
+    'Kepler': 'blue',
+    'K2': 'orange'
+  }
+
   const mapSvg = d3.select(".left-side")
-      .append("svg")
-      .attr('viewBox', `0 0 ${width} ${height}`)
-      .style('overflow', 'visible')
-      // .attr("width", containerWidth)
-      // .attr("height", containerHeight)
-      // .attr("viewBox", `0 0 ${containerWidth} ${containerHeight}`)
-      // .attr("preserveAspectRatio", "xMidYMid meet")
-      // .append("g")
-      // .attr("transform", `translate(${mapMargin.left}, ${mapMargin.top})`);
+    .append("svg")
+    .attr('viewBox', `0 0 ${width} ${height}`)
+    .style('overflow', 'visible')
 
   // Create a group for the main chart content
   const mapChartGroup = mapSvg.append("g");
 
-  // Load the data for the map
-  d3.json("earth_like.json").then(data => {
-      // --- Debugging step: Log data to console ---
-      console.log("Exoplanet map data loaded:", data);
-      if (!data || !Array.isArray(data) || data.length === 0) {
-          console.warn("Exoplanet map data is empty, not an array, or not loaded correctly. No map will be rendered.");
-          return; // Stop execution if data is empty or not an array
-      }
-      // --- End Debugging step ---
+  // Scales
+  const xScale = d3.scaleLinear()
+    .domain([0, 360])
+    .range([usableArea.left, usableArea.right]);
 
-      // Scales
-      const xScale = d3.scaleLinear()
-          .domain([360, 0])
-          .range([usableArea.left, usableArea.right]);
-          // .range([usableArea.left, usableArea.right]);
+  const yScale = d3.scaleLinear()
+    .domain([-90, 90])
+    .range([usableArea.bottom, usableArea.top]);
 
-      const yScale = d3.scaleLinear()
-          .domain([-90, 90])
-          .range([usableArea.bottom, usableArea.top]);
-          // .range([mapHeight, 0]);
+  const xAxis = d3.axisBottom(xScale)
+    .tickValues(d3.range(0, 361, 30))
+    .tickFormat(d => `${d}°`);
+  const yAxis = d3.axisLeft(yScale)
+    .tickValues(d3.range(-90, 91, 30))
+    .tickFormat(d => `${d}°`);
 
-      // Size scale
-      const sizeScale = d3.scaleSqrt()
-          .domain([0, d3.max(data, d => d.temp_diff)])
-          .range([20, 5]);
+  mapChartGroup.append("g")
+    .attr("transform", `translate(0, ${usableArea.bottom})`)
+    .call(xAxis)
+    .append("text")
+    .attr("fill", "#fff")
+    .attr("x", usableArea.left + usableArea.width / 2)
+    .attr("y", 35)
+    .attr("text-anchor", "middle")
+    .text("Right Ascension (°)");
 
-      // Color scale
-      const colorScale = d3.scaleSequential(d3.interpolateCool)
-          .domain(d3.extent(data, d => d.pl_eqt));
-
-      // Axes
-      const xAxis = d3.axisBottom(xScale)
-          .tickValues(d3.range(0, 361, 30))
-          .tickFormat(d => `${d}°`);
-      const yAxis = d3.axisLeft(yScale)
-          .tickValues(d3.range(-90, 91, 30))
-          .tickFormat(d => `${d}°`);
-
-      mapChartGroup.append("g")
-          .attr("transform", `translate(0, ${usableArea.bottom})`)
-          .call(xAxis)
-          .append("text")
-          .attr("fill", "#fff")
-          .attr("x", usableArea.left + usableArea.width / 2)
-          .attr("y", 35)
-          .attr("text-anchor", "middle")
-          .text("Right Ascension (°)");
-          // .attr("class", "x axis")
-          // .attr("transform", `translate(0, ${height})`)
-          // .call(xAxis)
-          // .append("text")
-          // .attr("fill", "#fff")
-          // .attr("x", width / 2)
-          // .attr("y", 35)
-          // .attr("text-anchor", "middle")
-          // .text("Right Ascension (°)");
-
-      mapChartGroup.append("g")
-          .attr("transform", `translate(${usableArea.left},0)`)
-          .call(yAxis)
-          .append("text")
-          .attr("fill", "#fff")
-          .attr("transform", "rotate(-90)")
-          .attr("x", -height/2)
-          .attr("y", -27) 
-          .attr("text-anchor", "middle")
-          .text("Declination (°)");
-          // .attr("class", "y axis")
-          // .call(yAxis)
-          // .append("text")
-          // .attr("fill", "#fff")
-          // .attr("transform", "rotate(-90)")
-          // .attr("y", -60)
-          // .attr("x", -mapHeight / 2)
-          // .attr("text-anchor", "middle")
-          // .text("Declination (°)");
+  mapChartGroup.append("g")
+    .attr("transform", `translate(${usableArea.left},0)`)
+    .call(yAxis)
+    .append("text")
+    .attr("fill", "#fff")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height/2)
+    .attr("y", -27) 
+    .attr("text-anchor", "middle")
+    .text("Declination (°)");
         
-      mapChartGroup.append("text")
-        .attr("text-anchor", "middle")
-        .attr("x", usableArea.left + usableArea.width / 2)
-        .attr("y", usableArea.top / 2)
-        .style("font-size", "20px")
-        .style("font-weight", "bold")
-        .style("fill", 'white')
-        .text("Exoplanet's Location in the Celestial Universe"); // Change title
+  mapChartGroup.append("text")
+    .attr("text-anchor", "middle")
+    .attr("x", usableArea.left + usableArea.width / 2)
+    .attr("y", usableArea.top / 2)
+    .style("font-size", "20px")
+    .style("font-weight", "bold")
+    .style("fill", 'white')
+    .text("Where NASA Found New Worlds"); // Change title
 
-      // Gridlines
-      mapChartGroup.append("g")
-          .attr("class", "grid")
-          // .attr("transform", `translate(0, ${mapHeight})`)
-          // .call(xAxis.tickSize(-mapHeight).tickFormat(""));
-          .attr("transform", `translate(0, ${usableArea.bottom})`)
-          .call(xAxis.tickSize(-usableArea.height).tickFormat(""));
+  // Gridlines
+  mapChartGroup.append("g")
+    .attr("class", "grid")
+    .attr("transform", `translate(0, ${usableArea.bottom})`)
+    .call(xAxis.tickSize(-usableArea.height).tickFormat(""));
 
-      mapChartGroup.append("g")
-          .attr("class", "grid")
-          // .call(yAxis.tickSize(-mapWidth).tickFormat(""));
-          .attr("transform", `translate(${usableArea.left},0)`)
-          .call(yAxis.tickSize(-usableArea.width).tickFormat(""));
+  mapChartGroup.append("g")
+    .attr("class", "grid")
+    .attr("transform", `translate(${usableArea.left},0)`)
+    .call(yAxis.tickSize(-usableArea.width).tickFormat(""));
 
-      // Scatter Plot Points
-      mapChartGroup.selectAll(".exoplanet-point")
-          .data(data)
-          .enter()
-          .append("circle")
-          .attr("class", "exoplanet-point")
-          .attr("cx", d => xScale(d.ra))
-          .attr("cy", d => yScale(d.dec))
-          .attr("r", d => sizeScale(d.temp_diff))
-          .attr("fill", d => colorScale(d.pl_eqt))
-          .attr("opacity", 0.8)
-          .attr("stroke", "white")
-          .attr("stroke-width", 0.4);
+  mapChartGroup.selectAll(".exoplanet-point")
+    .data(validData)
+    .enter()
+    .append("circle")
+    .attr("class", "exoplanet-point")
+    .attr("cx", d => xScale(d.ra))
+    .attr("cy", d => yScale(d.dec))
+    .attr("r", 5)
+    .attr("fill", d => {
+      if (d.disc_facility === 'Kepler'){
+        return mapColor['Kepler'];
+      }
+      else if (d.disc_facility === 'K2'){
+        return mapColor['K2'];
+      }
+      else if (d.disc_facility === 'Transiting Exoplanet Survey Satellite (TESS)'){
+        return mapColor['TESS'];
+      }
+    })
+    .attr("opacity", 0.8)
+    .attr("stroke", "white")
+    .attr("stroke-width", 0.4);
 
-      // Highlight Top 5 and Add Annotations
-      mapChartGroup.selectAll(".top5-highlight")
-          .data(data.filter(d => d.is_top5))
-          .enter()
-          .append("circle")
-          .attr("class", "top5-highlight")
-          .attr("cx", d => xScale(d.ra))
-          .attr("cy", d => yScale(d.dec))
-          .attr("r", d => sizeScale(d.temp_diff) + 2)
-          .attr("class", "highlight-border");
-
-      mapChartGroup.selectAll(".top5-label")
-          .data(data.filter(d => d.is_top5))
-          .enter()
-          .append("text")
-          .attr("class", "exoplanet-label")
-          .attr("x", d => xScale(d.ra) + sizeScale(d.temp_diff) + 5)
-          .attr("y", d => yScale(d.dec) + 3)
-          .text(d => d.pl_name);
-
-      // COLOR BAR (D3.js implementation)
-      // const colorbarWidth = 20;
-      const colorbarWidth = 10;
-      // const colorbarHeight = mapHeight;
-      const colorbarHeight = usableArea.height;
-
-      const mapDefs = mapSvg.append("defs");
-
-      const linearGradient = mapDefs.append("linearGradient")
-          .attr("id", "colorbarGradientMap")
-          .attr("x1", "0%")
-          .attr("y1", "100%")
-          .attr("x2", "0%")
-          .attr("y2", "0%");
-
-      linearGradient.selectAll("stop")
-          .data(colorScale.ticks(5).map(t => ({
-              offset: (t - colorScale.domain()[0]) / (colorScale.domain()[1] - colorScale.domain()[0]),
-              color: colorScale(t)
-          })))
-          .enter().append("stop")
-          .attr("offset", d => d.offset)
-          .attr("stop-color", d => d.color);
-
-
-      const colorbarScale = d3.scaleLinear()
-          .domain(colorScale.domain())
-          .range([colorbarHeight, 0]);
-
-      const colorbarAxis = d3.axisRight(colorbarScale)
-          .ticks(5)
-          .tickFormat(d3.format(".0f"));
-
-      const colorbar = mapSvg.append("g")
-          // .attr("transform", `translate(${mapWidth + mapMargin.left + 20}, ${mapMargin.top})`);
-          .attr("transform", `translate(${usableArea.width + usableArea.left + 20}, ${usableArea.top})`);
-
-      colorbar.append("rect")
-          .attr("width", colorbarWidth)
-          .attr("height", colorbarHeight)
-          .attr("fill", "url(#colorbarGradientMap)");
-
-      colorbar.append("g")
-          .attr("class", "colorbar-axis")
-          .attr("transform", `translate(${colorbarWidth}, 0)`)
-          .call(colorbarAxis);
-
-      colorbar.append("text")
-          .attr("class", "colorbar-label")
-          .attr("transform", "rotate(-90)")
-          // .attr("y", -mapMargin.left + 5)
-          .attr("y", -usableArea.left + 25)
-          .attr("x", -(colorbarHeight / 2))
-          .attr("text-anchor", "middle")
-          .text("Equilibrium Temperature (K)");
-
-  }).catch(error => {
-      console.error("Error loading or parsing exoplanet map data:", error);
-  });
-}
-
-document.addEventListener('DOMContentLoaded', createExoplanetMap);
+  
+});
 
 // ==================================================
-// Jacquelyn's Code: EXOPLANETS DISCOVERIES END
+// Nghi's Code: EXOPLANETS DISCOVERIES END
 // ==================================================
 
 // ===========================
@@ -1176,6 +1084,61 @@ ExoplanetData.onDataLoaded((data) => {
         .attr("x", x + 10)
         .attr("y", y)
         .text(`${d[1]} Found In ${d[0]}`);
+
+      let text = document.querySelector('#increaseExoplanetText')
+      if (d[0] >= 2014 && d[0] < 2016){
+        text.innerHTML = `<p>
+                            In 2013, due to a failure in the reaction wheel of the spacecraft 
+                            NASA used in their Kepler mission (2009 - 2013), they repurposed the mission and 
+                            launched the K2 mission (2014 - 2018) in 2014. With a better spacecraft that is 
+                            more resistance against solar radiation pressure, along with a new 
+                            automated planet validation technique called the 'multiplicity 
+                            validation' that they created by processing backlog data of planet 
+                            candidates, we were able to see the initial surge of 870 newly 
+                            discovered planets.
+                          </p>`
+      }
+      else if (d[0] >= 2016 && d[0] < 2018){
+        text.innerHTML = `<p>
+                            In 2016, a new algorithm called 'Validation of Exoplanet Signals 
+                            using a Probabilistic Algorithm (VESPA)' was used by NASA to comfirm
+                            a record breaking amount of 1496 Exoplanets in one year. This algorithm
+                            is calculates the statistical significant probability that a detected 
+                            signal is caused by a true planet rather than a false positive, but it
+                            requires complete and clean dataset on Exoplanets, so while this was written
+                            before 2016, it was not until 2016 were they able to successfully confirm planets.
+                          </p>`
+      }
+      else if (d[0] >= 2018 && d[0] < 2021){
+        text.innerHTML = `<p>
+                            Succeeding Kepler, the Transiting Exoplanet Survey Satellite (TESS) was launched for the
+                            first time in 2018. It was designed to scan nearly the entire sky for
+                            exoplanets around the brightest and nearest stars. Unlike Kelper, which
+                            focuses on one small patch, TESS divides the sky into sectors and rotates its gaze 
+                            every 27 days, which is how it was able to discover 312 more planets,
+                            the ones Kepler missed.
+                          </p>`
+      }
+      else if (d[0] >= 2021){
+        text.innerHTML = `<p>
+                            Though the peak in 2021 was not as significant as 2016 and 2014, 
+                            this peak here came from many missions working in parallel. A combination of 
+                            COVID maturity across missions and method, along with the resolved in 
+                            confirmation of Exoplanets due to the pandemic in 2019, allowed for 555 new
+                            planet discoveries.
+                          </p>`
+      }
+      else {
+        text.innerHTML = `<p>
+                            After the discovery of Uranus, Pluto was discovered in 1930 as a planet, 
+                            but it was later reclassified as a Dwarf planet later on. However, our 
+                            solar system of 8 planets is not the only solar system that exists in 
+                            the Universe. Learning from history, our universe is always larger than 
+                            we might expect it to be. That’s when we discovered the first planet, 
+                            that rotates around another star besides the sun in 1992, to which are
+                            called ‘exoplanets’.
+                          </p>`
+      }
     }
   }
 

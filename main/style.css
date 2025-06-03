@@ -113,7 +113,16 @@ body {
 }
 
 #timeline {
-  margin-top: 2rem;
+  margin-top: 0;
+}
+
+#timeline-text {
+  padding: 1em;
+  text-align: center;
+
+  p {
+    margin: 10px;
+  }
 }
 
 /* ============================ */
@@ -1173,7 +1182,7 @@ select {
 
 #increaseDiscovery {
   display: flex;
-  padding: 1em;
+  padding: 2.5em;
   gap: 1em;
 }
 
@@ -1357,7 +1366,7 @@ select {
   /* flex-direction: column; */
   /* gap: 2rem; */
   /* align-items: flex-start; */
-  padding: 2rem;
+  padding: 1rem;
 
 }
 
@@ -1449,7 +1458,6 @@ body, h1, h2, p, ul, ol, li {
 .hero-container {
   display: flex;
   flex-wrap: wrap;
-  max-width: 1200px;
   width: 100%;
   justify-content: space-between;
   align-items: center;
@@ -1516,12 +1524,11 @@ body, h1, h2, p, ul, ol, li {
 .hero-container {
   display: flex;
   flex-wrap: wrap;
-  max-width: 1200px;
   width: 100%;
   justify-content: space-between;
   align-items: center;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 10px;
 }
 
 .team-list {
@@ -1529,9 +1536,9 @@ body, h1, h2, p, ul, ol, li {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 7rem;          /* space between items */
-  padding: 1rem;
+  text-align: center;
   border: none;
+  gap: 1em;
   border-radius: 1rem;
   background-color: rgba(255, 255, 255, 0.1);
   max-width: 90%;
@@ -1541,6 +1548,8 @@ body, h1, h2, p, ul, ol, li {
 .team-list li {
   font-size: clamp(1rem, 2vw, 1.2rem);
   font-weight: bold;
+  align-content: center;
+  flex: 1;
   padding: 0.5rem 1rem;
   border-radius: 0.75rem;
   background-color: rgba(255, 255, 255, 0.2);
@@ -1814,30 +1823,4 @@ body {
   opacity: 1;
   transform: translateY(0);
   }
-  
-  /* Timeline Scaling */
-  #timeline {
-  transform-origin: left center;
-  transition: transform 0.3s ease;
-  }
-  
-  /* Scale down on smaller screens */
-  @media (max-width: 1200px) {
-  #timeline {
-  transform: scale(0.8);
-  }
-  }
-  
-  @media (max-width: 800px) {
-  #timeline {
-  transform: scale(0.6);
-  }
-  }
-  
-  @media (max-width: 600px) {
-  #timeline {
-  transform: scale(0.4);
-  }
-  }
-  
   
