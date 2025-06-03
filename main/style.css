@@ -1603,7 +1603,7 @@ body, h1, h2, p, ul, ol, li {
 }
 
 .density-grid rect:hover {
-  fill: #white !important;
+  fill: white !important;
 }
 
 /* ============================ */

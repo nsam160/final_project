@@ -205,7 +205,8 @@ export function renderSystem(containerId, planetData, stage = 1) {
       setupPlanetNavigation();
     }, 100);
   } else if (stage === 2) {
-    // Interactive mode - setup interactive controls
+    // Interactive mode - setup interactive controls and background
+    addInteractiveSystemBackground(svg, hostname);
     setTimeout(() => {
       setupAnimationControls('interactive-animation');
       showInteractiveControls(systemInfo.id);
@@ -478,30 +479,175 @@ function setupPlanetNavigation() {
   }
 }
 
-// ✅ PHASE 1: Show interactive controls (basic for now)
+// ==================================================
+// PHASE 2: ENHANCED INTERACTIVE CONTROLS
+// ==================================================
+
 function showInteractiveControls(systemId) {
-  console.log(`Showing interactive controls for: ${systemId}`);
+  console.log(`🎛️ Showing interactive controls for: ${systemId}`);
   
-  // Hide all interactive control panels
-  document.querySelectorAll('.system-interactive-controls').forEach(panel => {
+  // Hide all control panels first
+  document.querySelectorAll('.control-panel').forEach(panel => {
     panel.style.display = 'none';
   });
   
-  // Show default message for now
-  const defaultPanel = document.getElementById('default-interactive-message');
-  if (defaultPanel) {
-    defaultPanel.style.display = 'block';
+  // Show the appropriate control panel based on system
+  const panelId = `${systemId}-controls`;
+  const panel = document.getElementById(panelId);
+  
+  if (panel) {
+    panel.style.display = 'block';
     
-    // Update title
-    const titleElement = document.getElementById('interactive-controls-title');
-    if (titleElement) {
-      const systemNames = {
-        'kepler': 'Kepler-90 Interactive Controls',
-        'toi': 'TOI-178 Interactive Controls', 
-        'gj': 'GJ 667C Interactive Controls'
-      };
-      titleElement.textContent = systemNames[systemId] || 'Interactive Controls';
+    // Update system info in interactive mode
+    const systemNames = {
+      'kepler': 'Kepler-90 System',
+      'toi': 'TOI-178 Resonance Chain', 
+      'gj': 'GJ 667C Habitable Zone'
+    };
+    
+    const nameElement = document.getElementById('interactive-system-name');
+    if (nameElement) {
+      nameElement.textContent = systemNames[systemId] || 'Exoplanet System';
     }
+    
+    const countElement = document.getElementById('interactive-planet-count');
+    if (countElement && currentSystemPlanets) {
+      countElement.textContent = `${currentSystemPlanets.length} planets`;
+    }
+    
+    // Setup the specific interactive functionality
+    setupSystemInteractiveControls(systemId);
+  } else {
+    console.warn(`❌ Interactive controls panel not found for: ${systemId}`);
+  }
+}
+
+// ==================================================
+// SYSTEM-SPECIFIC INTERACTIVE CONTROLS SETUP
+// ==================================================
+
+function setupSystemInteractiveControls(systemId) {
+  console.log(`🎛️ Setting up interactive controls for: ${systemId}`);
+  
+  if (systemId === 'kepler') {
+    setupKeplerInteractiveControls();
+  } else if (systemId === 'toi') {
+    setupTOIInteractiveControls();
+  } else if (systemId === 'gj') {
+    setupGJInteractiveControls();
+  }
+}
+
+// ==================================================
+// KEPLER-90 INTERACTIVE CONTROLS
+// ==================================================
+
+function setupKeplerInteractiveControls() {
+  console.log("🔆 Setting up Kepler-90 interactive controls");
+  
+  // Resonance Lines Toggle
+  const resonanceBtn = document.getElementById('kepler-resonance');
+  if (resonanceBtn) {
+    resonanceBtn.replaceWith(resonanceBtn.cloneNode(true));
+    const newBtn = document.getElementById('kepler-resonance');
+    
+    newBtn.onclick = function() {
+      const isShowing = this.textContent.includes('Hide');
+      this.textContent = isShowing ? 'Show Resonances' : 'Hide Resonances';
+      toggleResonanceLines(!isShowing);
+    };
+  }
+  
+  // Period Comparison
+  const periodsBtn = document.getElementById('kepler-periods');
+  if (periodsBtn) {
+    periodsBtn.replaceWith(periodsBtn.cloneNode(true));
+    const newBtn = document.getElementById('kepler-periods');
+    
+    newBtn.onclick = function() {
+      const isShowing = this.textContent.includes('Hide');
+      this.textContent = isShowing ? 'Compare Periods' : 'Hide Periods';
+      comparePeriods(!isShowing);
+    };
+  }
+}
+
+// ==================================================
+// TOI-178 INTERACTIVE CONTROLS
+// ==================================================
+
+function setupTOIInteractiveControls() {
+  console.log("🎵 Setting up TOI-178 interactive controls");
+  
+  // Resonance Chain Toggle
+  const chainBtn = document.getElementById('toi-chain');
+  if (chainBtn) {
+    chainBtn.replaceWith(chainBtn.cloneNode(true));
+    const newBtn = document.getElementById('toi-chain');
+    
+    newBtn.onclick = function() {
+      const isShowing = this.textContent.includes('Hide');
+      this.textContent = isShowing ? 'Show Chain' : 'Hide Chain';
+      toggleResonanceChain(!isShowing);
+    };
+  }
+  
+  // Period Ratios
+  const ratiosBtn = document.getElementById('toi-ratios');
+  if (ratiosBtn) {
+    ratiosBtn.replaceWith(ratiosBtn.cloneNode(true));
+    const newBtn = document.getElementById('toi-ratios');
+    
+    newBtn.onclick = function() {
+      const isShowing = this.textContent.includes('Hide');
+      this.textContent = isShowing ? 'Show Ratios' : 'Hide Ratios';
+      showPeriodRatios(!isShowing);
+    };
+  }
+}
+
+// ==================================================
+// GJ 667C INTERACTIVE CONTROLS
+// ==================================================
+
+function setupGJInteractiveControls() {
+  console.log("🌱 Setting up GJ 667C interactive controls");
+  
+  // Show Habitable Zone
+  const zoneBtn = document.getElementById('gj-zone');
+  if (zoneBtn) {
+    zoneBtn.replaceWith(zoneBtn.cloneNode(true));
+    const newBtn = document.getElementById('gj-zone');
+    
+    newBtn.onclick = function() {
+      const isShowing = this.textContent.includes('Hide');
+      this.textContent = isShowing ? 'Show Zone' : 'Hide Zone';
+      toggleHabitableZone(!isShowing);
+    };
+  }
+  
+  // Highlight Habitable Planets
+  const highlightBtn = document.getElementById('gj-highlight');
+  if (highlightBtn) {
+    highlightBtn.replaceWith(highlightBtn.cloneNode(true));
+    const newBtn = document.getElementById('gj-highlight');
+    
+    newBtn.onclick = function() {
+      highlightHabitablePlanets();
+    };
+  }
+  
+  // Temperature Zones
+  const tempsBtn = document.getElementById('gj-temps');
+  if (tempsBtn) {
+    tempsBtn.replaceWith(tempsBtn.cloneNode(true));
+    const newBtn = document.getElementById('gj-temps');
+    
+    newBtn.onclick = function() {
+      const isShowing = this.textContent.includes('Hide');
+      this.textContent = isShowing ? 'Temperature Zones' : 'Hide Temps';
+      showTemperatureZones(!isShowing);
+    };
   }
 }
 
@@ -612,15 +758,18 @@ function renderInteractiveSystem(system) {
   // Cleanup previous system
   cleanupEnhancedSystem();
   
-  // Clear the main orbit container
-  const orbitContainer = document.getElementById('orbit-container');
-  if (orbitContainer) {
-    orbitContainer.innerHTML = "";
+  // Use the interactive container for Stage 2
+  const interactiveContainer = document.getElementById('orbit-container-interactive');
+  if (interactiveContainer) {
+    interactiveContainer.innerHTML = "";
   }
   
-  // Initialize enhanced system for Stage 2 (Interactive mode)
+  // Initialize enhanced system for Stage 2 (Interactive mode) in the interactive container
   console.log('Initializing enhanced system for stage 2...');
-  initializeEnhancedSystem('orbit-container', system.hostname, 2);
+  initializeEnhancedSystem('orbit-container-interactive', system.hostname, 2);
+  
+  // Setup interactive animation controls
+  setupInteractiveAnimationControls();
   
   // Show interactive controls after a short delay
   setTimeout(() => {
@@ -766,7 +915,7 @@ function setupTooltips(planets, hostname, systemInfo) {
         <div style="margin-top: 10px;">
           <div>Mass: ${formatValue(d.pl_bmasse, 'Earth masses')}</div>
           <div>Radius: ${formatValue(d.pl_rade, 'Earth radii')}</div>
-          <div>Period: ${formatValue(d.pl_orbper, 'days')}</div>
+          <div>Period: ${formatValue(planet.pl_orbper, 'days')}</div>
           <div>Temperature: ${formatValue(d.pl_eqt, 'K')}</div>
           <div>Discovery: ${d.disc_year || 'Unknown'}</div>
         </div>
@@ -822,4 +971,629 @@ function setupPlanetAnimation(planets, planetData, hostname, auToPixels) {
       return `translate(${x}, ${y})`;
     });
   });
+}
+
+// ==================================================
+// PHASE 2: KEPLER-90 INTERACTIVE IMPLEMENTATIONS
+// ==================================================
+
+function toggleResonanceLines(show) {
+  console.log(`${show ? '🔗 Showing' : '❌ Hiding'} resonance lines for Kepler-90`);
+  
+  const svg = d3.select('#orbit-container svg');
+  if (svg.empty()) return;
+  
+  if (show) {
+    // Add resonance lines between planets
+    const resonanceData = [
+      {from: 0, to: 1, ratio: "2:1"},
+      {from: 1, to: 2, ratio: "3:2"}, 
+      {from: 2, to: 3, ratio: "4:3"}
+    ];
+    
+    resonanceData.forEach((res, i) => {
+      svg.append("line")
+        .attr("class", "resonance-line")
+        .attr("x1", -200 + (i * 100))
+        .attr("y1", -200)
+        .attr("x2", 200 - (i * 100))
+        .attr("y2", 200)
+        .attr("stroke", "#FFA500")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "5,5")
+        .attr("opacity", 0)
+        .transition()
+        .duration(1000)
+        .attr("opacity", 0.6);
+        
+      // Add ratio labels
+      svg.append("text")
+        .attr("class", "resonance-label")
+        .attr("x", -100 + (i * 80))
+        .attr("y", -100 + (i * 40))
+        .attr("fill", "#FFA500")
+        .attr("font-size", "12px")
+        .attr("text-anchor", "middle")
+        .text(res.ratio)
+        .attr("opacity", 0)
+        .transition()
+        .duration(1000)
+        .attr("opacity", 0.8);
+    });
+  } else {
+    // Remove resonance lines
+    svg.selectAll(".resonance-line, .resonance-label")
+      .transition()
+      .duration(500)
+      .attr("opacity", 0)
+      .remove();
+  }
+}
+
+// ==================================================
+// TOI-178 INTERACTIVE IMPLEMENTATIONS
+// ==================================================
+
+function toggleResonanceChain(show) {
+  console.log(`${show ? '🎵 Showing' : '❌ Hiding'} resonance chain for TOI-178`);
+  
+  const svg = d3.select('#orbit-container svg');
+  if (svg.empty()) return;
+  
+  if (show) {
+    // Create resonance chain visualization
+    const chainData = [
+      {angle: 0, ratio: "18"},
+      {angle: 60, ratio: "9"}, 
+      {angle: 120, ratio: "6"},
+      {angle: 180, ratio: "4"},
+      {angle: 240, ratio: "3"}
+    ];
+    
+    // Add resonance connections
+    for (let i = 0; i < chainData.length - 1; i++) {
+      const startAngle = chainData[i].angle * Math.PI / 180;
+      const endAngle = chainData[i + 1].angle * Math.PI / 180;
+      const radius = 150 + (i * 30);
+      
+      svg.append("path")
+        .attr("class", "resonance-chain")
+        .attr("d", `M ${Math.cos(startAngle) * radius} ${Math.sin(startAngle) * radius} 
+                   Q 0 0 ${Math.cos(endAngle) * radius} ${Math.sin(endAngle) * radius}`)
+        .attr("stroke", "#4682B4")
+        .attr("stroke-width", 3)
+        .attr("fill", "none")
+        .attr("stroke-dasharray", "10,5")
+        .attr("opacity", 0)
+        .transition()
+        .duration(1500)
+        .attr("opacity", 0.7);
+    }
+    
+    // Add ratio numbers
+    chainData.forEach((d, i) => {
+      const angle = d.angle * Math.PI / 180;
+      const radius = 180;
+      
+      svg.append("text")
+        .attr("class", "resonance-ratio")
+        .attr("x", Math.cos(angle) * radius)
+        .attr("y", Math.sin(angle) * radius)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#4682B4")
+        .attr("font-size", "16px")
+        .attr("font-weight", "bold")
+        .text(d.ratio)
+        .attr("opacity", 0)
+        .transition()
+        .duration(1500)
+        .attr("opacity", 1);
+    });
+  } else {
+    svg.selectAll(".resonance-chain, .resonance-ratio")
+      .transition()
+      .duration(800)
+      .attr("opacity", 0)
+      .remove();
+  }
+}
+
+function playResonanceMusic(play) {
+  console.log(`${play ? '🎵 Playing' : '🔇 Stopping'} resonance music for TOI-178`);
+  
+  if (play) {
+    // Visual music representation
+    const svg = d3.select('#orbit-container svg');
+    if (svg.empty()) return;
+    
+    // Create musical notes animation
+    const notePositions = [
+      {x: -100, y: -150, delay: 0},
+      {x: 50, y: -100, delay: 500},
+      {x: 150, y: -50, delay: 1000},
+      {x: 100, y: 100, delay: 1500},
+      {x: -50, y: 150, delay: 2000}
+    ];
+    
+    notePositions.forEach(note => {
+      setTimeout(() => {
+        svg.append("text")
+          .attr("class", "musical-note-anim")
+          .attr("x", note.x)
+          .attr("y", note.y)
+          .attr("text-anchor", "middle")
+          .attr("fill", "#4682B4")
+          .attr("font-size", "30px")
+          .text("♪")
+          .attr("opacity", 0)
+          .transition()
+          .duration(1000)
+          .attr("opacity", 1)
+          .attr("font-size", "40px")
+          .transition()
+          .duration(1000)
+          .attr("opacity", 0)
+          .attr("y", note.y - 50)
+          .remove();
+      }, note.delay);
+    });
+    
+    // Continue animation loop
+    setTimeout(() => {
+      if (document.getElementById('play-resonance-music')?.textContent.includes('Stop')) {
+        playResonanceMusic(true);
+      }
+    }, 3000);
+  }
+}
+
+// ==================================================
+// GJ 667C INTERACTIVE IMPLEMENTATIONS
+// ==================================================
+
+function toggleHabitableZone(show) {
+  console.log(`${show ? '🌱 Showing' : '❌ Hiding'} habitable zone for GJ 667C`);
+  
+  const svg = d3.select('#orbit-container svg');
+  if (svg.empty()) return;
+  
+  if (show) {
+    // Enhance existing habitable zone
+    svg.select(".habitable-zone")
+      .transition()
+      .duration(1000)
+      .attr("stroke-opacity", 0.6)
+      .attr("stroke-width", 12);
+      
+    // Add zone labels
+    svg.append("text")
+      .attr("class", "zone-label")
+      .attr("x", 0)
+      .attr("y", -90)
+      .attr("text-anchor", "middle")
+      .attr("fill", "#50C878")
+      .attr("font-size", "14px")
+      .text("Habitable Zone")
+      .attr("opacity", 0)
+      .transition()
+      .duration(1000)
+      .attr("opacity", 0.9);
+  } else {
+    svg.select(".habitable-zone")
+      .transition()
+      .duration(800)
+      .attr("stroke-opacity", 0.15)
+      .attr("stroke-width", 8);
+      
+    svg.selectAll(".zone-label")
+      .transition()
+      .duration(800)
+      .attr("opacity", 0)
+      .remove();
+  }
+}
+
+function highlightHabitablePlanets() {
+  console.log('🌍 Highlighting habitable planets in GJ 667C');
+  
+  const svg = d3.select('#orbit-container svg');
+  if (svg.empty()) return;
+  
+  // Highlight potentially habitable planets
+  svg.selectAll(".orbit-planet")
+    .transition()
+    .duration(1000)
+    .style("fill", function(d) {
+      return isInHabitableZone(d) ? "#50C878" : "#8B4513";
+    })
+    .style("stroke", function(d) {
+      return isInHabitableZone(d) ? "#32CD32" : "rgba(255,255,255,0.3)";
+    })
+    .style("stroke-width", function(d) {
+      return isInHabitableZone(d) ? 3 : 1.5;
+    })
+    .attr("r", function(d) {
+      const baseRadius = d3.select(this).attr("data-base-radius");
+      return isInHabitableZone(d) ? parseFloat(baseRadius) * 1.4 : baseRadius;
+    });
+    
+  // Add habitability labels
+  svg.selectAll(".orbit-planet")
+    .filter(d => isInHabitableZone(d))
+    .each(function(d, i) {
+      const transform = d3.select(this).attr("transform");
+      const match = transform.match(/translate\(([^,]+),([^)]+)\)/);
+      if (match) {
+        const x = parseFloat(match[1]);
+        const y = parseFloat(match[2]);
+        
+        svg.append("text")
+          .attr("class", "habitable-label")
+          .attr("x", x)
+          .attr("y", y - 25)
+          .attr("text-anchor", "middle")
+          .attr("fill", "#50C878")
+          .attr("font-size", "10px")
+          .text("Habitable?")
+          .attr("opacity", 0)
+          .transition()
+          .duration(1000)
+          .attr("opacity", 1);
+      }
+    });
+    
+  setTimeout(() => {
+    svg.selectAll(".habitable-label")
+      .transition()
+      .duration(1000)
+      .attr("opacity", 0)
+      .remove();
+      
+    svg.selectAll(".orbit-planet")
+      .transition()
+      .duration(1000)
+      .style("fill", d => isInHabitableZone(d) ? "#50C878" : "#8B4513")
+      .style("stroke", d => isInHabitableZone(d) ? "#32CD32" : "rgba(255,255,255,0.3)")
+      .style("stroke-width", 1.5)
+      .attr("r", function() { return d3.select(this).attr("data-base-radius"); });
+  }, 4000);
+}
+
+function toggleCompanionStars(show) {
+  console.log(`${show ? '⭐ Showing' : '❌ Hiding'} companion stars for GJ 667C`);
+  
+  const svg = d3.select('#orbit-container svg');
+  if (svg.empty()) return;
+  
+  if (show) {
+    // Enhance companion stars
+    svg.selectAll(".companion-star")
+      .transition()
+      .duration(1000)
+      .style("opacity", 1)
+      .attr("r", 10);
+      
+    // Add gravitational influence lines
+    svg.append("line")
+      .attr("class", "gravitational-line")
+      .attr("x1", -190)
+      .attr("y1", -155)
+      .attr("x2", 0)
+      .attr("y2", 0)
+      .attr("stroke", "#FFD700")
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "3,3")
+      .attr("opacity", 0)
+      .transition()
+      .duration(1500)
+      .attr("opacity", 0.4);
+  } else {
+    svg.selectAll(".companion-star")
+      .transition()
+      .duration(800)
+      .style("opacity", 0.6)
+      .attr("r", 6);
+      
+    svg.selectAll(".gravitational-line")
+      .transition()
+      .duration(800)
+      .attr("opacity", 0)
+      .remove();
+  }
+}
+
+function showTemperatureZones() {
+  console.log('🌡️ Showing temperature zones for GJ 667C');
+  
+  const svg = d3.select('#orbit-container svg');
+  if (svg.empty()) return;
+  
+  // Create temperature gradient zones
+  const zones = [
+    {radius: 40, color: "#FF4500", temp: "Hot Zone"},
+    {radius: 80, color: "#32CD32", temp: "Habitable"},
+    {radius: 120, color: "#4169E1", temp: "Cold Zone"}
+  ];
+  
+  zones.forEach((zone, i) => {
+    svg.append("circle")
+      .attr("class", "temp-zone")
+      .attr("cx", 0)
+      .attr("cy", 0)
+      .attr("r", zone.radius)
+      .attr("fill", "none")
+      .attr("stroke", zone.color)
+      .attr("stroke-width", 4)
+      .attr("stroke-opacity", 0)
+      .transition()
+      .delay(i * 300)
+      .duration(1000)
+      .attr("stroke-opacity", 0.3);
+      
+    // Add temperature labels
+    svg.append("text")
+      .attr("class", "temp-label")
+      .attr("x", zone.radius * 0.7)
+      .attr("y", zone.radius * 0.7)
+      .attr("fill", zone.color)
+      .attr("font-size", "12px")
+      .text(zone.temp)
+      .attr("opacity", 0)
+      .transition()
+      .delay(i * 300)
+      .duration(1000)
+      .attr("opacity", 0.8);
+  });
+  
+  setTimeout(() => {
+    svg.selectAll(".temp-zone, .temp-label")
+      .transition()
+      .duration(1000)
+      .attr("opacity", 0)
+      .remove();
+  }, 5000);
+}
+
+function updateStellarInfluence(influence) {
+  console.log(`⭐ Updating stellar influence visualization: ${influence}%`);
+  // Implementation for showing gravitational effects
+  const svg = d3.select('#orbit-container svg');
+  if (svg.empty()) return;
+  
+  // Adjust companion star prominence based on influence
+  svg.selectAll(".companion-star")
+    .transition()
+    .duration(500)
+    .style("opacity", 0.3 + (influence / 100) * 0.7)
+    .attr("r", 4 + (influence / 100) * 8);
+}
+
+// ==================================================
+// MISSING INTERACTIVE FUNCTIONS IMPLEMENTATION
+// ==================================================
+
+// Kepler-90 Functions
+function comparePeriods(show) {
+  console.log(`${show ? '📊 Showing' : '❌ Hiding'} period comparison for Kepler-90`);
+  
+  const svg = d3.select('#orbit-container svg');
+  if (svg.empty()) return;
+  
+  if (show) {
+    // Add period comparison visualization
+    const periods = [7.0, 8.9, 29.3, 91.9, 124.9, 210.6, 331.6, 14.4]; // Kepler-90 periods
+    const maxPeriod = Math.max(...periods);
+    
+    periods.forEach((period, i) => {
+      const barHeight = (period / maxPeriod) * 100;
+      const x = -250 + (i * 60);
+      
+      svg.append("rect")
+        .attr("class", "period-bar")
+        .attr("x", x)
+        .attr("y", 200)
+        .attr("width", 50)
+        .attr("height", 0)
+        .attr("fill", "#FFA500")
+        .attr("opacity", 0.7)
+        .transition()
+        .delay(i * 200)
+        .duration(1000)
+        .attr("height", barHeight)
+        .attr("y", 200 - barHeight);
+        
+      svg.append("text")
+        .attr("class", "period-label")
+        .attr("x", x + 25)
+        .attr("y", 220)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#FFA500")
+        .attr("font-size", "10px")
+        .text(`${period.toFixed(1)}d`)
+        .attr("opacity", 0)
+        .transition()
+        .delay(i * 200)
+        .duration(1000)
+        .attr("opacity", 1);
+    });
+    
+    setTimeout(() => {
+      svg.selectAll(".period-bar, .period-label")
+        .transition()
+        .duration(1000)
+        .attr("opacity", 0)
+        .remove();
+    }, 5000);
+  } else {
+    svg.selectAll(".period-bar, .period-label").remove();
+  }
+}
+
+// TOI-178 Functions
+function showPeriodRatios(show) {
+  console.log(`${show ? '🔢 Showing' : '❌ Hiding'} period ratios for TOI-178`);
+  
+  const svg = d3.select('#orbit-container svg');
+  if (svg.empty()) return;
+  
+  if (show) {
+    // Show the famous 18:9:6:4:3 resonance pattern
+    const ratios = ["18", "9", "6", "4", "3"];
+    const colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8"];
+    
+    ratios.forEach((ratio, i) => {
+      const angle = (i * 72) * Math.PI / 180; // 360/5 = 72 degrees apart
+      const radius = 200;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      
+      // Create ratio circles
+      svg.append("circle")
+        .attr("class", "ratio-circle")
+        .attr("cx", x)
+        .attr("cy", y)
+        .attr("r", 0)
+        .attr("fill", colors[i])
+        .attr("opacity", 0.8)
+        .transition()
+        .delay(i * 300)
+        .duration(800)
+        .attr("r", 25);
+        
+      // Add ratio text
+      svg.append("text")
+        .attr("class", "ratio-text")
+        .attr("x", x)
+        .attr("y", y + 6)
+        .attr("text-anchor", "middle")
+        .attr("fill", "white")
+        .attr("font-size", "16px")
+        .attr("font-weight", "bold")
+        .text(ratio)
+        .attr("opacity", 0)
+        .transition()
+        .delay(i * 300 + 400)
+        .duration(600)
+        .attr("opacity", 1);
+    });
+    
+    // Add connecting lines for resonance
+    for (let i = 0; i < ratios.length - 1; i++) {
+      const angle1 = (i * 72) * Math.PI / 180;
+      const angle2 = ((i + 1) * 72) * Math.PI / 180;
+      const radius = 200;
+      
+      svg.append("line")
+        .attr("class", "resonance-connection")
+        .attr("x1", Math.cos(angle1) * radius)
+        .attr("y1", Math.sin(angle1) * radius)
+        .attr("x2", Math.cos(angle2) * radius)
+        .attr("y2", Math.sin(angle2) * radius)
+        .attr("stroke", "#4682B4")
+        .attr("stroke-width", 3)
+        .attr("stroke-dasharray", "5,5")
+        .attr("opacity", 0)
+        .transition()
+        .delay(1500)
+        .duration(1000)
+        .attr("opacity", 0.6);
+    }
+    
+    setTimeout(() => {
+      svg.selectAll(".ratio-circle, .ratio-text, .resonance-connection")
+        .transition()
+        .duration(1000)
+        .attr("opacity", 0)
+        .remove();
+    }, 6000);
+  } else {
+    svg.selectAll(".ratio-circle, .ratio-text, .resonance-connection").remove();
+  }
+}
+
+// Interactive animation controls
+function setupInteractiveAnimationControls() {
+  const playBtn = document.getElementById('interactive-play-pause');
+  const speedSlider = document.getElementById('interactive-speed');
+  const speedValue = document.getElementById('speed-value');
+  
+  if (playBtn) {
+    playBtn.onclick = function() {
+      isAnimationPlaying = !isAnimationPlaying;
+      this.textContent = isAnimationPlaying ? 'Pause' : 'Play';
+      
+      if (isAnimationPlaying && animationTimer) {
+        animationTimer.restart();
+      } else if (animationTimer) {
+        animationTimer.stop();
+      }
+    };
+  }
+  
+  if (speedSlider && speedValue) {
+    speedSlider.oninput = function() {
+      animationSpeed = parseFloat(this.value);
+      speedValue.textContent = `${animationSpeed}x`;
+      
+      if (animationTimer && isAnimationPlaying) {
+        animationTimer.stop();
+        setupPlanetAnimation(
+          d3.selectAll('.orbit-planet'), 
+          currentSystemPlanets, 
+          currentSystemPlanets[0]?.hostname,
+          d3.scaleLinear() // placeholder scale
+        );
+      }
+    };
+  }
+}
+
+// Enhanced system background for interactive mode
+function addInteractiveSystemBackground(svg, hostname) {
+  if (hostname === "KOI-351") {
+    // Add subtle grid for Kepler-90
+    const gridGroup = svg.append("g").attr("class", "interactive-grid");
+    
+    for (let i = -300; i <= 300; i += 50) {
+      gridGroup.append("line")
+        .attr("x1", i).attr("y1", -300)
+        .attr("x2", i).attr("y2", 300)
+        .attr("stroke", "#333")
+        .attr("stroke-width", 0.5)
+        .attr("opacity", 0.3);
+        
+      gridGroup.append("line")
+        .attr("x1", -300).attr("y1", i)
+        .attr("x2", 300).attr("y2", i)
+        .attr("stroke", "#333")
+        .attr("stroke-width", 0.5)
+        .attr("opacity", 0.3);
+    }
+  }
+  else if (hostname === "TOI-178") {
+    // Add resonance background pattern
+    const resonanceGroup = svg.append("g").attr("class", "resonance-background");
+    
+    for (let i = 1; i <= 5; i++) {
+      resonanceGroup.append("circle")
+        .attr("cx", 0).attr("cy", 0)
+        .attr("r", i * 50)
+        .attr("fill", "none")
+        .attr("stroke", "#4682B4")
+        .attr("stroke-width", 1)
+        .attr("stroke-dasharray", "2,8")
+        .attr("opacity", 0.2);
+    }
+  }
+  else if (hostname === "GJ 667 C") {
+    // Add habitable zone indicator
+    svg.append("circle")
+      .attr("class", "habitable-background")
+      .attr("cx", 0).attr("cy", 0)
+      .attr("r", 100)
+      .attr("fill", "rgba(50, 205, 50, 0.1)")
+      .attr("stroke", "rgba(50, 205, 50, 0.3)")
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "5,5");
+  }
 }
