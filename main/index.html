@@ -348,10 +348,10 @@
   <!-- Royce Section 5: EARTH SEARCH (TODO)  -->
   <!-- ================================ -->
 <section class="scroll-section" id="section-search">
-
-  <!-- insert code here  -->
   <h2 class="section-title">Earth-Like Worlds</h2>
-  <div class = 'search-container'>
+
+  <!-- Search Controls -->
+  <div class="search-container">
     <label>Features To Compare:
       <select id="features"></select>
     </label>
@@ -365,16 +365,58 @@
     </label>
   </div>
 
-  <div class="chart-wrapper">
-    <div class="bar-chart"></div>          <!-- your SVG lives here -->
-    <div id="top3">
-      <div class = "top3chart"></div>
+  <!-- 1) Chart Container at 90% width, centered -->
+  <div class="chart-wrapper-outer">
+    <div class="chart-wrapper">
+      <div class="bar-chart"></div> <!-- D3 injects the SVG here -->
+    </div>
+    <!-- The Show/Hide button sits at the top-right of the chart-wrapper-outer -->
+    <button id="toggle-details" class="toggle-button">Show More Details</button>
+  </div>
+
+  <!-- 2) Sliding Panel: initially hidden off-screen on the right -->
+  <div id="details-panel">
+    <div class="details-header">
+      <button id="close-details" class="close-button">✕</button>
       <h3 id="top3-title"></h3>
       <ol id="top3-list"></ol>
-      <p id="top3-text"></p> <!-- Dynamically explain the graphs here in global.js -->
+    </div>
+    <div class="details-content">
+      <div class="top3chart"></div>
+      <div class="details-text">
+        <p>The <strong>heat-map ABOVE</strong> displays the same three planets across <em>all six</em> metrics. Each row corresponds to one of the Top 3 planets, and each column corresponds to one of the six features (Radius, Mass, Temperature, Eccentricity, Distance, Orbital Period). Darker cells indicate very small percentage differences from Earth’s value—meaning that planet is close to Earth not just in the chosen feature but across multiple dimensions.</p>
+    
+    <p>In other words, the heat-map gives you a quick, holistic view of how each of the Top 3 planets measures up across every metric. A mostly dark-green row means that planet is highly Earth-like overall, whereas lighter or gray cells indicate larger deviations or missing data.</p>
+    
+    <p>Use this visualization to understand not only why these planets rank first for your selected metric, but also how they compare to Earth in all other important characteristics. Together, the dot-chart, the Top 3 list, and this heat-map help you identify the most promising candidates for Earth-like habitability.</p>
+         <p><strong>Radius (Earth Radius):</strong>  
+    This measures a planet’s size compared to Earth. A radius of 1 means the planet is the same size as Earth. Planets very close to 1 R⊕ often have similar gravity and surface area, making them prime candidates for Earth-like conditions.</p>
+    
+    <p><strong>Mass (Earth Mass):</strong>  
+    Mass tells us how much matter a planet contains compared to Earth. A mass near 1 M⊕ suggests a rocky composition and surface gravity similar to ours. Too heavy or too light can mean very different atmospheric retention or geologic activity.</p>
+    
+    <p><strong>Equilibrium Temperature (Kelvin):</strong>  
+    Equilibrium temperature (Tₑq) is the theoretical blackbody temperature a planet would have if it absorbed and re-radiated starlight exactly like Earth (no greenhouse effect). Earth’s Tₑq is 255 K. Planets near this value receive just the right amount of stellar energy to allow liquid water if they have an atmosphere.</p>
+    
+    <p><strong>Eccentricity:</strong>  
+    Eccentricity measures how circular a planet’s orbit is. Earth’s eccentricity is 0.0167 (nearly a perfect circle). If a planet’s eccentricity is close to 0, its distance (and temperature) from its star stays relatively constant. Higher eccentricity can cause extreme seasonal or temperature swings.</p>
+    
+    <p><strong>Distance (AU):</strong>  
+    This is the semi-major axis of the planet’s orbit in astronomical units (AU). 1 AU is the average distance from Earth to the Sun. A distance near 1 AU means the planet lies in a similar “habitable zone,” receiving Earth-like insolation.</p>
+    
+    <p><strong>Orbital Period (Days):</strong>  
+    Orbital period is the time a planet takes to complete one revolution around its star, measured in Earth days. Earth’s orbital period is 365.26 days. A period near one year often correlates with a familiar pattern of seasons and insolation cycles.</p>
+    
+    <p>Above, you see the <strong>Top 3 planets</strong> most similar to Earth for the single feature you selected. For example, if you chose “Mass,” these three planets have masses closest to 1 M⊕ among the dataset. Their names and values are shown at the top of this panel.</p>
+    
+    
+
+      </div>
     </div>
   </div>
-  </div>
+
+  <!-- Tooltip DIV (floats above everything) -->
+  <div id="roytooltip"></div>
 
   <!-- Nghi's Top 3 Start -->
   <div id="nghiTop3">
@@ -402,6 +444,7 @@
   </div>
 <!-- Nghi's Top 3 End -->
 </section>
+
 
   <!-- ================================ -->
   <!-- Nghi Section 6: UNIVERSE EXPLORER (TODO)      -->
@@ -465,5 +508,7 @@
     </div>
    </div>
 </section>
+
+  
 </body>
 </html>

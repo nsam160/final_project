@@ -1485,7 +1485,7 @@ select {
 
 
 /* ============================ */
-/* Royces's style.css  END   */
+/* Royces's style.css  start  */
 /* ============================ */
 
 .chart-wrapper {
@@ -1550,6 +1550,151 @@ select {
   font-size:9px;
   text-anchor:middle;
 }
+.search-container {
+  margin-left: 55px;  /* move the whole block in from the left */
+}
+
+#roytooltip {
+  position: fixed;            /* keep it on the viewport, not clipped by a parent */
+  pointer-events: none;       /* so you can still hover through */
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 12px;
+  border-radius: 4px;
+  visibility: hidden;         /* start hidden; JS will toggle this */
+  z-index: 9999;              /* appear above everything else */
+
+
+}
+/* ─────────── 1) Centered Chart Container ─────────── */
+.chart-wrapper-outer {
+  width: 70%;                   /* 90% of viewport width */
+  margin: 1rem auto;             /* center horizontally, with top/bottom gap */
+  position: relative;            /* to anchor the toggle button */
+  box-sizing: border-box;
+}
+
+/* The actual chart area */
+.chart-wrapper {
+  width: 100%;
+  height: 0%;
+  background: transparent;       /* or a subtle panel background */
+  min-height: 500px;             /* or whatever min‐height you prefer */
+  margin: 0 auto;
+  position: relative;
+}
+
+
+/* ─────────── 2) “Show More Details” / “Close” Buttons ─────────── */
+.toggle-button, .close-button {
+  position: absolute;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Show More Details: place top-right of chart-wrapper-outer */
+.toggle-button {
+  top: 10px;
+  right: 10px;
+  z-index: 1002; /* above chart but below dropdowns */
+}
+
+/* Close button inside the sliding panel, top-right corner */
+.close-button {
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.8);
+  z-index: 1003;
+}
+html, body {
+  overflow-x: hidden;
+}
+/* ─────────── 3) Sliding Details Panel ─────────── */
+#details-panel {
+  position: fixed;
+  top: 0;
+  right: -35vw;                   /* hide off-screen to the right (35% of viewport) */
+  width: 35vw;                    /* panel width = 35% of viewport width */
+  height: 100vh;
+  background: rgba(30, 30, 40, 0.95);
+  color: #eee;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.6);
+  overflow-y: auto;
+  transition: right 0.3s ease;
+  z-index: 1100;                  /* sits above the chart (1000), but below the close button (1003) */
+  display: flex;
+  flex-direction: column;
+}
+
+/* When panel has .open class, slide it into view */
+#details-panel.open {
+  right: 0;
+}
+
+/* Panel header */
+.details-header {
+  position: relative;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.details-header h3 {
+  margin: 0 2.5rem 0.5rem 0;
+  font-size: 1.25rem;
+  color: #4ecdc4;
+}
+
+.details-header ol {
+  margin: 0 0 1rem 1rem;
+  padding: 0;
+  list-style-type: decimal;
+}
+
+/* Panel content holds the heatmap and text */
+.details-content {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+/* Heatmap container */
+.top3chart svg{
+  width: 345px;
+  /* The D3 code appends an SVG within; let that SVG fill the width */
+}
+
+/* Explanatory text below the heatmap */
+.details-text {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  overflow-y: auto;
+}
+
+/* ─────────── 4) Ensure dropdowns stay on top of panel ─────────── */
+.search-container {
+  position: relative; /* so the selects can have higher z-index if necessary */
+  z-index: 1005;      /* higher than the panel’s 1000 */
+}
+
+/* ─────────── 5) Tooltip styling (unchanged) ─────────── */
+#roytooltip {
+  position: fixed; 
+  pointer-events: none;
+  padding: 6px 10px;
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  font-size: 12px;
+  border-radius: 4px;
+  visibility: hidden;
+  z-index: 1010; /* on top of everything */
+}
+
 
 /* ============================ */
 /* Royces's style.css  END   */

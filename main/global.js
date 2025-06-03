@@ -1696,14 +1696,13 @@ ExoplanetData.onDataLoaded((data) => {
 // ===========================
 
 
-
 const FEATURES = [
-  { key: "pl_rade",    label: "Radius",         unit: "km",    factor: 6371,    earth: 6371     },
-  { key: "pl_bmasse",  label: "Mass",           unit: "kg",    factor: 5.972e24,earth: 5.972e24 },
-  { key: "pl_insol",   label: "Insolation",     unit: "W m⁻²", factor: 1361,    earth: 1361     },
-  { key: "pl_eqt",     label: "Equilibrium T",  unit: "K",     factor: 1,       earth: 255      },
-  { key: "pl_orbeccen",label: "Eccentricity",   unit: "",      factor: 1,       earth: 0.0167   },
-  { key: "st_teff",    label: "Stellar T_eff",  unit: "K",     factor: 1,       earth: 5772     }
+  { key: "pl_rade",    label: "Radius",         unit: "Earth Radius", factor: 1, earth: 1     },
+  { key: "pl_bmasse",  label: "Mass",           unit: "Earth Mass",   factor: 1, earth: 1     },
+  { key: "pl_eqt",     label: "Temperature",     unit: "Kelvin",       factor: 1, earth: 255   },
+  { key: "pl_orbeccen",label: "Eccentricity",   unit: "",             factor: 1, earth: 0.0167 },
+  { key: "pl_orbsmax", label: "Distance",       unit: "AU",           factor: 1, earth: 1.0167 },
+  { key: "pl_orbper",  label: "Orbital Period", unit: "Days",         factor: 1, earth: 365.26 }
 ];
 
 /* ── 2.  Dropdown population ───────────────────────────────────── */
@@ -1742,6 +1741,30 @@ const chartSvg = d3.select(".bar-chart")
 
 const chartGroup = chartSvg.append("g")
     .attr("transform", `translate(${top50UsableArea.left},${top50UsableArea.top})`);
+
+// ── LEGEND: “Earth’s metric” dashed red line ──────────────────────
+const legend = chartGroup.append("g")
+  .attr("class", "legend")
+  .attr("transform", "translate(0,-20)");  // move up above the bars
+
+// draw a short horizontal red dashed line
+legend.append("line")
+  .attr("x1", 0)
+  .attr("y1", 0)
+  .attr("x2", 24)                   // 24px long
+  .attr("y2", 0)
+  .attr("stroke", "#e11d48")        // same red as earth-line
+  .attr("stroke-width", 2)
+  .attr("stroke-dasharray", "4 4");
+
+// add the text label to the right of that line
+legend.append("text")
+  .attr("x", 30)                    // 6px gap after the line
+  .attr("y", 4)                     // vertically centered on the line
+  .attr("fill", "#fff")
+  .attr("font-size", 12)
+  .text("Earth’s metric");
+
   // .attr("id", "exoCompareGroup")
   // .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -1781,13 +1804,15 @@ ExoplanetData.onDataLoaded(rows => {
   function draw(colKey, habFilter = "all") {
     const cfg = FEATURES.find(f => f.key === colKey);
     const raw = d => +d[colKey] * cfg.factor;
-
+    
     const candidates = rows.filter(d => {
       if (!Number.isFinite(raw(d))) return false;            // skip NaN
       if (habFilter === "yes") return +d.is_habitable === 1;
       if (habFilter === "no")  return +d.is_habitable === 0;
       return true;                                           // 'all'
     });
+    
+    const roytooltip = d3.select("#roytooltip");
 
     const planets = candidates
       .map(d => ({ ...d, delta: Math.abs(raw(d) - cfg.earth) }))
@@ -1835,19 +1860,95 @@ ExoplanetData.onDataLoaded(rows => {
         // .attr("y1", 0).attr("y2", innerH);
 
       /* ---- dots ---- */
-      chartGroup.selectAll("circle.dot")
-        .data(planets, d => d.pl_name)
-        .join(
-          enter => enter.append("circle")
-            .attr("class", "dot")
-            .attr("r", 6).attr("fill", "none")
-            .attr("stroke", "#10b981").attr("stroke-width", 2)
-            .attr("cx", d => x(raw(d)))
-            .attr("cy", d => y(d.pl_name) + y.bandwidth()/2),
-          update => update.transition().duration(400)
-            .attr("cx", d => x(raw(d)))
-            .attr("cy", d => y(d.pl_name) + y.bandwidth()/2)
-        );
+    chartGroup.selectAll("circle.dot")
+  .data(planets, d => d.pl_name)
+  .join(
+    enter => enter.append("circle")
+      .attr("class", "dot")
+      .attr("r", 6)
+      .attr("fill", "transparent")
+      .attr("stroke", "#10b981")
+      .attr("stroke-width", 2)
+      .attr("cx", d => x(raw(d)))
+      .attr("cy", d => y(d.pl_name) + y.bandwidth()/2)
+      // Updated tooltip event handlers
+      .on("mouseover", function(event, d) {
+        // Use function syntax to ensure 'this' context
+        const val = raw(d);
+        const unit = cfg.unit || "";
+        
+        // Debug log
+        console.log('Tooltip mouseover:', d.pl_name, 'at', event.pageX, event.pageY);
+        
+        // Make tooltip visible
+        roytooltip
+          .style("display", "block")
+          .style("opacity", "1")
+          .html(`
+            <strong style="color: #4ecdc4; display: block; margin-bottom: 4px;">${d.pl_name}</strong>
+            ${cfg.label}: ${d3.format(".3~g")(val)} ${unit}
+          `);
+        
+        // Position tooltip
+        const tooltipWidth = roytooltip.node().offsetWidth;
+        const tooltipHeight = roytooltip.node().offsetHeight;
+        
+        // Ensure tooltip stays within viewport
+        let left = event.pageX + 10;
+        let top = event.pageY - tooltipHeight - 10;
+        
+        // Adjust if tooltip would go off-screen
+        if (left + tooltipWidth > window.innerWidth) {
+          left = event.pageX - tooltipWidth - 10;
+        }
+        if (top < 0) {
+          top = event.pageY + 10;
+        }
+        
+        roytooltip
+          .style("left", left + "px")
+          .style("top", top + "px");
+          
+        // Highlight the dot
+        d3.select(this)
+          .attr("fill", "#10b981")
+          .attr("fill-opacity", 0.3);
+      })
+      .on("mousemove", function(event) {
+        // Update position on move
+        const tooltipWidth = roytooltip.node().offsetWidth;
+        const tooltipHeight = roytooltip.node().offsetHeight;
+        
+        let left = event.pageX + 10;
+        let top = event.pageY - tooltipHeight - 10;
+        
+        if (left + tooltipWidth > window.innerWidth) {
+          left = event.pageX - tooltipWidth - 10;
+        }
+        if (top < 0) {
+          top = event.pageY + 10;
+        }
+        
+        roytooltip
+          .style("left", left + "px")
+          .style("top", top + "px");
+      })
+      .on("mouseout", function() {
+        // Hide tooltip
+        roytooltip
+          .style("display", "none")
+          .style("opacity", "0");
+          
+        // Remove highlight
+        d3.select(this)
+          .attr("fill", "transparent");
+      }),
+    
+    update => update
+      .transition().duration(400)
+      .attr("cx", d => x(raw(d)))
+      .attr("cy", d => y(d.pl_name) + y.bandwidth()/2)
+  );
 
     /* ---- labels (flip side if needed) ---- */
     chartGroup.selectAll("text.pl-label")
@@ -1942,25 +2043,56 @@ ExoplanetData.onDataLoaded(rows => {
 
     // flatten planet × metric grid, flag missing values
     const hmData = top3.flatMap((p, row) =>
-      FEATURES.map((f, col) => {
-        const raw = +p[f.key] * f.factor;
-        const diff = Number.isFinite(raw)
-          ? Math.abs((raw - f.earth) / f.earth)
-          : null;                       // «missing»
-        return { row, col, diff, pname: p.pl_name };
-      })
-    );
+  FEATURES.map((f, col) => {
+    const rawVal = +p[f.key] * f.factor;
+    const diff = Number.isFinite(rawVal)
+      ? Math.abs((rawVal - f.earth) / f.earth)
+      : null;                       // missing
+    return {
+      row,
+      col,
+      diff,
+      pname: p.pl_name,
+      feature: f.label,
+      rawValue: Number.isFinite(rawVal)
+        ? d3.format(".3~g")(rawVal)
+        : "N/A",
+      unit: f.unit
+    };
+  })
+);
 
     // === cells ========================================================
     hmGroup.selectAll("rect")
-      .data(hmData)
-      .join("rect")
-        .attr("x", d => d.col * (hmCell + hmGap))
-        .attr("y", d => d.row * (hmCell + hmGap))
-        .attr("width",  hmCell)
-        .attr("height", hmCell)
-        .attr("fill", d => d.diff === null ? "#666" : hmColor(d.diff));
+  .data(hmData)
+  .join("rect")
+    .attr("x", d => d.col * (hmCell + hmGap))
+    .attr("y", d => d.row * (hmCell + hmGap))
+    .attr("width",  hmCell)
+    .attr("height", hmCell)
+    .attr("fill", d => d.diff === null ? "#666" : hmColor(d.diff))
+    // ── ADD TOOLTIP LISTENERS ON HEAT‐MAP CELLS ───────────────────────────
+    .on("mouseover", (event, d) => {
+      roytooltip
+        .style("visibility", "visible")
+        .html(`
+          <strong>${d.pname}</strong><br/>
+          ${d.feature}: ${d.rawValue} ${d.unit}<br/>
+          ${d.diff !== null
+            ? "Δ = " + d3.format(".1%")(d.diff)
+            : ""}
+        `);
+        console.log('showing tooltip at', event.pageX, event.pageY);
 
+    })
+    .on("mousemove", event => {
+      roytooltip
+        .style("top",  (event.pageY + 12) + "px")
+        .style("left", (event.pageX + 12) + "px");
+    })
+    .on("mouseout", () => {
+      roytooltip.style("visibility", "hidden");
+    });
     // === column labels (metrics) ======================================
     hmGroup.selectAll("text.colLab")
       .data(FEATURES)
@@ -2004,6 +2136,35 @@ ExoplanetData.onDataLoaded(rows => {
   habDD.on("change", () => draw(dropdown.property("value"), habDD.property("value")));
   dropdown.on("change", () => draw(dropdown.property("value"), habDD.property("value")));
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const detailsPanel = document.getElementById("details-panel");
+  const toggleBtn    = document.getElementById("toggle-details");
+  const closeBtn     = document.getElementById("close-details");
+
+  // Show the panel when “Show More Details” is clicked
+  toggleBtn.addEventListener("click", () => {
+    detailsPanel.classList.add("open");
+  });
+
+  // Hide the panel when “✕” is clicked
+  closeBtn.addEventListener("click", () => {
+    detailsPanel.classList.remove("open");
+  });
+
+  // Optionally, if you click outside the panel it closes
+  document.body.addEventListener("click", (e) => {
+    // If click was not inside the panel or the toggle button, close
+    if (
+      detailsPanel.classList.contains("open") &&
+      !detailsPanel.contains(e.target) &&
+      !toggleBtn.contains(e.target)
+    ) {
+      detailsPanel.classList.remove("open");
+    }
+  });
+});
+
 
 // ===========================
 // Royce's Code END
