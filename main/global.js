@@ -281,6 +281,9 @@ function initializeCamilleSection() {
   setupConnectionLines();
   enhanceCapsules();
   
+  // Initialize stage navigation functionality
+  setupStageNavigation();
+  
   // Now we can call this since we imported it
   setupKeyboardNavigation();
 }
@@ -347,6 +350,10 @@ function drawMiniSystem(selector, planets) {
 function showDetailedSystem(systemKey) {
   const system = systemData.find(s => s.id === systemKey);
   
+  // Store current active system for stage navigation
+  window.currentActiveSystem = system;
+  console.log(`🎯 Set current active system to: ${system.hostname}`);
+  
   // Add null checks for DOM elements
   const systemTitleElement = document.getElementById("system-title-orbit");
   if (systemTitleElement) {
@@ -397,9 +404,12 @@ function showDetailedSystem(systemKey) {
     container.style.height = "500px";
     orbitContainer.appendChild(container);
     
-    // Initialize the enhanced system with proper timing
+    // Initialize the enhanced system with proper timing (default to stage 1)
     setTimeout(() => {
-      initializeEnhancedSystem(`container-${system.id}`, system.hostname);
+      initializeEnhancedSystem(`container-${system.id}`, system.hostname, 1);
+      
+      // Ensure stage 1 is active by default
+      switchToStage(1);
     }, 100);
   }
 }
@@ -2056,3 +2066,72 @@ window.addEventListener('scroll', () => {
     labels.classList.remove('scrolled');
   }
 });
+
+// Stage Navigation System Functions
+function setupStageNavigation() {
+  console.log('🎬 Setting up stage navigation...');
+  
+  const stageButtons = document.querySelectorAll('.stage-btn');
+  
+  stageButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const stageNumber = parseInt(this.getAttribute('data-stage'));
+      switchToStage(stageNumber);
+    });
+  });
+  
+  console.log('✅ Stage navigation setup complete');
+}
+
+function switchToStage(stageNumber) {
+  console.log(`🔄 Switching to stage ${stageNumber}`);
+  
+  // Update button states
+  document.querySelectorAll('.stage-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  const activeButton = document.querySelector(`.stage-btn[data-stage="${stageNumber}"]`);
+  if (activeButton) {
+    activeButton.classList.add('active');
+  }
+  
+  // Update panel visibility with fade transition
+  document.querySelectorAll('.stage-panel').forEach(panel => {
+    panel.classList.remove('active');
+    panel.style.opacity = '0';
+  });
+  
+  const activePanel = document.getElementById(`system-stage-${stageNumber}`);
+  if (activePanel) {
+    setTimeout(() => {
+      activePanel.classList.add('active');
+      activePanel.style.opacity = '1';
+    }, 100);
+  }
+  
+  // Call appropriate render function based on stage
+  if (window.currentActiveSystem) {
+    const system = window.currentActiveSystem;
+    
+    setTimeout(() => {
+      if (stageNumber === 1) {
+        console.log('🔧 Calling renderOverviewSystem...');
+        if (typeof window.renderOverviewSystem === 'function') {
+          window.renderOverviewSystem(system);
+        } else {
+          console.error('❌ renderOverviewSystem function not available');
+        }
+      } else if (stageNumber === 2) {
+        console.log('🔧 Calling renderInteractiveSystem...');
+        if (typeof window.renderInteractiveSystem === 'function') {
+          window.renderInteractiveSystem(system);
+        } else {
+          console.error('❌ renderInteractiveSystem function not available');
+        }
+      }
+    }, 450); // Allow time for panel transition
+  } else {
+    console.warn('⚠️ No current active system for stage switching');
+  }
+}
