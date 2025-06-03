@@ -641,19 +641,8 @@ g.on("mouseover", (event, d) => {
     }
 })
 .on("mousemove", function(event, d) {
-  // Get mouse position
-    // const mouseX = event.clientX;
-    // const mouseY = event.clientY;
-
-    // // Get tooltip width dynamically
-    // const tooltipNode = tooltip.node();
-    // const tooltipWidth = tooltipNode.offsetWidth;
-
-    // // Position tooltip so its center aligns with the mouse X
-    // const tooltipX = mouseX - tooltipWidth / 2;
-    // const tooltipY = mouseY - 50; // offset Y above the cursor
     const tooltipX = event.clientX - tooltip.node().offsetWidth / 2;
-    const tooltipY = timelineY + 30;
+    const tooltipY = timelineY;
 
     tooltip
       .style("left", `${tooltipX}px`)
@@ -693,9 +682,9 @@ ExoplanetData.onDataLoaded((data) => {
   ).sort((a, b) => b.disc_facility.localeCompare(a.disc_facility));
 
   let mapColor = {
-    'TESS': 'yellow',
-    'Kepler': 'blue',
-    'K2': 'orange'
+    'TESS': 'gray',
+    'Kepler': 'rgb(214, 172, 80)',
+    'K2': 'rgb(61, 83, 157)'
   }
 
   const mapSvg = d3.select(".left-side")
@@ -784,9 +773,63 @@ ExoplanetData.onDataLoaded((data) => {
     })
     .attr("opacity", 0.8)
     .attr("stroke", "white")
-    .attr("stroke-width", 0.4);
+    .attr("stroke-width", 0.4)
+    .on("mouseover", (event, d) => {
+      const text = document.querySelector('.right-side');
 
-  
+      if (d.disc_facility === 'Kepler'){
+        text.innerHTML = `
+                          <p><b>Kepler (2009 - 2013)</b></p>
+                          <p>
+                            The original Kepler mission only stared at a single 
+                            patch of sky, known as the constellation Cygnus, 
+                            for 4 straight years. Its strategy was to fixed its stare 
+                            at one location to detect tiny light dips over time, so a wide
+                            sweep of the sky was not feasible for such precision. This is
+                            why most of Kepler's discovered planet are within a small patch around
+                            (290°, 45°).
+                          </p>
+                        `;
+      }
+      else if (d.disc_facility === 'K2'){
+        text.innerHTML = `
+                          <p><b>K2 (2014 - 2018)</b></p>
+                          <p>
+                            This repurposed version of Kepler, after a hardware 
+                            failure occured, observed along the ecliptic plane. This
+                            is why we see that most of the Exoplanets discovered by
+                            K2, is a wave-like sine graph around the declination 
+                            degree 0.
+                          </p>
+                        `;
+      }
+      else if (d.disc_facility === 'Transiting Exoplanet Survey Satellite (TESS)'){
+        text.innerHTML = `
+                          <p><b>Transiting Exoplanet Survey Satellite - TESS (2018 - Present)</b></p>
+                          <p>
+                            TESS scans the entire sky for any new Exoplanets, which 
+                            is why we see most of the plot covered in gray dots. 
+                            Its goal is to find Exoplanets in bright nearby stars that are
+                            easy to follow up with on the ground with a telescope. Like Kepler, it is a 
+                            transit method, but what makes it different from the Kepler's
+                            mission is that is viewpoint is not restricted. It is constantly
+                            rotating each sector in the sky every 27 days and it is
+                            ongoing even now.
+                          </p>
+                        `;
+      }
+    })
+    .on("mouseout", () => {
+        const text = document.querySelector('.right-side');
+        text.innerHTML = `<p>
+                          Three of NASA's biggest Exoplanet's Mission are Kepler, 
+                          K2, and TESS. To interpret this graph, each colors 
+                          are of a different NASA mission. The 'Right Ascension' 
+                          degree is the horizontal location of the Exoplanet in 
+                          the sky, while the 'Declination' degree is the vertical 
+                          location of the Exoplanet in the sky.
+                        </p>`;
+    }); 
 });
 
 // ==================================================
@@ -800,7 +843,7 @@ ExoplanetData.onDataLoaded((data) => {
 ExoplanetData.onDataLoaded((data) => {
   const top3Overall = document.querySelector('#top3Overall');
   const width = 600;
-  const height = 800;
+  const height = 400;
   const margin = { top: 25, right: 57, bottom: 50, left: 50 };
   const usableArea = {
     top: margin.top,
@@ -986,7 +1029,7 @@ ExoplanetData.onDataLoaded((data) => {
     svg.append("path")
         .datum(countPlanet)
         .attr("fill", "none")
-        .attr("stroke", 'lightblue')
+        .attr("stroke", 'rgb(214, 172, 80)')
         .attr("opacity", '0.7')
         .attr("stroke-width", 2)
         .attr("d", line);

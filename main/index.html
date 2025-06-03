@@ -91,6 +91,9 @@
       <!-- Your fixed text content here -->
       <p><strong>Let's start off with the planets we know and their history.</strong></p>
       <p>Since Earth, Mercury, Mars, Venus, Jupiter, and Saturn were all visible to the human eye, we have always known since the beginning of time that they exist, even when we did not understand the concept of planets. None of these planets have a specific discovery date, but the first recorded observation of them was made around 1000 BCE by the ancient Babylonians.</p>
+      <p>
+        <i><small style="opacity: 0.5;">(Hover and travel over the solar system planets to continue the solar system history story)</small></i>
+      </p>
     </div>
   </section>
   <br><br>
@@ -111,6 +114,9 @@
           that rotates around another star besides the sun in 1992, to which are
           called ‘exoplanets’.
         </p>
+        <p>
+          <i><small style="opacity: 0.5;">(Hover and travel over the line graph to read more stories on the Exoplanet's discovery across the years)</small></i>
+        </p>
       </div>
       </div>
     </div>
@@ -124,7 +130,10 @@
       <!-- RIGHT SIDE: Text or other info -->
       <div class="right-side">
         <p>
-          Three of NASA's biggest Exoplanet's Mission are Kepler, K2, and TESS
+          Three of NASA's biggest Exoplanet's Mission are Kepler, K2, and TESS. To interpret this graph, each colors are of a different NASA mission. The 'Right Ascension' degree is the horizontal location of the Exoplanet in the sky, while the 'Declination' degree is the vertical location of the Exoplanet in the sky.
+        </p> 
+        <p>
+          <i><small style="opacity: 0.5;">(Hover over each colored dots (yellow: Kepler, blue: K2, gray: TESS) to learn more about each mission)</small></i>
         </p>
         <!-- Add more descriptive text or subsections here -->
       </div>
@@ -373,7 +382,26 @@
 <section class="scroll-section">
   <div id="nghiTop3">
     <div id="top3Overall"></div>
-    <div id="top3TextNghi"></div>
+    <div id="top3TextNghi">
+      <p>
+        These are the top ten planets closest to Earth in terms of the different 
+        properties. Below are the listed properties of Earth that we compared it to
+        to get the 10 resemblance:
+      </p>
+      <ul class="instructionExplorer">
+        <li><b>Radius (in Earth Radius):</b> 1</li>
+        <li><b>Mass (in Earth Mass):</b> 1</li>
+        <li><b>Temperature (in Kelvin):</b> 255</li>
+        <li><b>Eccentricity:</b> 0.0167</li>
+        <li><b>Distance (in AU):</b> 1.0167</li>
+        <li><b>Orbital Period (in Days):</b> 365.26</li>
+      </ul>
+      <p>
+        Judging from the table, it appears that 'Proxima Centauri b' is the best choice
+        for new life outside of Earth. It has conditions most similar to Earth and 
+        it is the closest known Exoplanet to Earth.
+      </p>
+    </div>
   </div>
 </section>
 <!-- Nghi's Top 3 End -->
@@ -387,13 +415,11 @@
    <div id="solarExplorer">
     <div id="filterSolarSystem">
       <label><b>How To Use:</b>
-        <ol>
+        <ol class="instructionExplorer">
           <li>Use the search bar to filter out dropdown host stars or search for a specific host star directly (optional)</li>
           <li>Use the dropdown box to select a specific host star</li>
           <li>Select a speed to run animation</li>
           <li>Pause or play animation at any time</li>
-          <li>Select the star at the center to see details about the host star and its system (default)</li>
-          <li>Select a specific exoplanet or its rotational ring to see planet detail</li>
         </ol>
       </label>
       <label><b class="b-label">Search Host Star: </b>
@@ -426,10 +452,19 @@
     </div>
     <div id="lastCanvas"></div>
     <div id="infoSolarSystem">
-    <label>
-      <b class="b-label">System Profile:</b>
-      <div id="nghi-tooltip"></div>
-    </label>
+      <label><b>Exoplorer Interaction Instruction:</b>
+        <ul class="instructionExplorer">
+          <li>Select the star at the center to see details about the host star and its system (default)</li>
+          <li>Select a specific exoplanet or its rotational ring to see planet detail</li>
+          <li>To zoom in and out, use the touchpad or mouse and swipe or scroll around</li>
+          <li>To rotate, hold down on the touchpad or mouse and then swipe or scroll around</li>
+          <li>To move the entire planetary system left, right, up, or down, hold down on the 'Shift' key, then interact with the keypad or mouse</li>
+        </ul>
+      </label>
+      <label>
+        <b class="b-label">System Profile:</b>
+        <div id="nghi-tooltip"></div>
+      </label>
     </div>
    </div>
 </section>

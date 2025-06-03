@@ -981,9 +981,11 @@ html, body {
 
 #nghiTop3 {
   display: flex;
-  margin: 1em;
-  gap: 1em;
+  margin: 3em;
+  gap: 2em;
 }
+
+
 
 #top3TextNghi {
   flex: 1;
@@ -1161,7 +1163,6 @@ select {
   border-radius: 1rem;
   color: white;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  max-width: 500px;
   flex: 1;
   max-height: fit-content;
 }
@@ -1182,8 +1183,8 @@ select {
 
 #increaseDiscovery {
   display: flex;
-  padding: 2.5em;
-  gap: 1em;
+  padding: 3rem;
+  gap: 2em;
 }
 
 .intro-subsections {
@@ -1198,6 +1199,10 @@ select {
   border-radius: 1rem;
   color: white;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.instructionExplorer {
+  margin-left: 1em;
 }
 
 /* ============================ */
@@ -1361,13 +1366,9 @@ select {
 /* Container that holds left and right side */
 .side-by-side-container {
   display: flex;
-  width: 100%;
   height: min-content;
-  /* flex-direction: column; */
-  /* gap: 2rem; */
-  /* align-items: flex-start; */
-  padding: 1rem;
-
+  padding: 3rem;
+  gap: 2em;
 }
 
 /* Left side: plot or images */
@@ -1393,8 +1394,6 @@ select {
   padding-left: 1rem; */
   flex: 1;
   height: min-content;
-  padding-left: 1rem;
-  padding-right: 3rem;
 }
 
 /* @media (max-width: 768px) {
