@@ -1,7 +1,7 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { initializeExtremePlanets } from './camilleExtreme.js';
+import { initializeExtremePlanets, extremeSystemData, renderExtremeOverview, renderExtremeInteractive, cleanupExtremeSystem } from './camilleExtreme.js';
 import { renderSystem, initializeEnhancedSystem, cleanupEnhancedSystem, setupKeyboardNavigation } from './camilleOrbit.js';
 
 
