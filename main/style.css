@@ -1803,3 +1803,41 @@ body {
   border-color: #4ecdc4;
   color: white;
 }
+
+.scroll-section {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  }
+  
+  .scroll-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+  }
+  
+  /* Timeline Scaling */
+  #timeline {
+  transform-origin: left center;
+  transition: transform 0.3s ease;
+  }
+  
+  /* Scale down on smaller screens */
+  @media (max-width: 1200px) {
+  #timeline {
+  transform: scale(0.8);
+  }
+  }
+  
+  @media (max-width: 800px) {
+  #timeline {
+  transform: scale(0.6);
+  }
+  }
+  
+  @media (max-width: 600px) {
+  #timeline {
+  transform: scale(0.4);
+  }
+  }
+  
+  
