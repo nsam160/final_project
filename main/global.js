@@ -560,8 +560,8 @@ const planets = [
   { name: "Neptune", discovered: "1846", color: "#4169e1", radius: 60, imageUrl: "../images/neptune.png" }
 ];
 
-const svgHeight = 300;
-const padding = 30;
+const svgHeight = 200;
+const padding = 20;
 let currentX = 100;
 const positions = planets.map((planet, i) => {
   if (i === 0) return currentX;
@@ -610,13 +610,29 @@ g.on("mouseover", (event, d) => {
     tooltip.style("opacity", 1)
       .html(`<strong>${d.name}</strong><br/>Discovered: ${d.discovered}`);
 })
-.on("mousemove", (event) => {
-  const tooltipX = event.pageX + 15;
-  const tooltipY = timelineY - 100;
+.on("mousemove", function(event, d) {
+const tooltipNode = tooltip.node();
+const tooltipWidth = tooltipNode.offsetWidth;
+const tooltipHeight = tooltipNode.offsetHeight;
 
-  tooltip.style("left", tooltipX + "px")
-         .style("top", tooltipY + "px");
-})
+const svgElement = d3.select("#timeline svg").node();
+const svgRect = svgElement.getBoundingClientRect();
+
+const planetIndex = planets.indexOf(d);
+const planetX = positions[planetIndex];
+
+const absoluteX = svgRect.left + window.scrollX + planetX;
+const absoluteY = svgRect.top + window.scrollY + timelineY - d.radius;
+
+let tooltipX = absoluteX - (tooltipWidth / 2);
+const tooltipY = absoluteY - tooltipHeight - 500;
+const pageWidth = window.innerWidth;
+
+// Boundary checks
+if (tooltipX < 0) tooltipX = 5;
+if (tooltipX + tooltipWidth > pageWidth) {
+tooltipX = pageWidth - tooltipWidth - 5;
+}})
 .on("mouseout", () => {
     tooltip.style("opacity", 0);
 });
@@ -2135,3 +2151,19 @@ function switchToStage(stageNumber) {
     console.warn('⚠️ No current active system for stage switching');
   }
 }
+
+// scroll section
+const sections = document.querySelectorAll('.scroll-section');
+
+const observer = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+entry.target.classList.add('visible');
+} else {
+entry.target.classList.remove('visible');
+}
+});
+}, { threshold: 0.1 });
+
+sections.forEach(section => observer.observe(section));
+
