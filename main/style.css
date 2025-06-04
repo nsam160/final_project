@@ -1701,9 +1701,53 @@ html, body {
   border-radius: 4px;
   height: min-content;
 }
+/* Remove the blurry filters and fix the volume button positioning */
 
+/* Remove or comment out the filter on the icon */
+#volume-icon {
+  /* This filter chain converts black to white */
+  filter: invert(1);
+  width: 32px;
+  height: 32px;
+  display: block;
+}
 
-/* ============================ */
+/* Ensure the button is on top and not affected by backdrop filters */
+.volume-button {
+  position: fixed !important;  /* Changed to fixed to ensure it's relative to viewport */
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  outline: none;
+  z-index: 99999;
+  isolation: isolate;  /* Prevents backdrop-filter from affecting children */
+}
+
+/* Optional: Add a subtle background to make it more visible */
+.volume-button {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  backdrop-filter: none !important;  /* Ensure no blur effect */
+}
+
+.volume-button:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* If you still want the icon to have a specific color, use opacity instead of filters */
+#volume-icon {
+  opacity: 0.9;
+}
+
+.volume-button:hover #volume-icon {
+  opacity: 1;
+}
+
+/* =======
+===================== */
 /* Royces's style.css  END   */
 /* ============================ */
 
