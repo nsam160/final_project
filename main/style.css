@@ -862,6 +862,14 @@ body {
   font-size: 0.9rem;
 }
 
+/* Planet navigation controls */
+.planet-navigation-controls {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 .animation-controls-section {
   background: rgba(0, 0, 0, 0.3);
   border: 2px solid rgba(255, 255, 255, 0.1);
