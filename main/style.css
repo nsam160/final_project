@@ -441,7 +441,7 @@ body {
 #orbit-container svg {
   width: 100%;
   height: 100%;
-  max-width: none; /* Remove the max-width limit */
+  max-width: 650px; /* Remove the max-width limit */
   max-height: 450px;
   margin: auto;
   display: block;

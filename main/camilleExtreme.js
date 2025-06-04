@@ -785,7 +785,7 @@ function setupExtremeOverviewControls(extremeSystem) {
           </div>
         </div>
         <button class="control-button" onclick="showExtremeComparison('${extremeSystem.id}')">
-          🌍 Compare to Earth
+          Compare to Earth
         </button>
       </div>
     `;
@@ -794,7 +794,7 @@ function setupExtremeOverviewControls(extremeSystem) {
 
 // PHASE 2: Setup extreme-specific interactive controls
 function setupExtremeInteractiveControls(extremeSystem) {
-  console.log(`🎛️ Setting up interactive controls for: ${extremeSystem.title}`);
+  console.log(`Setting up interactive controls for: ${extremeSystem.title}`);
   
   // Replace animation controls with extreme-specific controls
   const animationSection = document.querySelector('.animation-controls-section');
@@ -809,7 +809,7 @@ function getExtremeControlsHTML(extremeSystem) {
   if (extremeSystem.id === "kelt") {
     return `
       <div class="control-group">
-        <h3>🔥 Plasma Controls</h3>
+        <h3>Plasma Controls</h3>
         <div class="control-item">
           <label>Plasma Intensity: <span id="plasma-intensity-value">${extremeControlStates.kelt.plasmaIntensity}%</span></label>
           <input type="range" id="plasma-intensity" min="0" max="100" value="${extremeControlStates.kelt.plasmaIntensity}" class="extreme-slider">
@@ -831,7 +831,7 @@ function getExtremeControlsHTML(extremeSystem) {
   } else if (extremeSystem.id === "wasp") {
     return `
       <div class="control-group">
-        <h3>☔ Iron Rain Controls</h3>
+        <h3>Iron Rain Controls</h3>
         <div class="control-item">
           <label>Day/Night Balance: <span id="day-night-value">${extremeControlStates.wasp.dayNightRatio}%</span></label>
           <input type="range" id="day-night-ratio" min="0" max="100" value="${extremeControlStates.wasp.dayNightRatio}" class="extreme-slider">
@@ -854,7 +854,7 @@ function getExtremeControlsHTML(extremeSystem) {
   } else if (extremeSystem.id === "kepler80") {
     return `
       <div class="control-group">
-        <h3>💎 Density Controls</h3>
+        <h3>Density Controls</h3>
         <div class="control-item">
           <label>Compression Level: <span id="compression-value">${extremeControlStates.kepler80.compressionLevel}%</span></label>
           <input type="range" id="compression-level" min="0" max="100" value="${extremeControlStates.kepler80.compressionLevel}" class="extreme-slider">
@@ -991,7 +991,7 @@ function setupKepler80ControlListeners() {
 
 // PHASE 2: Update visualization functions
 function updateKELTVisualization() {
-  console.log('🔥 Updating KELT-9b visualization');
+  console.log('Updating KELT-9b visualization');
   if (currentExtremeSystem?.id === "kelt" && currentExtremeStage === 2) {
     // Re-render the visualization with new parameters
     renderExtremeInteractive(currentExtremeSystem);
@@ -999,14 +999,14 @@ function updateKELTVisualization() {
 }
 
 function updateWASPVisualization() {
-  console.log('☔ Updating WASP-76b visualization');
+ u  console.log('Updating WASP-76b visualization');
   if (currentExtremeSystem?.id === "wasp" && currentExtremeStage === 2) {
     renderExtremeInteractive(currentExtremeSystem);
   }
 }
 
 function updateKepler80Visualization() {
-  console.log('💎 Updating Kepler-80f visualization');
+  console.log('Updating Kepler-80f visualization');
   if (currentExtremeSystem?.id === "kepler80" && currentExtremeStage === 2) {
     renderExtremeInteractive(currentExtremeSystem);
   }
@@ -1014,7 +1014,7 @@ function updateKepler80Visualization() {
 
 // PHASE 2: Show extreme interactive control panel
 function showExtremeInteractiveControlPanel(systemId) {
-  console.log(`🎛️ Showing extreme interactive control panel for: ${systemId}`);
+  console.log(`Showing extreme interactive control panel for: ${systemId}`);
   
   // Hide all system control panels
   document.querySelectorAll('.system-interactive-controls').forEach(panel => {
@@ -1025,9 +1025,9 @@ function showExtremeInteractiveControlPanel(systemId) {
   const titleElement = document.getElementById('interactive-controls-title');
   if (titleElement) {
     const titles = {
-      'kelt': '🔥 KELT-9b Plasma Controls',
-      'wasp': '☔ WASP-76b Iron Rain Controls',
-      'kepler80': '💎 Kepler-80f Density Controls'
+      'kelt': 'KELT-9b Plasma Controls',
+      'wasp': 'WASP-76b Iron Rain Controls',
+      'kepler80': 'Kepler-80f Density Controls'
     };
     titleElement.textContent = titles[systemId] || 'Extreme Planet Controls';
   }
@@ -1035,7 +1035,7 @@ function showExtremeInteractiveControlPanel(systemId) {
 
 // PHASE 2: Show extreme comparison (for overview mode)
 window.showExtremeComparison = function(systemId) {
-  console.log(`🌍 Showing Earth comparison for: ${systemId}`);
+  console.log(`Showing Earth comparison for: ${systemId}`);
   
   const system = extremeSystemData.find(s => s.id === systemId);
   if (!system) return;

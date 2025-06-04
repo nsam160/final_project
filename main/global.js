@@ -85,7 +85,6 @@ function loadExoplanetData() {
     isDataLoaded = true;
     
     console.log(`Loaded ${data.length} exoplanets`);
-    console.log('Sample data:', data[0]);
     
     // Execute all callbacks waiting for data
     dataLoadedCallbacks.forEach(callback => callback(allExoplanets));
@@ -352,7 +351,7 @@ function showDetailedSystem(systemKey) {
   
   // Store current active system for stage navigation
   window.currentActiveSystem = system;
-  console.log(`🎯 Set current active system to: ${system.hostname}`);
+  console.log('Set current active system to:', system.hostname);
   
   // Add null checks for DOM elements
   const systemTitleElement = document.getElementById("system-title-orbit");
@@ -878,7 +877,6 @@ ExoplanetData.onDataLoaded((data) => {
   const [minE, maxE] = d3.extent(validData, p => Math.abs(p.pl_orbeccen - earthData.eccentricityE));
   const [minD, maxD] = d3.extent(validData, p => Math.abs(p.pl_orbsmax - earthData.semiAxisDistAU));
   const [minO, maxO] = d3.extent(validData, p => Math.abs(p.pl_orbper - earthData.orbitalDay));
-  console.log([minO, maxO]);
 
   let mapped = validData.map(p => {
     const rad = (Math.abs(p.pl_rade - earthData.radiusE) - minR) / (maxR - minR);
@@ -922,8 +920,6 @@ ExoplanetData.onDataLoaded((data) => {
       top3OverallData.push({x: xLabels[key], y: row.name, value: row[key], trueValue: row[`${key}Ori`]});
     }
   });
-
-  console.log(top3OverallData);
 
   const svg = d3.select("#top3Overall")
     .append("svg")
@@ -2252,7 +2248,7 @@ window.addEventListener('scroll', () => {
 
 // Stage Navigation System Functions
 function setupStageNavigation() {
-  console.log('🎬 Setting up stage navigation...');
+  console.log('Setting up stage navigation...');
   
   const stageButtons = document.querySelectorAll('.stage-btn');
   
@@ -2263,11 +2259,11 @@ function setupStageNavigation() {
     });
   });
   
-  console.log('✅ Stage navigation setup complete');
+  console.log('Stage navigation setup complete');
 }
 
 function switchToStage(stageNumber) {
-  console.log(`🔄 Switching to stage ${stageNumber}`);
+  console.log(`Switching to stage ${stageNumber}`);
   
   // Update button states
   document.querySelectorAll('.stage-btn').forEach(btn => {
@@ -2299,23 +2295,23 @@ function switchToStage(stageNumber) {
     
     setTimeout(() => {
       if (stageNumber === 1) {
-        console.log('🔧 Calling renderOverviewSystem...');
+        console.log('Calling renderOverviewSystem...');
         if (typeof window.renderOverviewSystem === 'function') {
           window.renderOverviewSystem(system);
         } else {
-          console.error('❌ renderOverviewSystem function not available');
+          console.error('renderOverviewSystem function not available');
         }
       } else if (stageNumber === 2) {
-        console.log('🔧 Calling renderInteractiveSystem...');
+        console.log('Calling renderInteractiveSystem...');
         if (typeof window.renderInteractiveSystem === 'function') {
           window.renderInteractiveSystem(system);
         } else {
-          console.error('❌ renderInteractiveSystem function not available');
+          console.error('renderInteractiveSystem function not available');
         }
       }
     }, 450); // Allow time for panel transition
   } else {
-    console.warn('⚠️ No current active system for stage switching');
+    console.warn('No current active system for stage switching');
   }
 }
 

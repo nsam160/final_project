@@ -2,7 +2,7 @@
 6// camilleOrbit.js - PHASE 1
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
-//  PHASE 1: Enhanced global variables
+//Enhanced global variables
 let currentSelectedPlanet = 0;
 let animationSpeed = 1;
 let isAnimationPlaying = true;
@@ -16,7 +16,7 @@ window.currentActiveSystem = null;
 window.renderOverviewSystem = renderOverviewSystem;
 window.renderInteractiveSystem = renderInteractiveSystem;
 
-//  PHASE 1: Enhanced system narratives (preserved your existing structure)
+// system narratives
 const systemNarratives = {
   "KOI-351": {
     title: "Kepler-90",
@@ -61,16 +61,18 @@ const systemNarratives = {
   }
 };
 
-// ✅ PHASE 1: Enhanced renderSystem function
+//Enhanced renderSystem function
 export function renderSystem(containerId, planetData, stage = 1) {
   if (!planetData || planetData.length === 0) {
     console.warn(`No planet data provided for container: ${containerId}`);
     return;
   }
 
-  const width = 600;
-  const height = 600;
-  const maxRadius = 280;
+
+
+  const width = 900;  // Same for both stages
+  const height = 600;  // Same for both stages
+  const maxRadius = 280;  // Same for both stages
 
   const hostname = planetData[0].hostname;
   const systemInfo = systemNarratives[hostname] || {};
@@ -78,13 +80,13 @@ export function renderSystem(containerId, planetData, stage = 1) {
 
   console.log(`Rendering system: ${hostname} with ${planetData.length} planets (Stage ${stage})`);
   
-  // ✅ PHASE 1: Store current system data
+  //Store current system data
   currentSystemPlanets = planetData.slice();
   currentSelectedPlanet = 0;
   currentContainer = containerId;
   currentStage = stage;
 
-  // ✅ PHASE 1: Enhanced container selection (preserved your logic)
+  //Enhanced container selection (preserved your logic)
   let container;
   if (typeof containerId === 'string') {
     const selector = containerId.startsWith('#') ? containerId : `#${containerId}`;
@@ -114,10 +116,10 @@ export function renderSystem(containerId, planetData, stage = 1) {
     .style("height", "100%")
     .style("border-radius", "10px");
 
-  // ✅ PHASE 1: Enhanced background elements
+  //background elements
   addSystemSpecificBackground(svg, hostname, stage);
 
-  // ✅ PHASE 1: Enhanced central star with click functionality
+  //central star with click functionality
   svg.append("circle")
     .attr("class", "star")
     .attr("cx", 0)
@@ -133,7 +135,7 @@ export function renderSystem(containerId, planetData, stage = 1) {
       }
     });
 
-  // ✅ Process planet data (preserved your existing logic)
+  //Process planet data
   planetData = planetData
     .map(p => ({
       ...p,
@@ -162,7 +164,7 @@ export function renderSystem(containerId, planetData, stage = 1) {
   const tempColorScale = d3.scaleSequential(d3.interpolateRdYlBu)
     .domain([3000, 0]);
 
-  // ✅ Draw orbits (preserved your existing logic)
+  // Draw orbits
   svg.selectAll(".orbit")
     .data(planetData)
     .enter()
@@ -177,7 +179,7 @@ export function renderSystem(containerId, planetData, stage = 1) {
     .style("stroke-width", hostname === "TOI-178" ? 1.5 : 1)
     .style("stroke-dasharray", hostname === "TOI-178" ? "5,3" : "none");
 
-  // ✅ PHASE 1: Enhanced planets with selection support
+  //Enhanced planets with selection support
   const planets = svg.selectAll(".planet")
     .data(planetData)
     .enter()
@@ -191,12 +193,12 @@ export function renderSystem(containerId, planetData, stage = 1) {
     .style("cursor", "pointer")
     .style("filter", d => getPlanetFilter(d, hostname));
 
-  // ✅ PHASE 1: Setup enhanced functionality
+  // Setup functionality
   setupTooltips(planets, hostname, systemInfo);
   addPlanetSelectionToSystem(planets, planetData, hostname, systemInfo);
   setupPlanetAnimation(planets, planetData, hostname, auToPixels);
 
-  // ✅ PHASE 1: Initialize UI based on stage
+  // Initialize UI based on stage
   if (stage === 1) {
     // Overview mode - setup planet profile
     setTimeout(() => {
@@ -216,7 +218,7 @@ export function renderSystem(containerId, planetData, stage = 1) {
   return { svg, planets, orbits: null, auToPixels };
 }
 
-// ✅ PHASE 1: Enhanced system-specific background elements
+//Enhanced system-specific background elements
 function addSystemSpecificBackground(svg, hostname, stage = 1) {
   // System-specific decorations
   if (hostname === "GJ 667 C") {
@@ -297,7 +299,7 @@ function addSystemSpecificBackground(svg, hostname, stage = 1) {
   }
 }
 
-// ✅ PHASE 1: Planet selection functionality
+// PHASE 1: Planet selection functionality
 function addPlanetSelectionToSystem(planets, planetData, hostname, systemInfo) {
   planets.on("click", function(event, d) {
     event.stopPropagation();
@@ -311,7 +313,7 @@ function addPlanetSelectionToSystem(planets, planetData, hostname, systemInfo) {
   }
 }
 
-// ✅ PHASE 1: Select a specific planet and update the profile
+// PHASE 1: Select a specific planet and update the profile
 function selectPlanetInSystem(planetIndex, planetData, hostname, systemInfo) {
   if (planetIndex < 0 || planetIndex >= planetData.length) return;
   
@@ -337,7 +339,7 @@ function selectPlanetInSystem(planetIndex, planetData, hostname, systemInfo) {
   updatePlanetProfile(planetIndex, planetData, hostname, systemInfo);
 }
 
-// ✅ PHASE 1: Update planet profile panel
+//Update planet profile panel
 function updatePlanetProfile(planetIndex, planetData, hostname, systemInfo) {
   if (planetIndex >= planetData.length) return;
   
@@ -366,7 +368,7 @@ function updatePlanetProfile(planetIndex, planetData, hostname, systemInfo) {
   updatePlanetVisual(planet, hostname);
 }
 
-// ✅ PHASE 1: Show system information when star is clicked
+//Show system information when star is clicked
 function showSystemInfo() {
   if (currentSystemPlanets.length === 0) return;
   
@@ -391,7 +393,8 @@ function showSystemInfo() {
   updatePlanetVisual({ hostname }, hostname, true);
 }
 
-// ✅ PHASE 1: Update 3D planet visual
+// 
+//Update 3D planet visual
 function updatePlanetVisual(planet, hostname, isSystemView = false) {
   const visual = document.getElementById('planet-visual-display');
   if (!visual) return;
@@ -416,7 +419,7 @@ function updatePlanetVisual(planet, hostname, isSystemView = false) {
   }
 }
 
-// ✅ PHASE 1: Setup animation controls
+//Setup animation controls
 function setupAnimationControls(prefix = 'animation') {
   const playPauseBtn = document.getElementById(`${prefix}-play-pause`);
   const speedSlider = document.getElementById(`${prefix}-speed-slider`);
@@ -429,7 +432,7 @@ function setupAnimationControls(prefix = 'animation') {
     
     newBtn.onclick = function() {
       isAnimationPlaying = !isAnimationPlaying;
-      this.textContent = isAnimationPlaying ? '⏸️ Pause' : '▶️ Play';
+      this.textContent = isAnimationPlaying ? 'Pause' : 'Play';
       
       // Update both animation controls if they exist
       const otherBtn = document.getElementById(prefix === 'animation' ? 'interactive-animation-play-pause' : 'animation-play-pause');
@@ -455,7 +458,7 @@ function setupAnimationControls(prefix = 'animation') {
   }
 }
 
-// ✅ PHASE 1: Setup planet navigation
+//Setup planet navigation
 function setupPlanetNavigation() {
   const nextPlanetBtn = document.getElementById('next-planet-btn');
   
@@ -484,7 +487,7 @@ function setupPlanetNavigation() {
 // ==================================================
 
 function showInteractiveControls(systemId) {
-  console.log(`🎛️ Showing interactive controls for: ${systemId}`);
+  console.log(`Showing interactive controls for: ${systemId}`);
   
   // Hide all control panels first
   document.querySelectorAll('.control-panel').forEach(panel => {
@@ -518,7 +521,7 @@ function showInteractiveControls(systemId) {
     // Setup the specific interactive functionality
     setupSystemInteractiveControls(systemId);
   } else {
-    console.warn(`❌ Interactive controls panel not found for: ${systemId}`);
+    console.warn(` Interactive controls panel not found for: ${systemId}`);
   }
 }
 
@@ -527,7 +530,7 @@ function showInteractiveControls(systemId) {
 // ==================================================
 
 function setupSystemInteractiveControls(systemId) {
-  console.log(`🎛️ Setting up interactive controls for: ${systemId}`);
+  console.log(`Setting up interactive controls for: ${systemId}`);
   
   if (systemId === 'kepler') {
     setupKeplerInteractiveControls();
@@ -543,7 +546,7 @@ function setupSystemInteractiveControls(systemId) {
 // ==================================================
 
 function setupKeplerInteractiveControls() {
-  console.log("🔆 Setting up Kepler-90 interactive controls");
+  console.log(" Setting up Kepler-90 interactive controls");
   
   // Resonance Lines Toggle
   const resonanceBtn = document.getElementById('kepler-resonance');
@@ -577,7 +580,7 @@ function setupKeplerInteractiveControls() {
 // ==================================================
 
 function setupTOIInteractiveControls() {
-  console.log("🎵 Setting up TOI-178 interactive controls");
+  console.log("Setting up TOI-178 interactive controls");
   
   // Resonance Chain Toggle
   const chainBtn = document.getElementById('toi-chain');
@@ -611,7 +614,7 @@ function setupTOIInteractiveControls() {
 // ==================================================
 
 function setupGJInteractiveControls() {
-  console.log("🌱 Setting up GJ 667C interactive controls");
+  console.log("Setting up GJ 667C interactive controls");
   
   // Show Habitable Zone
   const zoneBtn = document.getElementById('gj-zone');
@@ -651,9 +654,22 @@ function setupGJInteractiveControls() {
   }
 }
 
-// ✅ PHASE 1: Enhanced initializeEnhancedSystem (preserved your existing logic)
+// PHASE 1: Enhanced initializeEnhancedSystem (preserved your existing logic)
 export function initializeEnhancedSystem(containerId, hostname, stage = 1) {
   console.log(`Initializing enhanced system for ${hostname} in container ${containerId} (Stage ${stage})`);
+  
+  if (stage === 2) {
+    const container = document.getElementById('orbit-container-interactive');
+    if (container) {
+      container.style.width = '100%';
+      container.style.height = '600px';
+      container.style.maxWidth = 'none';
+      container.style.border = 'none';
+      container.style.background = 'transparent';
+      container.style.padding = '0';
+    }
+  }
+  
   
   if (!window.ExoplanetData || !window.ExoplanetData.isLoaded()) {
     console.log("Data not loaded yet, waiting...");
@@ -675,7 +691,7 @@ export function initializeEnhancedSystem(containerId, hostname, stage = 1) {
   }
 }
 
-// ✅ PHASE 1: Enhanced cleanup
+// PHASE 1: Enhanced cleanup
 export function cleanupEnhancedSystem() {
   if (animationTimer) {
     animationTimer.stop();
@@ -694,7 +710,7 @@ export function cleanupEnhancedSystem() {
   currentStage = 1;
 }
 
-// ✅ PHASE 1: Enhanced keyboard navigation
+// PHASE 1: Enhanced keyboard navigation
 export function setupKeyboardNavigation() {
   document.addEventListener("keydown", (event) => {
     if (!currentSystemPlanets.length) return;
@@ -728,9 +744,9 @@ export function setupKeyboardNavigation() {
   });
 }
 
-// ✅ PHASE 1: Render system in overview mode (Stage 1) - FIXED
+// PHASE 1: Render system in overview mode (Stage 1) - FIXED
 function renderOverviewSystem(system) {
-  console.log(`🔧 Rendering overview for: ${system.hostname}`);
+  console.log(` Rendering overview for: ${system.hostname}`);
   
   // Cleanup previous system
   cleanupEnhancedSystem();
@@ -751,9 +767,9 @@ function renderOverviewSystem(system) {
   initializeEnhancedSystem('orbit-container', system.hostname, 1);
 }
 
-// ✅ PHASE 1: Render system in interactive mode (Stage 2) - FIXED
+// PHASE 1: Render system in interactive mode (Stage 2) - FIXED
 function renderInteractiveSystem(system) {
-  console.log(`🔧 Rendering interactive mode for: ${system.hostname}`);
+  console.log(` Rendering interactive mode for: ${system.hostname}`);
   
   // Cleanup previous system
   cleanupEnhancedSystem();
@@ -762,6 +778,11 @@ function renderInteractiveSystem(system) {
   const interactiveContainer = document.getElementById('orbit-container-interactive');
   if (interactiveContainer) {
     interactiveContainer.innerHTML = "";
+
+    interactiveContainer.style.width = '100%';
+    interactiveContainer.style.height = '600px';
+    interactiveContainer.style.background = 'transparent';
+    interactiveContainer.style.border = 'none';
   }
   
   // Initialize enhanced system for Stage 2 (Interactive mode) in the interactive container
@@ -780,7 +801,7 @@ function renderInteractiveSystem(system) {
   }, 200);
 }
 
-// ✅ PHASE 1: Enhanced helper functions (preserved your existing logic where possible)
+// PHASE 1: Enhanced helper functions (preserved your existing logic where possible)
 function getOrbitValue(p) {
   if (p.pl_orbsmax) return +p.pl_orbsmax;
   if (p.pl_orbper && p.st_mass) {
@@ -875,7 +896,7 @@ function formatValue(value, unit) {
   return isNaN(num) ? "Unknown" : `${num.toFixed(2)} ${unit}`;
 }
 
-// ✅ PHASE 1: Enhanced tooltips (preserved your existing logic)
+// PHASE 1: Enhanced tooltips (preserved your existing logic)
 function setupTooltips(planets, hostname, systemInfo) {
   // Remove any existing tooltip first
   d3.select("#tooltip").remove();
@@ -928,7 +949,7 @@ function setupTooltips(planets, hostname, systemInfo) {
   });
 }
 
-// ✅ PHASE 1: Enhanced planet animation (improved from your existing logic)
+// PHASE 1: Enhanced planet animation (improved from your existing logic)
 function setupPlanetAnimation(planets, planetData, hostname, auToPixels) {
   if (animationTimer) animationTimer.stop();
 
@@ -978,9 +999,9 @@ function setupPlanetAnimation(planets, planetData, hostname, auToPixels) {
 // ==================================================
 
 function toggleResonanceLines(show) {
-  console.log(`${show ? '🔗 Showing' : '❌ Hiding'} resonance lines for Kepler-90`);
+  console.log(`${show ? 'Showing' : 'Hiding'} resonance lines for Kepler-90`);
   
-  const svg = d3.select('#orbit-container svg');
+  const svg = d3.select('#orbit-container-interactive svg');
   if (svg.empty()) return;
   
   if (show) {
@@ -1035,7 +1056,7 @@ function toggleResonanceLines(show) {
 // ==================================================
 
 function toggleResonanceChain(show) {
-  console.log(`${show ? '🎵 Showing' : '❌ Hiding'} resonance chain for TOI-178`);
+  console.log(`${show ? 'Showing' : 'Hiding'} resonance chain for TOI-178`);
   
   const svg = d3.select('#orbit-container svg');
   if (svg.empty()) return;
@@ -1099,7 +1120,7 @@ function toggleResonanceChain(show) {
 }
 
 function playResonanceMusic(play) {
-  console.log(`${play ? '🎵 Playing' : '🔇 Stopping'} resonance music for TOI-178`);
+  console.log(`${play ? 'Playing' : 'Stopping'} resonance music for TOI-178`);
   
   if (play) {
     // Visual music representation
@@ -1152,7 +1173,7 @@ function playResonanceMusic(play) {
 // ==================================================
 
 function toggleHabitableZone(show) {
-  console.log(`${show ? '🌱 Showing' : '❌ Hiding'} habitable zone for GJ 667C`);
+  console.log(`${show ? 'Showing' : 'Hiding'} habitable zone for GJ 667C`);
   
   const svg = d3.select('#orbit-container svg');
   if (svg.empty()) return;
@@ -1194,7 +1215,7 @@ function toggleHabitableZone(show) {
 }
 
 function highlightHabitablePlanets() {
-  console.log('🌍 Highlighting habitable planets in GJ 667C');
+  console.log('Highlighting habitable planets in GJ 667C');
   
   const svg = d3.select('#orbit-container svg');
   if (svg.empty()) return;
@@ -1260,7 +1281,7 @@ function highlightHabitablePlanets() {
 }
 
 function toggleCompanionStars(show) {
-  console.log(`${show ? '⭐ Showing' : '❌ Hiding'} companion stars for GJ 667C`);
+  console.log(`${show ? 'Showing' : 'Hiding'} companion stars for GJ 667C`);
   
   const svg = d3.select('#orbit-container svg');
   if (svg.empty()) return;
@@ -1303,7 +1324,7 @@ function toggleCompanionStars(show) {
 }
 
 function showTemperatureZones() {
-  console.log('🌡️ Showing temperature zones for GJ 667C');
+  console.log('Showing temperature zones for GJ 667C');
   
   const svg = d3.select('#orbit-container svg');
   if (svg.empty()) return;
@@ -1374,9 +1395,9 @@ function updateStellarInfluence(influence) {
 
 // Kepler-90 Functions
 function comparePeriods(show) {
-  console.log(`${show ? '📊 Showing' : '❌ Hiding'} period comparison for Kepler-90`);
+  console.log(`${show ? ' Showing' : ' Hiding'} period comparison for Kepler-90`);
   
-  const svg = d3.select('#orbit-container svg');
+  const svg = d3.select('#orbit-container-interactive svg');
   if (svg.empty()) return;
   
   if (show) {
@@ -1431,7 +1452,7 @@ function comparePeriods(show) {
 
 // TOI-178 Functions
 function showPeriodRatios(show) {
-  console.log(`${show ? '🔢 Showing' : '❌ Hiding'} period ratios for TOI-178`);
+  console.log(`${show ? 'Showing' : 'Hiding'} period ratios for TOI-178`);
   
   const svg = d3.select('#orbit-container svg');
   if (svg.empty()) return;
