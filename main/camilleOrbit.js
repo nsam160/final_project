@@ -162,27 +162,56 @@ export function renderSystem(containerId, planetData, stage = 1) {
   const tempColorScale = d3.scaleSequential(d3.interpolateRdYlBu)
     .domain([3000, 0]);
 
+  function calcRingPos(planet, segment = 64){
+    const points = [];
+    const ecc = planet.ecc;
+    const a = planet.a;
+
+    for (let i = 0; i <= segment; i++) {
+      let M = 2 * Math.PI * (i / segment);
+      let E = M;
+      for (let j = 0; j < 5; j++){
+        E = M + ecc * Math.sin(E);
+      }
+
+      const x = (a * (Math.cos(E) - ecc));
+      const y = a * Math.sqrt(1 - ecc * ecc) * Math.sin(E);
+      points.push({
+        x: auToPixels(x),
+        y: auToPixels(y)
+      });
+    }
+
+    return points;
+  }
+
   // ✅ Draw orbits (preserved your existing logic)
   svg.selectAll(".orbit")
-    .data(planetData)
-    .enter()
-    .append("ellipse")
-    .attr("class", "orbit")
-    .attr("cx", d => auToPixels(d.a * d.ecc))
-    .attr("cy", 0)
-    .attr("rx", d => auToPixels(d.a))
-    .attr("ry", d => auToPixels(d.a * Math.sqrt(1 - d.ecc * d.ecc)))
-    .style("fill", "none")
-    .style("stroke", hostname === "TOI-178" ? "#335577" : "#555")
-    .style("stroke-width", hostname === "TOI-178" ? 1.5 : 1)
-    .style("stroke-dasharray", hostname === "TOI-178" ? "5,3" : "none");
+    .remove();
+
+  planetData.forEach(planet => {
+    const orbitsPoint = calcRingPos(planet);
+    const orbitLine = d3.line()
+      .x(p => p.x)
+      .y(p => p.y)
+      .curve(d3.curveLinearClosed);
+
+    svg.append("path")
+      .attr("d", orbitLine(orbitsPoint))
+      .attr("class", "orbit")
+      .style("fill", "none")
+      .style("stroke", hostname === "TOI-178" ? "#335577" : "#555")
+      .style("stroke-width", hostname === "TOI-178" ? 1.5 : 1)
+      .style("stroke-dasharray", hostname === "TOI-178" ? "5,3" : "none");
+  });
 
   // ✅ PHASE 1: Enhanced planets with selection support
-  const planets = svg.selectAll(".planet")
+  const planets = svg.selectAll(".orbit-planet").remove()
     .data(planetData)
     .enter()
     .append("circle")
     .attr("class", "planet orbit-planet")
+    .attr("id", d => d.pl_name)
     .attr("r", d => getPlanetRadius(d, hostname, radiusScale))
     .attr("data-base-radius", d => getPlanetRadius(d, hostname, radiusScale))
     .style("fill", (d, i) => getPlanetColor(d, i, hostname, tempColorScale))
@@ -190,6 +219,8 @@ export function renderSystem(containerId, planetData, stage = 1) {
     .style("stroke-width", 1.5)
     .style("cursor", "pointer")
     .style("filter", d => getPlanetFilter(d, hostname));
+  
+  console.log(planets);
 
   // ✅ PHASE 1: Setup enhanced functionality
   setupTooltips(planets, hostname, systemInfo);
@@ -915,7 +946,7 @@ function setupTooltips(planets, hostname, systemInfo) {
         <div style="margin-top: 10px;">
           <div>Mass: ${formatValue(d.pl_bmasse, 'Earth masses')}</div>
           <div>Radius: ${formatValue(d.pl_rade, 'Earth radii')}</div>
-          <div>Period: ${formatValue(planet.pl_orbper, 'days')}</div>
+          <div>Period: ${formatValue(planets.pl_orbper, 'days')}</div>
           <div>Temperature: ${formatValue(d.pl_eqt, 'K')}</div>
           <div>Discovery: ${d.disc_year || 'Unknown'}</div>
         </div>
@@ -932,10 +963,20 @@ function setupTooltips(planets, hostname, systemInfo) {
 function setupPlanetAnimation(planets, planetData, hostname, auToPixels) {
   if (animationTimer) animationTimer.stop();
 
+  let currentTime = 0;
+  let localTime = 0;
   animationTimer = d3.timer(function (elapsed) {
-    if (!isAnimationPlaying) return;
-    
-    planets.attr("transform", function (d, i) {
+    if (!isAnimationPlaying) {
+      localTime = elapsed;
+      return;
+    }
+    else {
+      let delta = elapsed - localTime;
+      currentTime += (delta / 1000);
+      localTime = elapsed;
+    }
+
+    function calc(d, i) {
       const period = +d.pl_orbper || 365;
       const ecc = d.ecc;
       const a = d.a;
@@ -946,13 +987,14 @@ function setupPlanetAnimation(planets, planetData, hostname, auToPixels) {
       else if (hostname === "GJ 667 C") speedFactor = 1.2;
       
       // Calculate orbital position
-      const timeScale = period * 100 / speedFactor;
-      const progress = (elapsed * animationSpeed / timeScale) % 1;
-      const M = progress * 2 * Math.PI;
+      // const timeScale = period * 100 / speedFactor;
+      const timeScale = currentTime * animationSpeed * speedFactor;
+      // const progress = (elapsed * animationSpeed / timeScale);
+      const M = ((timeScale % period) / period) * 2 * Math.PI;
       
       // Solve Kepler's equation
       let E = M;
-      for (let j = 0; j < 5; j++) {
+      for (let j = 0; j < 10; j++) {
         E = M + ecc * Math.sin(E);
       }
       
@@ -961,15 +1003,19 @@ function setupPlanetAnimation(planets, planetData, hostname, auToPixels) {
       let y_rel = a * Math.sqrt(1 - ecc * ecc) * Math.sin(E);
       
       // Add ellipse center offset
-      let x_orb = x_rel + (a * ecc);
+      let x_orb = x_rel;
       let y_orb = y_rel;
       
       // Convert to screen coordinates
       const x = auToPixels(x_orb);
       const y = auToPixels(y_orb);
       
-      return `translate(${x}, ${y})`;
-    });
+      return [x, y];
+    };
+
+    planets
+      .attr("cx", d => calc(d)[0])
+      .attr("cy", d => calc(d)[1]);
   });
 }
 
@@ -1002,8 +1048,8 @@ function toggleResonanceLines(show) {
         .attr("stroke-width", 2)
         .attr("stroke-dasharray", "5,5")
         .attr("opacity", 0)
-        .transition()
-        .duration(1000)
+        // .transition()
+        // .duration(1000)
         .attr("opacity", 0.6);
         
       // Add ratio labels
@@ -1016,15 +1062,15 @@ function toggleResonanceLines(show) {
         .attr("text-anchor", "middle")
         .text(res.ratio)
         .attr("opacity", 0)
-        .transition()
-        .duration(1000)
+        // .transition()
+        // .duration(1000)
         .attr("opacity", 0.8);
     });
   } else {
     // Remove resonance lines
     svg.selectAll(".resonance-line, .resonance-label")
-      .transition()
-      .duration(500)
+      // .transition()
+      // .duration(500)
       .attr("opacity", 0)
       .remove();
   }
@@ -1065,8 +1111,8 @@ function toggleResonanceChain(show) {
         .attr("fill", "none")
         .attr("stroke-dasharray", "10,5")
         .attr("opacity", 0)
-        .transition()
-        .duration(1500)
+        // .transition()
+        // .duration(1500)
         .attr("opacity", 0.7);
     }
     
@@ -1085,14 +1131,14 @@ function toggleResonanceChain(show) {
         .attr("font-weight", "bold")
         .text(d.ratio)
         .attr("opacity", 0)
-        .transition()
-        .duration(1500)
+        // .transition()
+        // .duration(1500)
         .attr("opacity", 1);
     });
   } else {
     svg.selectAll(".resonance-chain, .resonance-ratio")
-      .transition()
-      .duration(800)
+      // .transition()
+      // .duration(800)
       .attr("opacity", 0)
       .remove();
   }
@@ -1126,12 +1172,12 @@ function playResonanceMusic(play) {
           .attr("font-size", "30px")
           .text("♪")
           .attr("opacity", 0)
-          .transition()
-          .duration(1000)
+          // .transition()
+          // .duration(1000)
           .attr("opacity", 1)
           .attr("font-size", "40px")
-          .transition()
-          .duration(1000)
+          // .transition()
+          // .duration(1000)
           .attr("opacity", 0)
           .attr("y", note.y - 50)
           .remove();
@@ -1160,8 +1206,8 @@ function toggleHabitableZone(show) {
   if (show) {
     // Enhance existing habitable zone
     svg.select(".habitable-zone")
-      .transition()
-      .duration(1000)
+      // .transition()
+      // .duration(1000)
       .attr("stroke-opacity", 0.6)
       .attr("stroke-width", 12);
       
@@ -1175,19 +1221,19 @@ function toggleHabitableZone(show) {
       .attr("font-size", "14px")
       .text("Habitable Zone")
       .attr("opacity", 0)
-      .transition()
-      .duration(1000)
+      // .transition()
+      // .duration(1000)
       .attr("opacity", 0.9);
   } else {
     svg.select(".habitable-zone")
-      .transition()
-      .duration(800)
+      // .transition()
+      // .duration(800)
       .attr("stroke-opacity", 0.15)
       .attr("stroke-width", 8);
       
     svg.selectAll(".zone-label")
-      .transition()
-      .duration(800)
+      // .transition()
+      // .duration(800)
       .attr("opacity", 0)
       .remove();
   }
@@ -1201,8 +1247,6 @@ function highlightHabitablePlanets() {
   
   // Highlight potentially habitable planets
   svg.selectAll(".orbit-planet")
-    .transition()
-    .duration(1000)
     .style("fill", function(d) {
       return isInHabitableZone(d) ? "#50C878" : "#8B4513";
     })
@@ -1236,22 +1280,22 @@ function highlightHabitablePlanets() {
           .attr("font-size", "10px")
           .text("Habitable?")
           .attr("opacity", 0)
-          .transition()
-          .duration(1000)
+          // .transition()
+          // .duration(1000)
           .attr("opacity", 1);
       }
     });
     
   setTimeout(() => {
     svg.selectAll(".habitable-label")
-      .transition()
-      .duration(1000)
+      // .transition()
+      // .duration(1000)
       .attr("opacity", 0)
       .remove();
       
     svg.selectAll(".orbit-planet")
-      .transition()
-      .duration(1000)
+    //   .transition()
+    //   .duration(1000)
       .style("fill", d => isInHabitableZone(d) ? "#50C878" : "#8B4513")
       .style("stroke", d => isInHabitableZone(d) ? "#32CD32" : "rgba(255,255,255,0.3)")
       .style("stroke-width", 1.5)
@@ -1268,8 +1312,8 @@ function toggleCompanionStars(show) {
   if (show) {
     // Enhance companion stars
     svg.selectAll(".companion-star")
-      .transition()
-      .duration(1000)
+      // .transition()
+      // .duration(1000)
       .style("opacity", 1)
       .attr("r", 10);
       
@@ -1284,19 +1328,19 @@ function toggleCompanionStars(show) {
       .attr("stroke-width", 2)
       .attr("stroke-dasharray", "3,3")
       .attr("opacity", 0)
-      .transition()
-      .duration(1500)
+      // .transition()
+      // .duration(1500)
       .attr("opacity", 0.4);
   } else {
     svg.selectAll(".companion-star")
-      .transition()
-      .duration(800)
+      // .transition()
+      // .duration(800)
       .style("opacity", 0.6)
       .attr("r", 6);
       
     svg.selectAll(".gravitational-line")
-      .transition()
-      .duration(800)
+      // .transition()
+      // .duration(800)
       .attr("opacity", 0)
       .remove();
   }
@@ -1325,9 +1369,9 @@ function showTemperatureZones() {
       .attr("stroke", zone.color)
       .attr("stroke-width", 4)
       .attr("stroke-opacity", 0)
-      .transition()
-      .delay(i * 300)
-      .duration(1000)
+      // .transition()
+      // .delay(i * 300)
+      // .duration(1000)
       .attr("stroke-opacity", 0.3);
       
     // Add temperature labels
@@ -1339,16 +1383,16 @@ function showTemperatureZones() {
       .attr("font-size", "12px")
       .text(zone.temp)
       .attr("opacity", 0)
-      .transition()
-      .delay(i * 300)
-      .duration(1000)
+      // .transition()
+      // .delay(i * 300)
+      // .duration(1000)
       .attr("opacity", 0.8);
   });
   
   setTimeout(() => {
     svg.selectAll(".temp-zone, .temp-label")
-      .transition()
-      .duration(1000)
+      // .transition()
+      // .duration(1000)
       .attr("opacity", 0)
       .remove();
   }, 5000);
@@ -1362,8 +1406,8 @@ function updateStellarInfluence(influence) {
   
   // Adjust companion star prominence based on influence
   svg.selectAll(".companion-star")
-    .transition()
-    .duration(500)
+    // .transition()
+    // .duration(500)
     .style("opacity", 0.3 + (influence / 100) * 0.7)
     .attr("r", 4 + (influence / 100) * 8);
 }
@@ -1396,9 +1440,9 @@ function comparePeriods(show) {
         .attr("height", 0)
         .attr("fill", "#FFA500")
         .attr("opacity", 0.7)
-        .transition()
-        .delay(i * 200)
-        .duration(1000)
+        // .transition()
+        // .delay(i * 200)
+        // .duration(1000)
         .attr("height", barHeight)
         .attr("y", 200 - barHeight);
         
@@ -1411,16 +1455,16 @@ function comparePeriods(show) {
         .attr("font-size", "10px")
         .text(`${period.toFixed(1)}d`)
         .attr("opacity", 0)
-        .transition()
-        .delay(i * 200)
-        .duration(1000)
+        // .transition()
+        // .delay(i * 200)
+        // .duration(1000)
         .attr("opacity", 1);
     });
     
     setTimeout(() => {
       svg.selectAll(".period-bar, .period-label")
-        .transition()
-        .duration(1000)
+        // .transition()
+        // .duration(1000)
         .attr("opacity", 0)
         .remove();
     }, 5000);
@@ -1455,9 +1499,9 @@ function showPeriodRatios(show) {
         .attr("r", 0)
         .attr("fill", colors[i])
         .attr("opacity", 0.8)
-        .transition()
-        .delay(i * 300)
-        .duration(800)
+        // .transition()
+        // .delay(i * 300)
+        // .duration(800)
         .attr("r", 25);
         
       // Add ratio text
@@ -1471,9 +1515,9 @@ function showPeriodRatios(show) {
         .attr("font-weight", "bold")
         .text(ratio)
         .attr("opacity", 0)
-        .transition()
-        .delay(i * 300 + 400)
-        .duration(600)
+        // .transition()
+        // .delay(i * 300 + 400)
+        // .duration(600)
         .attr("opacity", 1);
     });
     
@@ -1493,16 +1537,16 @@ function showPeriodRatios(show) {
         .attr("stroke-width", 3)
         .attr("stroke-dasharray", "5,5")
         .attr("opacity", 0)
-        .transition()
-        .delay(1500)
-        .duration(1000)
+        // .transition()
+        // .delay(1500)
+        // .duration(1000)
         .attr("opacity", 0.6);
     }
     
     setTimeout(() => {
       svg.selectAll(".ratio-circle, .ratio-text, .resonance-connection")
-        .transition()
-        .duration(1000)
+        // .transition()
+        // .duration(1000)
         .attr("opacity", 0)
         .remove();
     }, 6000);
