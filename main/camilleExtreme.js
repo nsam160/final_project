@@ -999,7 +999,7 @@ function updateKELTVisualization() {
 }
 
 function updateWASPVisualization() {
- u  console.log('Updating WASP-76b visualization');
+  console.log('Updating WASP-76b visualization');
   if (currentExtremeSystem?.id === "wasp" && currentExtremeStage === 2) {
     renderExtremeInteractive(currentExtremeSystem);
   }
