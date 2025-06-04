@@ -208,7 +208,8 @@ export function renderSystem(containerId, planetData, stage = 1) {
   });
 
   //Enhanced planets with selection support
-  const planets = svg.selectAll(".orbit-planet").remove()
+  const planets = svg.selectAll(".orbit-planet")
+    .remove()
     .data(planetData)
     .enter()
     .append("circle")
@@ -931,6 +932,8 @@ function formatValue(value, unit) {
 function setupTooltips(planets, hostname, systemInfo) {
   // Remove any existing tooltip first
   d3.select("#tooltip").remove();
+
+  let selected = null;
   
   const tooltip = d3.select("body").append("div")
     .attr("id", "tooltip")
@@ -950,6 +953,11 @@ function setupTooltips(planets, hostname, systemInfo) {
     const descriptions = systemInfo.descriptions || {};
     const description = descriptions[planetLetter] || `A planet in the ${hostname} system.`;
     
+    selected = d3.select(this);
+
+    d3.select(this)
+      .attr("r", 1.3 * +d3.select(this).attr("r"));
+
     let specialInfo = "";
     if (hostname === "TOI-178") {
       specialInfo = `<p style="color: #4ecdc4; font-style: italic;">Part of the cosmic orchestra's resonance chain.</p>`;
@@ -977,6 +985,8 @@ function setupTooltips(planets, hostname, systemInfo) {
            .style("top", (event.pageY - 28) + "px");
   }).on("mouseout", () => {
     tooltip.style("opacity", 0);
+    selected
+      .attr("r", +selected.attr("r") / 1.3);
   });
 }
 
