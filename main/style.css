@@ -1554,18 +1554,6 @@ select {
   margin-left: 55px;  /* move the whole block in from the left */
 }
 
-#roytooltip {
-  display: block;
-  position: absolute;            /* keep it on the viewport, not clipped by a parent */
-  pointer-events: none;       /* so you can still hover through */
-  padding: 6px 8px;
-  background: rgba(0, 0, 0, 0.75);
-  color: #fff;
-  font-size: 12px;
-  border-radius: 4px;
-  width: min-content;
-  height: min-content;
-}
 /* ─────────── 1) Centered Chart Container ─────────── */
 .chart-wrapper-outer {
   width: 70%;                   /* 90% of viewport width */
@@ -1682,7 +1670,7 @@ html, body {
 }
 
 /* ─────────── 5) Tooltip styling (unchanged) ─────────── */
-#roytooltip {
+/* #roytooltip {
   position: fixed; 
   pointer-events: none;
   padding: 6px 10px;
@@ -1692,6 +1680,18 @@ html, body {
   border-radius: 4px;
   visibility: hidden;
   z-index: 1010; /* on top of everything */
+/*} */
+
+#roytooltip {
+  display: block;
+  position: absolute;            /* keep it on the viewport, not clipped by a parent */
+  pointer-events: none;       /* so you can still hover through */
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 12px;
+  border-radius: 4px;
+  height: min-content;
 }
 
 

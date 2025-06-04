@@ -1875,35 +1875,32 @@ ExoplanetData.onDataLoaded(rows => {
         
         // Debug log
         console.log('Tooltip mouseover:', d.pl_name, 'at', event.pageX, event.pageY);
-        
+
         // Make tooltip visible
         roytooltip
           .style("display", "block")
-          .style("opacity", "1")
           .html(`
             <strong style="color: #4ecdc4; display: block; margin-bottom: 4px;">${d.pl_name}</strong>
             ${cfg.label}: ${d3.format(".3~g")(val)} ${unit}
-          `);
+          `)
+          .style("left", event.pageX + "px")
+          .style("top", event.pageY + "px");
         
-        // Position tooltip
-        const tooltipWidth = roytooltip.node().offsetWidth;
-        const tooltipHeight = roytooltip.node().offsetHeight;
+        // // Position tooltip
+        // const tooltipWidth = roytooltip.node().offsetWidth;
+        // const tooltipHeight = roytooltip.node().offsetHeight;
         
-        // Ensure tooltip stays within viewport
-        let left = event.pageX + 10;
-        let top = event.pageY - tooltipHeight - 10;
+        // // Ensure tooltip stays within viewport
+        // let left = event.pageX + 10;
+        // let top = event.pageY - tooltipHeight - 10;
         
-        // Adjust if tooltip would go off-screen
-        if (left + tooltipWidth > window.innerWidth) {
-          left = event.pageX - tooltipWidth - 10;
-        }
-        if (top < 0) {
-          top = event.pageY + 10;
-        }
-        
-        roytooltip
-          .style("left", left + "px")
-          .style("top", top + "px");
+        // // Adjust if tooltip would go off-screen
+        // if (left + tooltipWidth > window.innerWidth) {
+        //   left = event.pageX - tooltipWidth - 10;
+        // }
+        // if (top < 0) {
+        //   top = event.pageY + 10;
+        // }
           
         // Highlight the dot
         d3.select(this)
@@ -1911,29 +1908,14 @@ ExoplanetData.onDataLoaded(rows => {
           .attr("fill-opacity", 0.3);
       })
       .on("mousemove", function(event) {
-        // Update position on move
-        const tooltipWidth = roytooltip.node().offsetWidth;
-        const tooltipHeight = roytooltip.node().offsetHeight;
-        
-        let left = event.pageX + 10;
-        let top = event.pageY - tooltipHeight - 10;
-        
-        if (left + tooltipWidth > window.innerWidth) {
-          left = event.pageX - tooltipWidth - 10;
-        }
-        if (top < 0) {
-          top = event.pageY + 10;
-        }
-        
         roytooltip
-          .style("left", left + "px")
-          .style("top", top + "px");
+          .style("left", event.pageX + "px")
+          .style("top", event.pageY + "px");
       })
       .on("mouseout", function() {
         // Hide tooltip
         roytooltip
-          .style("display", "none")
-          .style("opacity", "0");
+          .style("display", "none");
           
         // Remove highlight
         d3.select(this)
@@ -1941,7 +1923,7 @@ ExoplanetData.onDataLoaded(rows => {
       }),
     
     update => update
-      .transition().duration(400)
+      // .transition().duration(400)
       .attr("cx", d => x(raw(d)))
       .attr("cy", d => y(d.pl_name) + y.bandwidth()/2)
   );
@@ -2070,14 +2052,16 @@ ExoplanetData.onDataLoaded(rows => {
     // ── ADD TOOLTIP LISTENERS ON HEAT‐MAP CELLS ───────────────────────────
     .on("mouseover", (event, d) => {
       roytooltip
-        .style("visibility", "visible")
+        .style("display", "block")
         .html(`
           <strong>${d.pname}</strong><br/>
           ${d.feature}: ${d.rawValue} ${d.unit}<br/>
           ${d.diff !== null
             ? "Δ = " + d3.format(".1%")(d.diff)
             : ""}
-        `);
+        `)
+        .style("top",  (event.clientX + 12) + "px")
+        .style("left", (event.clientY + 12) + "px")
         console.log('showing tooltip at', event.pageX, event.pageY);
 
     })
@@ -2087,7 +2071,7 @@ ExoplanetData.onDataLoaded(rows => {
         .style("left", (event.pageX + 12) + "px");
     })
     .on("mouseout", () => {
-      roytooltip.style("visibility", "hidden");
+      roytooltip.style("display", "none");
     });
     // === column labels (metrics) ======================================
     hmGroup.selectAll("text.colLab")
