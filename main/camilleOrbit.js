@@ -971,24 +971,24 @@ function setupPlanetAnimation(planets, planetData, hostname, auToPixels) {
       return;
     }
     else {
+      // System-specific speed factors
+      let speedFactor = 1;
+      if (hostname === "TOI-178") speedFactor = 0.7;
+      else if (hostname === "GJ 667 C") speedFactor = 1.2;
+      
       let delta = elapsed - localTime;
-      currentTime += (delta / 1000);
+      currentTime += (delta / 1000) * animationSpeed * speedFactor;
       localTime = elapsed;
     }
 
     function calc(d, i) {
       const period = +d.pl_orbper || 365;
       const ecc = d.ecc;
-      const a = d.a;
-      
-      // System-specific speed factors
-      let speedFactor = 1;
-      if (hostname === "TOI-178") speedFactor = 0.7;
-      else if (hostname === "GJ 667 C") speedFactor = 1.2;
+      const a = d.a
       
       // Calculate orbital position
       // const timeScale = period * 100 / speedFactor;
-      const timeScale = currentTime * animationSpeed * speedFactor;
+      const timeScale = currentTime;
       // const progress = (elapsed * animationSpeed / timeScale);
       const M = ((timeScale % period) / period) * 2 * Math.PI;
       
