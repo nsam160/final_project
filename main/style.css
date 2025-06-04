@@ -951,7 +951,7 @@ body {
 
 .orbit-planet {
   cursor: pointer;
-  transition: all 0.3s ease;
+  /* transition: all 0.3s ease; */
   filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
 }
 
@@ -1555,17 +1555,16 @@ select {
 }
 
 #roytooltip {
-  position: fixed;            /* keep it on the viewport, not clipped by a parent */
+  display: block;
+  position: absolute;            /* keep it on the viewport, not clipped by a parent */
   pointer-events: none;       /* so you can still hover through */
   padding: 6px 8px;
   background: rgba(0, 0, 0, 0.75);
   color: #fff;
   font-size: 12px;
   border-radius: 4px;
-  visibility: hidden;         /* start hidden; JS will toggle this */
-  z-index: 9999;              /* appear above everything else */
-
-
+  width: min-content;
+  height:min-content;
 }
 /* ─────────── 1) Centered Chart Container ─────────── */
 .chart-wrapper-outer {
