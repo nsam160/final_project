@@ -9,7 +9,6 @@ html {
     background-repeat: repeat;
     background-size: auto;
     background-attachment: fixed;
-    background-position: top left;
     color: white;
     font-family: 'Outfit', sans-serif;
     margin: 0;
@@ -23,8 +22,11 @@ html {
     padding: 0;
     margin: 0 auto;
     text-align: center;
-    max-width: 800px;  /* optional: to keep things readable */
-    margin: 1em;
+    /* max-width: 800px;  optional: to keep things readable */
+    margin-left: 7em;
+    margin-right: 7em;
+    margin-bottom: 1em;
+    margin-top: 1em;
   }
   
   .glossary li {
