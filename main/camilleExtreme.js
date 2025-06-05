@@ -1058,14 +1058,14 @@ function updateExtremeProfile(planetData, extremeSystem) {
   
   const updates = [
     { id: 'profile-planet-name', text: planetData?.pl_name || extremeSystem.title },
-    { id: 'profile-planet-mass', text: `${(planetData?.pl_bmasse || 1).toFixed(2)} Earth masses` },
-    { id: 'profile-planet-radius', text: `${(planetData?.pl_rade || 1).toFixed(2)} Earth radii` },
-    { id: 'profile-planet-period', text: `${(planetData?.pl_orbper || 1).toFixed(2)} days` },
+    { id: 'profile-planet-mass', text: `${planetData ? parseFloat(planetData.pl_bmasse || 1).toFixed(2) : '1.00'} Earth masses` },
+    { id: 'profile-planet-radius', text: `${planetData ? parseFloat(planetData.pl_rade || 1).toFixed(2) : '1.00'} Earth radii` },
+    { id: 'profile-planet-period', text: `${planetData ? parseFloat(planetData.pl_orbper || 1).toFixed(2) : '1.00'} days` },
+    { id: 'profile-planet-distance', text: `${planetData ? parseFloat(planetData.pl_orbsmax || 0).toFixed(3) : '0.000'} AU` },
     { id: 'profile-planet-temp', text: stats.mainStat },
-    { id: 'profile-planet-distance', text: `${(planetData?.pl_orbsmax || 0).toFixed(3)} AU` },
     { id: 'profile-planet-description', text: `${extremeSystem.fullDesc}\n\nThis extreme world pushes the boundaries of planetary science with conditions impossible on Earth.` }
   ];
-  
+
   updates.forEach(({ id, text }) => {
     const element = document.getElementById(id);
     if (element) element.textContent = text;

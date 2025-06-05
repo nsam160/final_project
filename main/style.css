@@ -184,7 +184,7 @@ body {
 }
 
 .stage-panel.active {
-  display: block;
+  display: block !important;
   opacity: 1;
 }
 
@@ -305,15 +305,6 @@ body {
   color: white;
 }
 
-/* System Container Styling */
-.system-container {
-  background-color: rgba(0, 0, 0, 0.65);
-  margin: 2rem auto;
-  padding: 1rem;
-  border-radius: 8px;
-  max-width: 1000px;
-}
-
 /* Tooltip Styling */
 #tooltip {
   z-index: 999;
@@ -334,13 +325,6 @@ body {
   display: block;
 }
 
-/* Controls & Text */
-.controls-container {
-  margin-top: 1em;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
 
 .control-group {
   background: rgba(255, 255, 255, 0.05);
@@ -368,49 +352,9 @@ body {
   transform: translateY(0);
 }
 
-/* Responsive SVG Container */
-.visualization-container svg {
-  width: 100%;
-  max-width: 500px;
-  height: auto;
-  display: block;
-  margin: auto;
-}
-
-/* Story Panel Styling */
-.story-container {
-  color: #eee;
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-.story-container h2 {
-  font-size: 1.5rem;
-  margin-top: 1rem;
-  color: #fff;
-}
-
-.story-intro {
-  font-style: italic;
-  color: #ccc;
-}
-
 /* Planet Glow Effect */
 .planet {
   filter: drop-shadow(0 0 4px rgba(0, 150, 255, 0.7));
-}
-
-/* Scroll Reveal Animation */
-.reveal {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.6s ease-out;
-  will-change: opacity, transform;
-}
-
-.reveal.visible {
-  opacity: 1;
-  transform: none;
 }
 
 /* Floating Capsule Map Layout */
@@ -617,22 +561,6 @@ body {
   box-shadow: 0 0 25px rgba(170, 170, 170, 0.6);
 }
 
-/* Connection descriptions */
-.connection-description {
-  position: absolute;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  max-width: 150px;
-  text-align: center;
-  pointer-events: none;
-  z-index: 10;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
 
 /* Connection container */
 #capsule-connections {
@@ -676,19 +604,6 @@ body {
   text-align: center;
 }
 
-/* System-specific content in detailed view */
-.system-specific-content {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fade-in-up 0.8s 0.3s forwards ease-out;
-}
-
-.system-specific-content h3 {
-  margin-top: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding-bottom: 0.5rem;
-  font-family: 'Outfit', sans-serif;
-}
 
 /* Synthesis section styling */
 #synthesis {
@@ -938,7 +853,7 @@ body {
   border-radius: 50%;
   cursor: pointer;
 }
-
+/* duplicate style name to Royce*/
 .toggle-button {
   background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
   border: none;
@@ -979,32 +894,39 @@ body {
 
 /* Extreme overview stats */
 .extreme-overview-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 15px 0;
+  background: rgba(20, 20, 30, 0.8);
+  border: 1px solid #444;
+  border-radius: 10px;
   padding: 15px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 15px 0;
+  backdrop-filter: blur(5px);
 }
 
 .stat-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin: 8px 0;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item:last-child {
+  border-bottom: none;
 }
 
 .stat-label {
-  color: #ccc;
+  color: #aaa;
   font-size: 0.9rem;
+  font-weight: 400;
 }
 
 .stat-value {
-  color: #4ecdc4;
-  font-weight: 600;
+  color: #feca57;
+  font-weight: bold;
   font-size: 0.9rem;
 }
+
 
 /* Extreme control items layout */
 .control-item {
@@ -1028,32 +950,35 @@ body {
   font-weight: 600;
 }
 
-/* Enhanced extreme sliders */
+/* =============================== */
+/* PHASE 2: EXTREME INTERACTIVE CONTROLS */
+/* =============================== */
+
+/* Extreme control sliders */
 .extreme-slider {
   width: 100%;
-  height: 8px;
+  height: 6px;
   border-radius: 5px;
   background: linear-gradient(90deg, #333, #666);
   outline: none;
   opacity: 0.8;
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease;
   cursor: pointer;
   margin: 8px 0;
 }
 
 .extreme-slider:hover {
   opacity: 1;
-  background: linear-gradient(90deg, #444, #777);
 }
 
 .extreme-slider::-webkit-slider-thumb {
   appearance: none;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: linear-gradient(45deg, #ff6b47, #ff3300);
   cursor: pointer;
-  border: 3px solid #fff;
+  border: 2px solid #fff;
   box-shadow: 0 2px 10px rgba(255, 107, 71, 0.4);
   transition: all 0.2s ease;
 }
@@ -1064,106 +989,171 @@ body {
 }
 
 .extreme-slider::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: linear-gradient(45deg, #ff6b47, #ff3300);
   cursor: pointer;
-  border: 3px solid #fff;
+  border: 2px solid #fff;
   box-shadow: 0 2px 10px rgba(255, 107, 71, 0.4);
 }
 
 /* Extreme control selects */
 .extreme-select {
   background: rgba(20, 20, 30, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid #444;
+  border-radius: 5px;
   color: #fff;
   padding: 8px 12px;
-  border-radius: 6px;
   font-size: 0.9rem;
   cursor: pointer;
-  outline: none;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin: 5px 0;
 }
 
 .extreme-select:hover,
 .extreme-select:focus {
-  border-color: #4ecdc4;
-  background: rgba(30, 30, 40, 0.9);
+  border-color: #ff6b47;
+  background: rgba(255, 107, 71, 0.1);
+  outline: none;
 }
 
 .extreme-select option {
-  background: rgba(20, 20, 30, 1);
+  background: #1a1a2e;
   color: #fff;
+  padding: 5px;
+}
+
+/* Extreme control items */
+.control-item {
+  margin: 15px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.control-item label {
+  color: #feca57;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.control-item label span {
+  color: #ff6b47;
+  font-weight: bold;
+  background: rgba(255, 107, 71, 0.1);
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 107, 71, 0.3);
 }
 
 /* Control buttons for extreme functions */
 .control-button {
-  background: linear-gradient(45deg, #4ecdc4, #44a08d);
+  background: linear-gradient(45deg, #667eea, #764ba2);
   border: none;
   color: white;
-  padding: 12px 20px;
-  border-radius: 25px;
+  padding: 10px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 500;
   transition: all 0.3s ease;
   font-size: 0.9rem;
-  margin: 10px 5px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  text-transform: capitalize;
+  margin: 5px 0;
 }
 
 .control-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
-  background: linear-gradient(45deg, #44a08d, #4ecdc4);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(45deg, #764ba2, #667eea);
 }
 
 .control-button:active {
-  transform: translateY(0px);
-  box-shadow: 0 2px 10px rgba(78, 205, 196, 0.3);
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(102, 126, 234, 0.2);
 }
 
-/* Planet-specific control styling */
-.control-group h3 {
-  color: #feca57;
-  font-size: 1.1rem;
-  margin: 0 0 15px 0;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+/* Planet-specific color themes for sliders */
+/* KELT-9b (thermal) */
+.control-group:has(#plasma-intensity) .extreme-slider::-webkit-slider-thumb {
+  background: linear-gradient(45deg, #ff3300, #ff6600);
 }
 
-/* KELT-9b plasma controls */
-#plasma-intensity {
-  background: linear-gradient(90deg, #ff3300, #ff6600);
+/* WASP-76b (atmospheric) */  
+.control-group:has(#iron-rain-intensity) .extreme-slider::-webkit-slider-thumb {
+  background: linear-gradient(45deg, #ff6b47, #8B4513);
 }
 
-#stellar-radiation {
-  background: linear-gradient(90deg, #ff6600, #ffa500);
+/* Kepler-80f (structural) */
+.control-group:has(#compression-level) .extreme-slider::-webkit-slider-thumb {
+  background: linear-gradient(45deg, #888888, #C0C0C0);
 }
 
-/* WASP-76b atmospheric controls */
-#day-night-ratio {
-  background: linear-gradient(90deg, #4169e1, #ff6b47);
+/* Responsive design for extreme controls */
+@media (max-width: 768px) {
+  .control-item {
+    margin: 10px 0;
+  }
+  
+  .control-item label {
+    font-size: 0.8rem;
+  }
+  
+  .extreme-slider {
+    height: 8px;
+  }
+  
+  .extreme-slider::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .control-button {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
 }
 
-#iron-rain-intensity {
-  background: linear-gradient(90deg, #8b0000, #ff4500);
+/* Animation for iron rain effect */
+.iron-rain {
+  animation: fall 3s linear infinite;
 }
 
-#wind-speed {
-  background: linear-gradient(90deg, #666, #aaa);
+@keyframes fall {
+  from {
+    transform: translateY(-50px);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(500px);
+    opacity: 0;
+  }
 }
 
-/* Kepler-80f density controls */
-#compression-level {
-  background: linear-gradient(90deg, #333, #888);
+/* Animation for control updates */
+.control-item label span {
+  transition: all 0.2s ease;
 }
 
-#gravity-multiplier {
-  background: linear-gradient(90deg, #4b0082, #8a2be2);
+.control-item label span.updating {
+  background: rgba(255, 107, 71, 0.3);
+  transform: scale(1.05);
 }
+
+.scroll-section {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  }
+  
+  .scroll-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+  }
 
 /* ============================ */
 /*  Camille's style.css   END */
@@ -1942,66 +1932,6 @@ body, h1, h2, p, ul, ol, li {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
-
-/* Extreme planet visualization styles */
-#extreme-visual, #kelt-visual, #kepler-visual {
-  background: radial-gradient(circle at center, #1a1a2e, #000);
-  border-radius: 15px;
-  overflow: hidden;
-  position: relative;
-}
-
-#toggle-daynight {
-  transition: all 0.3s ease;
-}
-
-#toggle-daynight:hover {
-  background: #5590C4 !important;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(70, 130, 180, 0.4);
-}
-
-/* Animation for iron rain effect */
-.iron-rain {
-  animation: fall 3s linear infinite;
-}
-
-@keyframes fall {
-  from {
-    transform: translateY(-50px);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(500px);
-    opacity: 0;
-  }
-}
-
-/* Plasma pulsing effect for KELT-9b */
-.plasma-pulse {
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.7;
-  }
-}
-
-/* Density grid animation for Kepler-80f */
-.density-grid rect {
-  transition: fill 0.5s ease;
-}
-
-.density-grid rect:hover {
-  fill: white !important;
-}
-
 /* ============================ */
 /*     GLOBAL style.css  */
 /* ============================ */
@@ -2023,403 +1953,4 @@ body {
   padding: 0;
   width: 100%;
   height: 100%;
-}
-
-/* Stage Navigation System */
-.stage-navigation {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin: 2rem 0;
-  padding: 0 1rem;
-}
-
-.stage-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: #ccc;
-  padding: 12px 24px;
-  border-radius: 25px;
-  cursor: pointer;
-  font-family: 'Outfit', sans-serif;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-}
-
-.stage-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.5);
-  color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-.stage-btn.active {
-  background: linear-gradient(45deg, #4ecdc4, #44a08d);
-  border-color: #4ecdc4;
-  color: white;
-  box-shadow: 0 0 20px rgba(78, 205, 196, 0.4);
-}
-
-.stage-btn.active:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(78, 205, 196, 0.6);
-}
-
-.stage-content {
-  position: relative;
-  min-height: 600px;
-}
-
-.stage-panel {
-  display: none;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.stage-panel.active {
-  display: block;
-  opacity: 1;
-}
-
-/* Stage 2 specific styles */
-.minimal-interactive-layout {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.interactive-visualization {
-  position: relative;
-  background: rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 20px;
-  min-height: 500px;
-}
-
-.system-info-minimal {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: rgba(0, 0, 0, 0.7);
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.system-info-minimal h3 {
-  margin: 0 0 5px 0;
-  color: #4ecdc4;
-  font-size: 1.2rem;
-}
-
-.system-info-minimal p {
-  margin: 0;
-  color: #ccc;
-  font-size: 0.9rem;
-}
-
-.controls-bar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 15px;
-}
-
-.control-btn {
-  background: linear-gradient(45deg, #4ecdc4, #44a08d);
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-}
-
-.control-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
-}
-
-.system-controls {
-  background: rgba(0, 0, 0, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-}
-
-.control-panel {
-  margin-top: 15px;
-}
-
-.control-panel h4 {
-  margin: 0 0 15px 0;
-  color: #4ecdc4;
-  font-size: 1.1rem;
-}
-
-.control-grid {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.feature-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #ccc;
-  padding: 8px 16px;
-  border-radius: 15px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: all 0.3s ease;
-}
-
-.feature-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-.feature-btn.active {
-  background: #4ecdc4;
-  border-color: #4ecdc4;
-  color: white;
-}
-
-.scroll-section {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-  }
-  
-  .scroll-section.visible {
-  opacity: 1;
-  transform: translateY(0);
-  }
-  
-/* =============================== */
-/* PHASE 2: EXTREME INTERACTIVE CONTROLS */
-/* =============================== */
-
-/* Extreme control sliders */
-.extreme-slider {
-  width: 100%;
-  height: 6px;
-  border-radius: 5px;
-  background: linear-gradient(90deg, #333, #666);
-  outline: none;
-  opacity: 0.8;
-  transition: opacity 0.2s ease;
-  cursor: pointer;
-  margin: 8px 0;
-}
-
-.extreme-slider:hover {
-  opacity: 1;
-}
-
-.extreme-slider::-webkit-slider-thumb {
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: linear-gradient(45deg, #ff6b47, #ff3300);
-  cursor: pointer;
-  border: 2px solid #fff;
-  box-shadow: 0 2px 10px rgba(255, 107, 71, 0.4);
-  transition: all 0.2s ease;
-}
-
-.extreme-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 15px rgba(255, 107, 71, 0.6);
-}
-
-.extreme-slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: linear-gradient(45deg, #ff6b47, #ff3300);
-  cursor: pointer;
-  border: 2px solid #fff;
-  box-shadow: 0 2px 10px rgba(255, 107, 71, 0.4);
-}
-
-/* Extreme control selects */
-.extreme-select {
-  background: rgba(20, 20, 30, 0.9);
-  border: 1px solid #444;
-  border-radius: 5px;
-  color: #fff;
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
-  margin: 5px 0;
-}
-
-.extreme-select:hover,
-.extreme-select:focus {
-  border-color: #ff6b47;
-  background: rgba(255, 107, 71, 0.1);
-  outline: none;
-}
-
-.extreme-select option {
-  background: #1a1a2e;
-  color: #fff;
-  padding: 5px;
-}
-
-/* Extreme control items */
-.control-item {
-  margin: 15px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.control-item label {
-  color: #feca57;
-  font-weight: 500;
-  font-size: 0.9rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.control-item label span {
-  color: #ff6b47;
-  font-weight: bold;
-  background: rgba(255, 107, 71, 0.1);
-  padding: 2px 8px;
-  border-radius: 3px;
-  border: 1px solid rgba(255, 107, 71, 0.3);
-}
-
-/* Control buttons for extreme functions */
-.control-button {
-  background: linear-gradient(45deg, #667eea, #764ba2);
-  border: none;
-  color: white;
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-  text-transform: capitalize;
-  margin: 5px 0;
-}
-
-.control-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-  background: linear-gradient(45deg, #764ba2, #667eea);
-}
-
-.control-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 5px rgba(102, 126, 234, 0.2);
-}
-
-/* Extreme overview stats */
-.extreme-overview-stats {
-  background: rgba(20, 20, 30, 0.8);
-  border: 1px solid #444;
-  border-radius: 10px;
-  padding: 15px;
-  margin: 15px 0;
-  backdrop-filter: blur(5px);
-}
-
-.stat-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 8px 0;
-  padding: 5px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.stat-item:last-child {
-  border-bottom: none;
-}
-
-.stat-label {
-  color: #aaa;
-  font-size: 0.9rem;
-  font-weight: 400;
-}
-
-.stat-value {
-  color: #feca57;
-  font-weight: bold;
-  font-size: 0.9rem;
-}
-
-/* Planet-specific color themes for sliders */
-/* KELT-9b (thermal) */
-.control-group:has(#plasma-intensity) .extreme-slider::-webkit-slider-thumb {
-  background: linear-gradient(45deg, #ff3300, #ff6600);
-}
-
-/* WASP-76b (atmospheric) */  
-.control-group:has(#iron-rain-intensity) .extreme-slider::-webkit-slider-thumb {
-  background: linear-gradient(45deg, #ff6b47, #8B4513);
-}
-
-/* Kepler-80f (structural) */
-.control-group:has(#compression-level) .extreme-slider::-webkit-slider-thumb {
-  background: linear-gradient(45deg, #888888, #C0C0C0);
-}
-
-/* Responsive design for extreme controls */
-@media (max-width: 768px) {
-  .control-item {
-    margin: 10px 0;
-  }
-  
-  .control-item label {
-    font-size: 0.8rem;
-  }
-  
-  .extreme-slider {
-    height: 8px;
-  }
-  
-  .extreme-slider::-webkit-slider-thumb {
-    width: 18px;
-    height: 18px;
-  }
-  
-  .control-button {
-    padding: 8px 12px;
-    font-size: 0.8rem;
-  }
-}
-
-/* Animation for control updates */
-.control-item label span {
-  transition: all 0.2s ease;
-}
-
-.control-item label span.updating {
-  background: rgba(255, 107, 71, 0.3);
-  transform: scale(1.05);
 }
