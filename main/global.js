@@ -2270,6 +2270,8 @@ function switchToStage(stageNumber) {
     setTimeout(() => {
       activePanel.classList.add('active');
       activePanel.style.opacity = '1';
+
+      //activePanel.style.display = 'block'; // Ensure it's visible
     }, 100);
   }
   

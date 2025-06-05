@@ -24,7 +24,7 @@ const systemNarratives = {
     descriptions: {
       'b': "The innermost planet, orbits in 7 days. Earth-sized.",
       'c': "Super-Earth, orbits every 9 days.",
-      'd': "Mini-Neptune, about 2.9× Earth's size.",
+      'd': "Neptune, about 2.9× Earth's size.",
       'e': "Sub-Neptune, 2.7× Earth's size, orbits in 92 days.",
       'f': "Sub-Neptune orbiting every 125 days.",
       'g': "Gas giant, 8.1× Earth size, 210-day orbit.",
@@ -238,12 +238,19 @@ export function renderSystem(containerId, planetData, stage = 1) {
       setupAnimationControls('animation');
       setupPlanetNavigation();
     }, 100);
-  } else if (stage === 2) {
+  } // (fixed):
+  if (stage === 2) {
     // Interactive mode - setup interactive controls and background
     addInteractiveSystemBackground(svg, hostname);
     setTimeout(() => {
       setupAnimationControls('interactive-animation');
-      showInteractiveControls(systemInfo.id);
+      
+      // Check if this is an extreme planet or regular orbit system
+      const extremePlanets = ['KELT-9', 'WASP-76', 'Kepler-80'];
+      if (!extremePlanets.includes(hostname) && systemInfo.id) {
+        showInteractiveControls(systemInfo.id);
+      }
+      // Extreme planets handle their own controls in camilleExtreme.js
     }, 100);
   }
 
@@ -975,7 +982,7 @@ function setupTooltips(planets, hostname, systemInfo) {
         <div style="margin-top: 10px;">
           <div>Mass: ${formatValue(d.pl_bmasse, 'Earth masses')}</div>
           <div>Radius: ${formatValue(d.pl_rade, 'Earth radii')}</div>
-          <div>Period: ${formatValue(planets.pl_orbper, 'days')}</div>
+          <div>Period: ${formatValue(planet.pl_orbper, 'days')}</div>
           <div>Temperature: ${formatValue(d.pl_eqt, 'K')}</div>
           <div>Discovery: ${d.disc_year || 'Unknown'}</div>
         </div>
