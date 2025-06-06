@@ -1,5 +1,4 @@
-// camilleOrbit.js - FINAL MERGED VERSION
-6// camilleOrbit.js - PHASE 1
+// camilleOrbit.js 
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
 //Enhanced global variables
@@ -528,6 +527,13 @@ function setupPlanetNavigation() {
 function showInteractiveControls(systemId) {
   console.log(`Showing interactive controls for: ${systemId}`);
   
+  // FIRST: Clear any existing controls
+  const animationSection = document.querySelector('.animation-controls-section');
+  if (animationSection) {
+    animationSection.innerHTML = '';
+    animationSection.style.display = 'none';
+  }
+  
   // Hide all control panels first
   document.querySelectorAll('.control-panel').forEach(panel => {
     panel.style.display = 'none';
@@ -560,7 +566,7 @@ function showInteractiveControls(systemId) {
     // Setup the specific interactive functionality
     setupSystemInteractiveControls(systemId);
   } else {
-    console.warn(` Interactive controls panel not found for: ${systemId}`);
+    console.warn(`Interactive controls panel not found for: ${systemId}`);
   }
 }
 
@@ -730,15 +736,34 @@ export function initializeEnhancedSystem(containerId, hostname, stage = 1) {
   }
 }
 
-// PHASE 1: Enhanced cleanup
+// Enhanced cleanup
 export function cleanupEnhancedSystem() {
+  //console.log("Cleaning up enhanced system");
+  
+  // Stop and null ALL timers
   if (animationTimer) {
     animationTimer.stop();
     animationTimer = null;
+    console.log("✓ Animation timer stopped");
   }
   
-  // Remove any global tooltips
-  d3.select("#tooltip").remove();
+  // Remove ALL tooltips (there might be multiple)
+  d3.selectAll("#tooltip").style("opacity", 0);
+  
+  // Clear ALL SVG containers
+  const containers = ['orbit-container', 'orbit-container-interactive'];
+  containers.forEach(id => {
+    const container = document.getElementById(id);
+    if (container) {
+      container.innerHTML = '';
+      //console.log(`✓ Cleared container: ${id}`);
+    }
+  });
+  
+  // Remove any lingering D3 selections
+  d3.selectAll(".orbit-planet").remove();
+  d3.selectAll(".plasma-ring").remove();
+  d3.selectAll(".resonance-line").remove();
   
   // Reset state variables
   currentSystemPlanets = [];
@@ -747,7 +772,12 @@ export function cleanupEnhancedSystem() {
   animationSpeed = 1;
   currentContainer = null;
   currentStage = 1;
+  
+  //console.log("✓ System cleanup complete");
 }
+
+// Expose functions to window for test framework
+window.cleanupEnhancedSystem = cleanupEnhancedSystem;
 
 // PHASE 1: Enhanced keyboard navigation
 export function setupKeyboardNavigation() {
@@ -784,8 +814,33 @@ export function setupKeyboardNavigation() {
 }
 
 // PHASE 1: Render system in overview mode (Stage 1) - FIXED
+// function renderOverviewSystem(system) {
+//   console.log(` Rendering overview for: ${system.hostname}`);
+  
+//   // Cleanup previous system
+//   cleanupEnhancedSystem();
+  
+//   // Clear the main orbit container
+//   const orbitContainer = document.getElementById('orbit-container');
+//   if (orbitContainer) {
+//     orbitContainer.innerHTML = "";
+//   }
+  
+//   // Hide interactive controls
+//   document.querySelectorAll('.system-interactive-controls').forEach(panel => {
+//     panel.style.display = 'none';
+//   });
+  
+//   // Initialize enhanced system for Stage 1 (Overview mode)
+//   console.log('Initializing enhanced system for stage 1...');
+//   initializeEnhancedSystem('orbit-container', system.hostname, 1);
+// }
+
+// Fix for camilleOrbit.js - Update renderOverviewSystem and renderInteractiveSystem
+
 function renderOverviewSystem(system) {
-  console.log(` Rendering overview for: ${system.hostname}`);
+  // IMPORTANT: Use the system parameter, not window.currentActiveSystem
+  console.log(`📍 Rendering overview for: ${system.hostname || system.title}`);
   
   // Cleanup previous system
   cleanupEnhancedSystem();
@@ -803,12 +858,14 @@ function renderOverviewSystem(system) {
   
   // Initialize enhanced system for Stage 1 (Overview mode)
   console.log('Initializing enhanced system for stage 1...');
+  // Use the system parameter's hostname
   initializeEnhancedSystem('orbit-container', system.hostname, 1);
 }
 
-// PHASE 1: Render system in interactive mode (Stage 2) - FIXED
+// Replace renderInteractiveSystem function (around line 841)
 function renderInteractiveSystem(system) {
-  console.log(` Rendering interactive mode for: ${system.hostname}`);
+  // IMPORTANT: Use the system parameter, not window.currentActiveSystem
+  console.log(`🎮 Rendering interactive mode for: ${system.hostname || system.title}`);
   
   // Cleanup previous system
   cleanupEnhancedSystem();
@@ -817,28 +874,64 @@ function renderInteractiveSystem(system) {
   const interactiveContainer = document.getElementById('orbit-container-interactive');
   if (interactiveContainer) {
     interactiveContainer.innerHTML = "";
-
     interactiveContainer.style.width = '100%';
     interactiveContainer.style.height = '600px';
     interactiveContainer.style.background = 'transparent';
     interactiveContainer.style.border = 'none';
+    interactiveContainer.style.display = 'block';
   }
   
   // Initialize enhanced system for Stage 2 (Interactive mode) in the interactive container
-  console.log('Initializing enhanced system for stage 2...');
+  console.log('🚀 Initializing enhanced system for stage 2...');
+  // Use the system parameter's hostname
   initializeEnhancedSystem('orbit-container-interactive', system.hostname, 2);
   
   // Setup interactive animation controls
   setupInteractiveAnimationControls();
   
-  // Show interactive controls after a short delay
-  setTimeout(() => {
-    const systemInfo = systemNarratives[system.hostname] || {};
-    if (systemInfo.id) {
+  // Show interactive controls ONLY ONCE after a short delay
+  const systemInfo = systemNarratives[system.hostname] || {};
+  if (systemInfo.id) {
+    setTimeout(() => {
       showInteractiveControls(systemInfo.id);
-    }
-  }, 200);
+    }, 200);
+  }
 }
+
+// PHASE 1: Render system in interactive mode (Stage 2) - FIXED
+// function renderInteractiveSystem(system) {
+//   console.log(`🎮 Rendering interactive mode for: ${system.hostname}`);
+  
+//   // Cleanup previous system
+//   cleanupEnhancedSystem();
+  
+//   // Use the interactive container for Stage 2
+//   const interactiveContainer = document.getElementById('orbit-container-interactive');
+//   if (interactiveContainer) {
+//     interactiveContainer.innerHTML = "";
+//     interactiveContainer.style.width = '100%';
+//     interactiveContainer.style.height = '600px';
+//     interactiveContainer.style.background = 'transparent';
+//     interactiveContainer.style.border = 'none';
+//     interactiveContainer.style.display = 'block';
+//   }
+  
+//   // Initialize enhanced system for Stage 2 (Interactive mode) in the interactive container
+//   console.log('🚀 Initializing enhanced system for stage 2...');
+//   initializeEnhancedSystem('orbit-container-interactive', system.hostname, 2);
+  
+//   // Setup interactive animation controls
+//   setupInteractiveAnimationControls();
+  
+//   // Show interactive controls ONLY ONCE after a short delay
+//   const systemInfo = systemNarratives[system.hostname] || {};
+//   if (systemInfo.id) {
+//     // Remove duplicate timeout
+//     setTimeout(() => {
+//       showInteractiveControls(systemInfo.id);
+//     }, 200);
+//   }
+// }
 
 // PHASE 1: Enhanced helper functions (preserved your existing logic where possible)
 function getOrbitValue(p) {
@@ -937,30 +1030,41 @@ function formatValue(value, unit) {
 
 // PHASE 1: Enhanced tooltips (preserved your existing logic)
 function setupTooltips(planets, hostname, systemInfo) {
-  // Remove any existing tooltip first
-  d3.select("#tooltip").remove();
-
-  let selected = null;
+  // Remove any existing tooltip first (but check if one exists)
+  let tooltip = d3.select("#tooltip");
   
-  const tooltip = d3.select("body").append("div")
-    .attr("id", "tooltip")
-    .style("position", "absolute")
-    .style("opacity", 0)
-    .style("color", "#fff")
-    .style("background", "rgba(0, 0, 0, 0.85)")
-    .style("padding", "10px")
-    .style("border-radius", "6px")
-    .style("pointer-events", "none")
-    .style("z-index", "999")
-    .style("max-width", "300px")
-    .style("font-size", "0.9rem");
+  if (tooltip.empty()) {
+    // Create new tooltip if it doesn't exist
+    tooltip = d3.select("body").append("div")
+      .attr("id", "tooltip")
+      .style("position", "absolute")
+      .style("opacity", 0)
+      .style("color", "#fff")
+      .style("background", "rgba(0, 0, 0, 0.85)")
+      .style("padding", "10px")
+      .style("border-radius", "6px")
+      .style("pointer-events", "none")
+      .style("z-index", "999")
+      .style("max-width", "300px")
+      .style("font-size", "0.9rem")
+      .style("border", "1px solid rgba(255, 255, 255, 0.2)")
+      .style("box-shadow", "0 0 10px rgba(0, 0, 0, 0.5)");
+    
+    console.log("✓ Tooltip created");
+  } else {
+    // Reset existing tooltip
+    tooltip.style("opacity", 0);
+    console.log("✓ Tooltip reset");
+  }
+
+  let selected = null;  // Declare selected here
 
   planets.on("mouseover", function (event, d) {
     const planetLetter = d.pl_name?.split(" ").pop();
     const descriptions = systemInfo.descriptions || {};
     const description = descriptions[planetLetter] || `A planet in the ${hostname} system.`;
     
-    selected = d3.select(this);
+    selected = d3.select(this);  // Now we can assign to it
 
     d3.select(this)
       .attr("r", 1.3 * +d3.select(this).attr("r"));
@@ -982,7 +1086,7 @@ function setupTooltips(planets, hostname, systemInfo) {
         <div style="margin-top: 10px;">
           <div>Mass: ${formatValue(d.pl_bmasse, 'Earth masses')}</div>
           <div>Radius: ${formatValue(d.pl_rade, 'Earth radii')}</div>
-          <div>Period: ${formatValue(planet.pl_orbper, 'days')}</div>
+          <div>Period: ${formatValue(d.pl_orbper, 'days')}</div>
           <div>Temperature: ${formatValue(d.pl_eqt, 'K')}</div>
           <div>Discovery: ${d.disc_year || 'Unknown'}</div>
         </div>
@@ -990,10 +1094,11 @@ function setupTooltips(planets, hostname, systemInfo) {
   }).on("mousemove", function (event) {
     tooltip.style("left", (event.pageX + 10) + "px")
            .style("top", (event.pageY - 28) + "px");
-  }).on("mouseout", () => {
+  }).on("mouseout", function() {
     tooltip.style("opacity", 0);
-    selected
-      .attr("r", +selected.attr("r") / 1.3);
+    if (selected) {
+      selected.attr("r", +selected.attr("r") / 1.3);
+    }
   });
 }
 
@@ -1065,50 +1170,140 @@ function toggleResonanceLines(show) {
   console.log(`${show ? 'Showing' : 'Hiding'} resonance lines for Kepler-90`);
   
   const svg = d3.select('#orbit-container-interactive svg');
-  if (svg.empty()) return;
+  if (svg.empty()) {
+    console.warn('Could not find interactive SVG container');
+    return;
+  }
   
   if (show) {
-    // Add resonance lines between planets
+    // Get actual planet data and orbital information 
+    const planets = svg.selectAll('.orbit-planet');
+    if (planets.empty()) {
+      console.warn('No planets found for resonance lines');
+      return;
+    }
+    
+    const planetData = planets.data();
+    if (!planetData || planetData.length < 2) {
+      console.warn('Insufficient planet data for resonance lines');
+      return;
+    }
+    
+    // Kepler-90 resonance relationships (based on actual orbital periods)
     const resonanceData = [
-      {from: 0, to: 1, ratio: "2:1"},
-      {from: 1, to: 2, ratio: "3:2"}, 
-      {from: 2, to: 3, ratio: "4:3"}
+      {from: 0, to: 1, ratio: "8:7", desc: "Inner resonance"},
+      {from: 2, to: 3, ratio: "3:1", desc: "Mid-system resonance"}, 
+      {from: 4, to: 5, ratio: "5:3", desc: "Outer resonance"}
     ];
     
+    // Get the auToPixels scale from the current system
+    // We can reconstruct it from the planet data
+    const maxOrbitalDistance = d3.max(planetData, d => d.a || 1);
+    const maxRadius = 280; // Same as in renderSystem
+    const minRadius = 40;
+    const auToPixels = d3.scaleLinear()
+      .domain([0, maxOrbitalDistance])
+      .range([0, maxRadius - minRadius]);
+    
+    // Create resonance visualization between orbits
     resonanceData.forEach((res, i) => {
-      svg.append("line")
-        .attr("class", "resonance-line")
-        .attr("x1", -200 + (i * 100))
-        .attr("y1", -200)
-        .attr("x2", 200 - (i * 100))
-        .attr("y2", 200)
-        .attr("stroke", "#FFA500")
-        .attr("stroke-width", 2)
-        .attr("stroke-dasharray", "5,5")
-        .attr("opacity", 0)
-        // .transition()
-        // .duration(1000)
-        .attr("opacity", 0.6);
+      if (res.from < planetData.length && res.to < planetData.length) {
+        const fromPlanet = planetData[res.from];
+        const toPlanet = planetData[res.to];
         
-      // Add ratio labels
-      svg.append("text")
-        .attr("class", "resonance-label")
-        .attr("x", -100 + (i * 80))
-        .attr("y", -100 + (i * 40))
-        .attr("fill", "#FFA500")
-        .attr("font-size", "12px")
-        .attr("text-anchor", "middle")
-        .text(res.ratio)
-        .attr("opacity", 0)
-        // .transition()
-        // .duration(1000)
-        .attr("opacity", 0.8);
+        // Get the orbital radii using the same scale as the visualization
+        const fromRadius = auToPixels(fromPlanet.a || 0);
+        const toRadius = auToPixels(toPlanet.a || 0);
+        
+        if (fromRadius <= 0 || toRadius <= 0) return;
+        
+        // Create curved resonance line between orbits
+        const midRadius = (fromRadius + toRadius) / 2;
+        const controlOffset = Math.abs(toRadius - fromRadius) * 0.4;
+        
+        const path = `M ${fromRadius} 0 Q ${midRadius} ${-controlOffset} ${toRadius} 0`;
+        
+        svg.append("path")
+          .attr("class", "resonance-line")
+          .attr("d", path)
+          .attr("stroke", "#FFA500")
+          .attr("stroke-width", 3)
+          .attr("stroke-dasharray", "8,4")
+          .attr("fill", "none")
+          .attr("opacity", 0)
+          .transition()
+          .duration(1000)
+          .delay(i * 300)
+          .attr("opacity", 0.8);
+          
+        // Add ratio labels at the curve peak
+        svg.append("text")
+          .attr("class", "resonance-label")
+          .attr("x", midRadius)
+          .attr("y", -controlOffset - 8)
+          .attr("text-anchor", "middle")
+          .attr("fill", "#FFA500")
+          .attr("font-size", "12px")
+          .attr("font-weight", "bold")
+          .text(res.ratio)
+          .attr("opacity", 0)
+          .transition()
+          .duration(800)
+          .delay(i * 300 + 500)
+          .attr("opacity", 1);
+          
+        // Add connecting dots at orbit intersections
+        [fromRadius, toRadius].forEach((radius, dotIndex) => {
+          svg.append("circle")
+            .attr("class", "resonance-line")
+            .attr("cx", radius)
+            .attr("cy", 0)
+            .attr("r", 3)
+            .attr("fill", "#FFA500")
+            .attr("opacity", 0)
+            .transition()
+            .duration(600)
+            .delay(i * 300 + dotIndex * 100)
+            .attr("opacity", 0.9);
+        });
+      }
     });
+    
+    // Add explanatory text
+    svg.append("text")
+      .attr("class", "resonance-explanation")
+      .attr("x", 0)
+      .attr("y", -200)
+      .attr("text-anchor", "middle")
+      .attr("fill", "#FFA500")
+      .attr("font-size", "16px")
+      .attr("font-weight", "bold")
+      .text("Orbital Resonances")
+      .attr("opacity", 0)
+      .transition()
+      .duration(1000)
+      .delay(1200)
+      .attr("opacity", 1);
+      
+    svg.append("text")
+      .attr("class", "resonance-explanation")
+      .attr("x", 0)
+      .attr("y", -180)
+      .attr("text-anchor", "middle")
+      .attr("fill", "#FFA500")
+      .attr("font-size", "11px")
+      .text("Gravitational relationships between planetary orbits")
+      .attr("opacity", 0)
+      .transition()
+      .duration(1000)
+      .delay(1400)
+      .attr("opacity", 0.9);
+      
   } else {
-    // Remove resonance lines
-    svg.selectAll(".resonance-line, .resonance-label")
-      // .transition()
-      // .duration(500)
+    // Remove resonance lines with smooth transition
+    svg.selectAll(".resonance-line, .resonance-label, .resonance-explanation")
+      .transition()
+      .duration(600)
       .attr("opacity", 0)
       .remove();
   }
@@ -1121,7 +1316,7 @@ function toggleResonanceLines(show) {
 function toggleResonanceChain(show) {
   console.log(`${show ? 'Showing' : 'Hiding'} resonance chain for TOI-178`);
   
-  const svg = d3.select('#orbit-container svg');
+  const svg = d3.select('#orbit-container-interactive svg');
   if (svg.empty()) return;
   
   if (show) {
@@ -1678,4 +1873,32 @@ function addInteractiveSystemBackground(svg, hostname) {
       .attr("stroke-width", 2)
       .attr("stroke-dasharray", "5,5");
   }
+}
+
+
+
+// Add at the END of camilleOrbit.js to expose all system-specific functions
+
+// Expose Kepler-90 functions
+window.toggleResonanceLines = toggleResonanceLines;
+window.comparePeriods = comparePeriods;
+
+// Expose TOI-178 functions  
+window.toggleResonanceChain = toggleResonanceChain;
+window.showPeriodRatios = showPeriodRatios;
+
+// Expose GJ 667C functions
+window.toggleHabitableZone = toggleHabitableZone;
+window.highlightHabitablePlanets = highlightHabitablePlanets;
+window.showTemperatureZones = showTemperatureZones;
+
+// Also expose these utility functions if they exist
+if (typeof updateKELTVisualization !== 'undefined') {
+  window.updateKELTVisualization = updateKELTVisualization;
+}
+if (typeof updateWASPVisualization !== 'undefined') {
+  window.updateWASPVisualization = updateWASPVisualization;
+}
+if (typeof updateKepler80Visualization !== 'undefined') {
+  window.updateKepler80Visualization = updateKepler80Visualization;
 }

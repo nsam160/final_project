@@ -132,13 +132,21 @@ function setupExtremeCapsules() {
 
 // PHASE 2: Enhanced detailed view with proper layout
 function showExtremeDetailedView(extremeSystem) {
-  console.log(` Showing extreme detailed view: ${extremeSystem.title}`);
+  console.log(`📍 Showing extreme detailed view: ${extremeSystem.title}`);
+  console.log(`🔍 Extreme type: ${extremeSystem.extremeType}`);
   
   currentExtremeSystem = extremeSystem;
   currentExtremeStage = 1;
   
   // Set global reference for stage navigation compatibility
-  window.currentActiveSystem = extremeSystem;
+  // Make sure ALL properties are preserved
+  window.currentActiveSystem = {
+    ...extremeSystem,
+    isExtreme: true,  // Add explicit flag
+    extremeType: extremeSystem.extremeType
+  };
+  
+  console.log(`✅ Set currentActiveSystem with extremeType: ${window.currentActiveSystem.extremeType}`);
   
   const overview = document.getElementById("overview");
   const detailedView = document.getElementById("detailed-view");
@@ -201,19 +209,61 @@ function resetStageNavigation() {
   });
 }
 
+// // PHASE 2: Enhanced Overview Mode (Stage 1) - NO ORBITAL CONTROLS
+// export function renderExtremeOverview(extremeSystem) {
+//   console.log(` Rendering extreme overview: ${extremeSystem.title}`);
+  
+//   currentExtremeStage = 1;
+//   const orbitContainer = document.getElementById('orbit-container');
+//   if (!orbitContainer) {
+//     console.error(" Orbit container not found");
+//     return;
+//   }
+  
+//   // Clear container
+//   orbitContainer.innerHTML = "";
+  
+//   // Get real planet data
+//   let planetData = null;
+//   if (window.ExoplanetData && window.ExoplanetData.isLoaded()) {
+//     const allPlanets = window.ExoplanetData.getAll();
+//     planetData = allPlanets.find(p => 
+//       p.pl_name === extremeSystem.planetName || 
+//       p.pl_name.includes(extremeSystem.planetName.split(' ')[0])
+//     );
+//   }
+  
+//   // Render extreme planet visualization
+//   renderExtremePlanetVisualization(orbitContainer, planetData, extremeSystem, 1);
+//   updateExtremeProfile(planetData, extremeSystem);
+  
+//   // PHASE 2: Setup extreme-specific overview controls (NO orbital controls)
+//   setTimeout(() => {
+//     setupExtremeOverviewControls(extremeSystem);
+//   }, 100);
+  
+//   // Hide any standard animation controls
+//   hideStandardAnimationControls();
+// }
+
 // PHASE 2: Enhanced Overview Mode (Stage 1) - NO ORBITAL CONTROLS
 export function renderExtremeOverview(extremeSystem) {
-  console.log(` Rendering extreme overview: ${extremeSystem.title}`);
+  console.log(`📍 Rendering extreme overview: ${extremeSystem.title}`);
   
   currentExtremeStage = 1;
+  
+  // Use the OVERVIEW container for Stage 1
   const orbitContainer = document.getElementById('orbit-container');
   if (!orbitContainer) {
-    console.error(" Orbit container not found");
+    console.error("❌ Orbit container not found");
     return;
   }
   
   // Clear container
   orbitContainer.innerHTML = "";
+  orbitContainer.style.display = 'block';
+  
+  console.log("📦 Using container:", orbitContainer.id);
   
   // Get real planet data
   let planetData = null;
@@ -239,15 +289,56 @@ export function renderExtremeOverview(extremeSystem) {
 }
 
 // PHASE 2: Enhanced Interactive Mode (Stage 2) - EXTREME CONTROLS
+// export function renderExtremeInteractive(extremeSystem) {
+//   console.log(` Rendering extreme interactive: ${extremeSystem.title}`);
+  
+//   currentExtremeStage = 2;
+  
+//   const orbitContainer = document.getElementById('orbit-container');
+//   if (!orbitContainer) return;
+  
+//   // Clear container
+//   orbitContainer.innerHTML = "";
+  
+//   // Get real planet data
+//   let planetData = null;
+//   if (window.ExoplanetData && window.ExoplanetData.isLoaded()) {
+//     const allPlanets = window.ExoplanetData.getAll();
+//     planetData = allPlanets.find(p => 
+//       p.pl_name === extremeSystem.planetName || 
+//       p.pl_name.includes(extremeSystem.planetName.split(' ')[0])
+//     );
+//   }
+  
+//   // Render enhanced interactive visualization
+//   renderExtremePlanetVisualization(orbitContainer, planetData, extremeSystem, 2);
+  
+//   // PHASE 2: Setup extreme-specific interactive controls
+//   setTimeout(() => {
+//     setupExtremeInteractiveControls(extremeSystem);
+//     showExtremeInteractiveControlPanel(extremeSystem.id);
+//   }, 200);
+// }
+
+// PHASE 2: Enhanced Interactive Mode (Stage 2) - EXTREME CONTROLS
 export function renderExtremeInteractive(extremeSystem) {
-  console.log(` Rendering extreme interactive: ${extremeSystem.title}`);
+  console.log(`🎮 Rendering extreme interactive: ${extremeSystem.title}`);
   
   currentExtremeStage = 2;
-  const orbitContainer = document.getElementById('orbit-container');
-  if (!orbitContainer) return;
   
-  // Clear container
-  orbitContainer.innerHTML = "";
+  // IMPORTANT: Use the INTERACTIVE container for Stage 2!
+  const container = document.getElementById('orbit-container-interactive');
+  if (!container) {
+    console.error("❌ Interactive container not found!");
+    return;
+  }
+  
+  // Clear container and make visible
+  container.innerHTML = "";
+  container.style.display = 'block';
+  container.style.minHeight = '600px';
+  
+  console.log("📦 Using container:", container.id);
   
   // Get real planet data
   let planetData = null;
@@ -259,8 +350,8 @@ export function renderExtremeInteractive(extremeSystem) {
     );
   }
   
-  // Render enhanced interactive visualization
-  renderExtremePlanetVisualization(orbitContainer, planetData, extremeSystem, 2);
+  // Render enhanced interactive visualization IN THE RIGHT CONTAINER
+  renderExtremePlanetVisualization(container, planetData, extremeSystem, 2);
   
   // PHASE 2: Setup extreme-specific interactive controls
   setTimeout(() => {
@@ -274,9 +365,16 @@ export function renderExtremeInteractive(extremeSystem) {
 
 // PHASE 2: Hide standard orbital animation controls for extreme planets
 function hideStandardAnimationControls() {
+  console.log("🚫 Hiding standard orbital animation controls for extreme planets");
   const animationSection = document.querySelector('.animation-controls-section');
   if (animationSection) {
     animationSection.style.display = 'none';
+  }
+ 
+  // Hide planet navigation controls too
+  const planetNav = document.querySelector('.planet-navigation-controls');
+  if (planetNav) {
+    planetNav.style.display = 'none';
   }
   
   // Hide orbital-specific elements
@@ -293,20 +391,38 @@ function hideStandardAnimationControls() {
       element.style.display = 'none';
     }
   });
-}
+} 
 
 // PHASE 2: Enhanced extreme planet visualization
 function renderExtremePlanetVisualization(container, planetData, extremeSystem, stage) {
+  console.log(`🎨 Rendering extreme planet: ${extremeSystem.title} (Stage ${stage})`);
+  console.log(`📊 Planet data available: ${planetData ? 'YES' : 'NO'}`);
+  
   const width = 600;
   const height = 600;
   
-  const svg = d3.select(container)
+  // Make sure container is a D3 selection
+  if (typeof container === 'string' || container instanceof Element) {
+    container = d3.select(container);
+  }
+  
+  // Clear any existing content
+  container.selectAll("*").remove();
+  
+  const svg = container
     .append("svg")
     .attr("viewBox", [-width / 2, -height / 2, width, height])
     .style("background", "radial-gradient(circle, #000428 0%, #004e92 100%)")
     .style("width", "100%")
     .style("height", "100%")
     .style("border-radius", "10px");
+    
+  console.log("✓ SVG created");
+   
+  // ADD THIS DEBUG CODE:
+  console.log("🔍 Container contents:", container.node().innerHTML.substring(0, 200));
+  console.log("🔍 SVG style:", svg.style("background"));
+  console.log("🔍 Container ID:", container.node().id);
   
   // PHASE 2: Enhanced backgrounds per extreme type and stage
   addExtremeBackground(svg, extremeSystem, planetData, stage);
@@ -359,6 +475,8 @@ function addKELTBackground(svg, stage, planetData) {
   const intensity = extremeControlStates.kelt.plasmaIntensity / 100;
   const radiation = extremeControlStates.kelt.stellarRadiation / 100;
   
+  console.log(`🔥 Adding KELT background - Stage: ${stage}, Intensity: ${intensity}`);
+  
   // Plasma rings (more intense based on controls)
   for (let i = 0; i < (stage === 2 ? 12 : 6); i++) {
     svg.append("circle")
@@ -372,6 +490,9 @@ function addKELTBackground(svg, stage, planetData) {
       .attr("stroke-opacity", (stage === 2 ? 0.2 : 0.15) * intensity)
       .attr("stroke-dasharray", "8,12");
   }
+  
+  console.log(`✅ Added ${stage === 2 ? 12 : 6} plasma rings`);
+  
   
   // Stellar radiation field
   if (stage === 2) {
@@ -506,7 +627,7 @@ function addKepler80Background(svg, stage, planetData) {
     .attr("fill", "#cccccc")
     .style("font-size", stage === 2 ? "16px" : "14px")
     .style("font-weight", "bold")
-    .text(`Density: ${density.toFixed(1)} g/cm³`);
+    .text(`Density: ${parseFloat(density).toFixed(1)} g/cm³`);
     
   if (stage === 2) {
     svg.append("text")
@@ -731,12 +852,19 @@ function getExtremeStats(extremeSystem, planetData) {
 
 // PHASE 2: Environmental animation (not orbital)
 function startExtremeEnvironmentalAnimation(svg, extremeSystem, stage) {
+  // Always stop previous timer first
   if (extremeAnimationTimer) {
     extremeAnimationTimer.stop();
+    extremeAnimationTimer = null;
   }
   
-  extremeAnimationTimer = d3.timer((elapsed) => {
+  console.log(`🎬 Starting environmental animation for ${extremeSystem.title}`);
+  
+  let elapsed = 0;
+  extremeAnimationTimer = d3.timer((time) => {
     if (!isExtremeAnimationPlaying) return;
+    
+    elapsed = time;
     
     // Gentle planet rotation
     svg.select(".extreme-planet")
@@ -794,22 +922,16 @@ function setupExtremeOverviewControls(extremeSystem) {
 
 // PHASE 2: Setup extreme-specific interactive controls
 function setupExtremeInteractiveControls(extremeSystem) {
-  console.log(`Setting up interactive controls for: ${extremeSystem.title}`);
+  console.log(`🎮 Setting up interactive controls for: ${extremeSystem.title}`);
   
-  // Replace animation controls with extreme-specific controls
-  const animationSection = document.querySelector('.animation-controls-section');
-  if (animationSection) {
-    animationSection.innerHTML = getExtremeControlsHTML(extremeSystem);
-    setupExtremeControlListeners(extremeSystem);
-  }
+  // Show the appropriate extreme control panel
+  showExtremeInteractiveControlPanel(extremeSystem.id);
 }
-
 // PHASE 2: Get HTML for extreme-specific controls
 function getExtremeControlsHTML(extremeSystem) {
   if (extremeSystem.id === "kelt") {
     return `
-      <div class="control-group">
-        <h3>Plasma Controls</h3>
+      <div class="extreme-controls-container">
         <div class="control-item">
           <label>Plasma Intensity: <span id="plasma-intensity-value">${extremeControlStates.kelt.plasmaIntensity}%</span></label>
           <input type="range" id="plasma-intensity" min="0" max="100" value="${extremeControlStates.kelt.plasmaIntensity}" class="extreme-slider">
@@ -830,8 +952,7 @@ function getExtremeControlsHTML(extremeSystem) {
     `;
   } else if (extremeSystem.id === "wasp") {
     return `
-      <div class="control-group">
-        <h3>Iron Rain Controls</h3>
+      <div class="extreme-controls-container">
         <div class="control-item">
           <label>Day/Night Balance: <span id="day-night-value">${extremeControlStates.wasp.dayNightRatio}%</span></label>
           <input type="range" id="day-night-ratio" min="0" max="100" value="${extremeControlStates.wasp.dayNightRatio}" class="extreme-slider">
@@ -853,8 +974,7 @@ function getExtremeControlsHTML(extremeSystem) {
     `;
   } else if (extremeSystem.id === "kepler80") {
     return `
-      <div class="control-group">
-        <h3>Density Controls</h3>
+      <div class="extreme-controls-container">
         <div class="control-item">
           <label>Compression Level: <span id="compression-value">${extremeControlStates.kepler80.compressionLevel}%</span></label>
           <input type="range" id="compression-level" min="0" max="100" value="${extremeControlStates.kepler80.compressionLevel}" class="extreme-slider">
@@ -1014,19 +1134,44 @@ function updateKepler80Visualization() {
 
 // PHASE 2: Show extreme interactive control panel
 function showExtremeInteractiveControlPanel(systemId) {
-  console.log(`Showing extreme interactive control panel for: ${systemId}`);
+  console.log(`🎮 Showing extreme interactive control panel for: ${systemId}`);
   
-  // Hide all system control panels
-  document.querySelectorAll('.system-interactive-controls').forEach(panel => {
+  // Hide all system control panels first
+  document.querySelectorAll('.control-panel').forEach(panel => {
     panel.style.display = 'none';
   });
+  
+  // Show the appropriate extreme control panel
+  const panelId = `${systemId}-controls`;
+  const panel = document.getElementById(panelId);
+  
+  if (panel) {
+    panel.style.display = 'block';
+    console.log(`✅ Showing control panel: ${panelId}`);
+    
+    // Insert the controls HTML into the control grid
+    const controlGrid = document.getElementById(`${systemId}-interactive-controls`);
+    if (controlGrid) {
+      const extremeSystem = extremeSystemData.find(s => s.id === systemId);
+      controlGrid.innerHTML = getExtremeControlsHTML(extremeSystem);
+      console.log(`✅ Inserted controls HTML for ${systemId}`);
+      
+      // Setup the control listeners
+      setupExtremeControlListeners(extremeSystem);
+      console.log(`✅ Setup control listeners for ${systemId}`);
+    } else {
+      console.error(`❌ Control grid not found: ${systemId}-interactive-controls`);
+    }
+  } else {
+    console.error(`❌ Control panel not found: ${panelId}`);
+  }
   
   // Update interactive controls title
   const titleElement = document.getElementById('interactive-controls-title');
   if (titleElement) {
     const titles = {
       'kelt': 'KELT-9b Plasma Controls',
-      'wasp': 'WASP-76b Iron Rain Controls',
+      'wasp': 'WASP-76b Iron Rain Controls', 
       'kepler80': 'Kepler-80f Density Controls'
     };
     titleElement.textContent = titles[systemId] || 'Extreme Planet Controls';
@@ -1082,11 +1227,11 @@ function showExtremeSystemInfo(extremeSystem, planetData) {
   
   const updates = [
     { id: 'profile-planet-name', text: extremeSystem.title },
-    { id: 'profile-planet-mass', text: planetData ? `${(planetData.pl_bmasse || 1).toFixed(2)} Earth masses` : 'Unknown' },
-    { id: 'profile-planet-radius', text: planetData ? `${(planetData.pl_rade || 1).toFixed(2)} Earth radii` : 'Unknown' },
-    { id: 'profile-planet-period', text: planetData ? `${(planetData.pl_orbper || 1).toFixed(2)} days` : 'Unknown' },
+    { id: 'profile-planet-mass', text: planetData ? `${parseFloat(planetData.pl_bmasse || 1).toFixed(2)} Earth masses` : 'Unknown' },
+    { id: 'profile-planet-radius', text: planetData ? `${parseFloat(planetData.pl_rade || 1).toFixed(2)} Earth radii` : 'Unknown' },
+    { id: 'profile-planet-period', text: planetData ? `${parseFloat(planetData.pl_orbper || 1).toFixed(2)} days` : 'Unknown' },
     { id: 'profile-planet-temp', text: stats.mainStat },
-    { id: 'profile-planet-distance', text: planetData ? `${(planetData.pl_orbsmax || 0).toFixed(3)} AU` : 'Unknown' },
+    { id: 'profile-planet-distance', text: planetData ? `${parseFloat(planetData.pl_orbsmax || 0).toFixed(3)} AU` : 'Unknown' },
     { id: 'profile-planet-description', text: `${extremeSystem.fullDesc}\n\nCurrent conditions: ${stats.detailStats.join(' • ')}` }
   ];
   

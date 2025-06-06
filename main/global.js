@@ -4,6 +4,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { initializeExtremePlanets, extremeSystemData, renderExtremeOverview, renderExtremeInteractive, cleanupExtremeSystem } from './camilleExtreme.js';
 import { renderSystem, initializeEnhancedSystem, cleanupEnhancedSystem, setupKeyboardNavigation } from './camilleOrbit.js';
 
+// Expose D3 to global scope for test framework compatibility
+window.d3 = d3;
 
 // =========================================
 // GLOBAL DATA USAGE loading main csv file 
@@ -57,6 +59,10 @@ window.ExoplanetData = {
   // Check if data is loaded
   isLoaded: () => isDataLoaded,
   
+  // Additional properties for test framework
+  dataLoaded: false,
+  planetCount: 0,
+  
   // Register callback for when data is loaded
   onDataLoaded: (callback) => {
     if (isDataLoaded) {
@@ -83,6 +89,10 @@ function loadExoplanetData() {
   d3.csv("exoplanet.csv").then(data => {
     allExoplanets = data;
     isDataLoaded = true;
+    
+    // Mark data as loaded and expose status to test framework
+    window.ExoplanetData.dataLoaded = true;
+    window.ExoplanetData.planetCount = data.length;
     
     console.log(`Loaded ${data.length} exoplanets`);
     
@@ -226,12 +236,14 @@ window.addEventListener('scroll', () => {
 // D3 ORBIT STORIES Global Code: Camille's Code START
 // END at line:279
 // ==================================================
-// COMMENT OUT OR REMOVE this problematic import line:
 //import { renderSystem, initializeEnhancedSystem, cleanupEnhancedSystem, setupKeyboardNavigation } from './camilleOrbit.js';
 
 const visitedSystems = new Set();
 // let allExoplanets = [];
 let showingConnections = false;
+let isSystemTransitioning = false;
+let isStageSwitching = false;
+let currentSystemKey = null;
 
 // Use safe element selection to avoid null reference errors
 const overview = document.getElementById("overview");
@@ -344,16 +356,17 @@ function drawMiniSystem(selector, planets) {
     );
 }
 
-// Show detailed view
 
 function showDetailedSystem(systemKey) {
   const system = systemData.find(s => s.id === systemKey);
   
+  cleanupEnhancedSystem(); // Ensure previous system is cleaned up
+
   // Store current active system for stage navigation
   window.currentActiveSystem = system;
   console.log('Set current active system to:', system.hostname);
   
-  // Add null checks for DOM elements
+  // Update titles
   const systemTitleElement = document.getElementById("system-title-orbit");
   if (systemTitleElement) {
     systemTitleElement.textContent = system.title;
@@ -391,21 +404,16 @@ function showDetailedSystem(systemKey) {
     }
   }
 
-  // Clear previous orbit container and cleanup
+  // FIXED: Use the existing orbit-container instead of creating dynamic ones
   cleanupEnhancedSystem();
+  const orbitContainer = document.getElementById('orbit-container');
   if (orbitContainer) {
     orbitContainer.innerHTML = "";
     
-    // Create new container for enhanced system
-    const container = document.createElement("div");
-    container.id = `container-${system.id}`;
-    container.style.width = "100%";
-    container.style.height = "500px";
-    orbitContainer.appendChild(container);
-    
-    // Initialize the enhanced system with proper timing (default to stage 1)
+    // Initialize the enhanced system directly in orbit-container
     setTimeout(() => {
-      initializeEnhancedSystem(`container-${system.id}`, system.hostname, 1);
+      // Pass the container ID directly, not a dynamic one
+      initializeEnhancedSystem('orbit-container', system.hostname, 1);
       
       // Ensure stage 1 is active by default
       switchToStage(1);
@@ -414,21 +422,37 @@ function showDetailedSystem(systemKey) {
 }
 
 // Capsule click + back
+// Replace the enhanceCapsules function in global.js (around line 430)
 function enhanceCapsules() {
   document.querySelectorAll(".capsule").forEach(el => {
     const id = el.dataset.system;
-    if (id) { // Only proceed if system ID exists
+    if (id) {
       const marker = document.createElement("div");
       marker.className = "visited-marker";
       marker.textContent = "Visited";
       el.appendChild(marker);
 
-      el.addEventListener("click", () => {
+      el.addEventListener("click", (event) => {
+        // Prevent rapid clicking
+        if (isSystemTransitioning) {
+          console.log('System transition in progress, please wait...');
+          return;
+        }
+        
+        // Prevent clicking the same system
+        if (currentSystemKey === id && document.getElementById('detailed-view').style.display !== 'none') {
+          console.log('This system is already active');
+          return;
+        }
+        
+        isSystemTransitioning = true;
+        currentSystemKey = id;
+        
         el.classList.add("visited");
         visitedSystems.add(id);
+        
         if (overview) overview.style.opacity = 0;
         
-        //  HIDE ENTIRE CAPSULE SECTION
         const section = document.getElementById("section-systems");
         if (section) section.style.display = "none";
 
@@ -439,41 +463,129 @@ function enhanceCapsules() {
             detailedView.style.display = "block";
             detailedView.style.opacity = 1;
           }
+          
+          // Reset transition flag after animation completes
+          setTimeout(() => {
+            isSystemTransitioning = false;
+          }, 500);
         }, 400);
+        
         checkStoryProgression();
       });
     }
   });
+}
 
-  const backButton = document.getElementById("back-button");
-  if (backButton) {
-    backButton.addEventListener("click", () => {
-      if (detailedView) detailedView.style.opacity = 0;
-      setTimeout(() => {
-        if (detailedView) detailedView.style.display = "none";
-        if (orbitContainer) orbitContainer.innerHTML = "";
-     
-        // Comment out function from missing file:
-        // cleanupEnhancedSystem();
+//const backButton = document.getElementById("back-button");
+// if (backButton) {
+//   backButton.addEventListener("click", () => {
+//     // Clean up ANY active system
+//     if (typeof cleanupEnhancedSystem === 'function') {
+//       cleanupEnhancedSystem();
+//     }
+//     if (typeof cleanupExtremeSystem === 'function') {
+//       cleanupExtremeSystem();
+//     }
+    
+//     // Clear the global reference
+//     window.currentActiveSystem = null;
+    
+//     if (detailedView) detailedView.style.opacity = 0;
+//     setTimeout(() => {
+//       if (detailedView) detailedView.style.display = "none";
+      
+//       // Clear ALL containers
+//       ['orbit-container', 'orbit-container-interactive'].forEach(id => {
+//         const element = document.getElementById(id);
+//         if (element) element.innerHTML = "";
+//       });
+      
+//       // Hide ALL control panels
+//       document.querySelectorAll('.control-panel').forEach(panel => {
+//         panel.style.display = 'none';
+//       });
+      
+//       // Clear animation controls section
+//       const animationSection = document.querySelector('.animation-controls-section');
+//       if (animationSection) {
+//         animationSection.innerHTML = '';
+//       }
 
-        // Hide all system containers
-        ["system1", "system2", "system3"].forEach(id => {
-          const element = document.getElementById(id);
-          if (element) {
-            element.style.display = "none";
-          }
-        });
+//       // Hide all system containers
+//       ["system1", "system2", "system3"].forEach(id => {
+//         const element = document.getElementById(id);
+//         if (element) {
+//           element.style.display = "none";
+//         }
+//       });
 
-        const section = document.getElementById("section-systems");
-        if (section) section.style.display = "block";
-        
-        if (overview) {
-          overview.style.display = "flex";
-          overview.style.opacity = 1;
+//       const section = document.getElementById("section-systems");
+//       if (section) section.style.display = "block";
+      
+//       if (overview) {
+//         overview.style.display = "flex";
+//         overview.style.opacity = 1;
+//       }
+//     }, 400);
+//   });
+// }
+
+// Update the back button handler (around line 470)
+const backButton = document.getElementById("back-button");
+if (backButton) {
+  backButton.addEventListener("click", () => {
+    // Reset current system key
+    currentSystemKey = null;
+    
+    // Clean up ANY active system
+    if (typeof cleanupEnhancedSystem === 'function') {
+      cleanupEnhancedSystem();
+    }
+    if (typeof cleanupExtremeSystem === 'function') {
+      cleanupExtremeSystem();
+    }
+    
+    // Clear the global reference
+    window.currentActiveSystem = null;
+    
+    if (detailedView) detailedView.style.opacity = 0;
+    setTimeout(() => {
+      if (detailedView) detailedView.style.display = "none";
+      
+      // Clear ALL containers
+      ['orbit-container', 'orbit-container-interactive'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.innerHTML = "";
+      });
+      
+      // Hide ALL control panels
+      document.querySelectorAll('.control-panel').forEach(panel => {
+        panel.style.display = 'none';
+      });
+      
+      // Clear animation controls section
+      const animationSection = document.querySelector('.animation-controls-section');
+      if (animationSection) {
+        animationSection.innerHTML = '';
+      }
+
+      // Hide all system containers
+      ["system1", "system2", "system3"].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.style.display = "none";
         }
-      }, 400);
-    });
-  }
+      });
+
+      const section = document.getElementById("section-systems");
+      if (section) section.style.display = "block";
+      
+      if (overview) {
+        overview.style.display = "flex";
+        overview.style.opacity = 1;
+      }
+    }, 400);
+  });
 }
 
 // Connections
@@ -2246,8 +2358,28 @@ function setupStageNavigation() {
   console.log('Stage navigation setup complete');
 }
 
+
+// Expose switchToStage to window for test framework access
+window.switchToStage = switchToStage;
+
+// Update the switchToStage function in global.js (around line 2270)
 function switchToStage(stageNumber) {
-  console.log(`Switching to stage ${stageNumber}`);
+  // Prevent rapid stage switching
+  if (isStageSwitching) {
+    console.log('Stage switch in progress...');
+    return;
+  }
+  
+  isStageSwitching = true;
+  console.log(`🔄 Switching to stage ${stageNumber}`);
+  
+  // IMPORTANT: Clean up everything first
+  if (typeof cleanupEnhancedSystem === 'function') {
+    cleanupEnhancedSystem();
+  }
+  if (typeof cleanupExtremeSystem === 'function') {
+    cleanupExtremeSystem();
+  }
   
   // Update button states
   document.querySelectorAll('.stage-btn').forEach(btn => {
@@ -2259,45 +2391,81 @@ function switchToStage(stageNumber) {
     activeButton.classList.add('active');
   }
   
-  // Update panel visibility with fade transition
+  // Hide ALL panels first
   document.querySelectorAll('.stage-panel').forEach(panel => {
     panel.classList.remove('active');
+    panel.style.display = 'none';
     panel.style.opacity = '0';
   });
   
+  // Clear ALL containers
+  ['orbit-container', 'orbit-container-interactive'].forEach(id => {
+    const container = document.getElementById(id);
+    if (container) {
+      container.innerHTML = '';
+    }
+  });
+  
+  // Show the active panel
   const activePanel = document.getElementById(`system-stage-${stageNumber}`);
   if (activePanel) {
     setTimeout(() => {
+      activePanel.style.display = 'block';
       activePanel.classList.add('active');
-      activePanel.style.opacity = '1';
-
-      //activePanel.style.display = 'block'; // Ensure it's visible
+      setTimeout(() => {
+        activePanel.style.opacity = '1';
+      }, 50);
     }, 100);
   }
   
   // Call appropriate render function based on stage
   if (window.currentActiveSystem) {
     const system = window.currentActiveSystem;
+    console.log(`📍 Rendering ${system.hostname || system.title} in stage ${stageNumber}`);
+    
+    const isExtremePlanet = system.isExtreme || system.extremeType !== undefined || 
+                           ['kelt', 'wasp', 'kepler80'].includes(system.id);
+    console.log(`🌟 Is extreme planet: ${isExtremePlanet}`);
     
     setTimeout(() => {
-      if (stageNumber === 1) {
-        console.log('Calling renderOverviewSystem...');
-        if (typeof window.renderOverviewSystem === 'function') {
-          window.renderOverviewSystem(system);
-        } else {
-          console.error('renderOverviewSystem function not available');
+      try {
+        if (stageNumber === 1) {
+          if (isExtremePlanet) {
+            console.log('🚀 Calling renderExtremeOverview...');
+            if (typeof window.renderExtremeOverview === 'function') {
+              window.renderExtremeOverview(system);
+            }
+          } else {
+            console.log('🌍 Calling renderOverviewSystem...');
+            if (typeof window.renderOverviewSystem === 'function') {
+              window.renderOverviewSystem(system);
+            }
+          }
+        } else if (stageNumber === 2) {
+          if (isExtremePlanet) {
+            console.log('🎮 Calling renderExtremeInteractive...');
+            if (typeof window.renderExtremeInteractive === 'function') {
+              window.renderExtremeInteractive(system);
+            }
+          } else {
+            console.log('🌍 Calling renderInteractiveSystem...');
+            if (typeof window.renderInteractiveSystem === 'function') {
+              window.renderInteractiveSystem(system);
+            }
+          }
         }
-      } else if (stageNumber === 2) {
-        console.log('Calling renderInteractiveSystem...');
-        if (typeof window.renderInteractiveSystem === 'function') {
-          window.renderInteractiveSystem(system);
-        } else {
-          console.error('renderInteractiveSystem function not available');
-        }
+      } catch (error) {
+        console.error('Error rendering system:', error);
+      } finally {
+        // Always reset the flag
+        setTimeout(() => {
+          isStageSwitching = false;
+        }, 300);
       }
-    }, 450); // Allow time for panel transition
+    }, 300);
   } else {
-    console.warn('No current active system for stage switching');
+    console.warn('⚠️ No current active system for stage switching');
+    isStageSwitching = false;
   }
 }
 
