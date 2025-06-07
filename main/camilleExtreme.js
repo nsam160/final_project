@@ -894,30 +894,45 @@ function startExtremeEnvironmentalAnimation(svg, extremeSystem, stage) {
 
 // PHASE 2: Setup extreme-specific overview controls (replace orbital controls)
 function setupExtremeOverviewControls(extremeSystem) {
-  console.log(` Setting up overview controls for: ${extremeSystem.title}`);
+  console.log(`🎮 Setting up overview controls for: ${extremeSystem.title}`);
   
-  // Replace animation controls section with extreme overview info
+  // DON'T replace innerHTML! Just hide the animation controls
   const animationSection = document.querySelector('.animation-controls-section');
   if (animationSection) {
-    animationSection.innerHTML = `
-      <div class="control-group">
-        <h3> Extreme Conditions</h3>
-        <div class="extreme-overview-stats" id="extreme-overview-stats">
-          <div class="stat-item">
-            <span class="stat-label">Type:</span>
-            <span class="stat-value">${extremeSystem.unique}</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Extremeness:</span>
-            <span class="stat-value">Beyond Earth Limits</span>
-          </div>
-        </div>
-        <button class="control-button" onclick="showExtremeComparison('${extremeSystem.id}')">
-          Compare to Earth
-        </button>
-      </div>
-    `;
+    animationSection.style.display = 'none';  // Hide, don't destroy
   }
+  
+  // Create a separate container for extreme controls
+  let extremeSection = document.querySelector('.extreme-overview-section');
+  if (!extremeSection) {
+    extremeSection = document.createElement('div');
+    extremeSection.className = 'extreme-overview-section animation-controls-section';
+    // Insert it after the hidden animation controls
+    if (animationSection && animationSection.parentNode) {
+      animationSection.parentNode.insertBefore(extremeSection, animationSection.nextSibling);
+    }
+  }
+  
+  // Put extreme controls in the new section
+  extremeSection.innerHTML = `
+    <div class="control-group">
+      <h3>🌟 Extreme Conditions</h3>
+      <div class="extreme-overview-stats" id="extreme-overview-stats">
+        <div class="stat-item">
+          <span class="stat-label">Type:</span>
+          <span class="stat-value">${extremeSystem.unique}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Extremeness:</span>
+          <span class="stat-value">Beyond Earth Limits</span>
+        </div>
+      </div>
+      <button class="control-button" onclick="showExtremeComparison('${extremeSystem.id}')">
+        Compare to Earth
+      </button>
+    </div>
+  `;
+  extremeSection.style.display = 'block';
 }
 
 // PHASE 2: Setup extreme-specific interactive controls
@@ -1285,6 +1300,12 @@ export function cleanupExtremeSystem() {
   
   // Remove any global tooltips
   d3.select("#tooltip").remove();
+
+  // Remove extreme overview section
+  const extremeSection = document.querySelector('.extreme-overview-section');
+  if (extremeSection) {
+    extremeSection.remove();
+  }
   
   // Show standard animation controls again
   const animationSection = document.querySelector('.animation-controls-section');

@@ -306,7 +306,7 @@ body {
 }
 
 /* Tooltip Styling */
-#tooltip {
+#orbit-tooltip {
   z-index: 999;
   background-color: rgba(0, 0, 0, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -317,7 +317,7 @@ body {
   font-size: 0.9rem;
 }
 
-#tooltip strong {
+#orbit-tooltip strong {
   color: #fff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   padding-bottom: 5px;
@@ -853,8 +853,8 @@ body {
   border-radius: 50%;
   cursor: pointer;
 }
-/* duplicate style name to Royce*/
-.toggle-button {
+/* Planet navigation button styles */
+.planet-nav-button {
   background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
   border: none;
   color: white;
@@ -867,7 +867,7 @@ body {
   font-size: 0.9rem;
 }
 
-.toggle-button:hover {
+.planet-nav-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
 }

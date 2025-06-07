@@ -67,8 +67,6 @@ export function renderSystem(containerId, planetData, stage = 1) {
     return;
   }
 
-
-
   const width = 900;  // Same for both stages
   const height = 600;  // Same for both stages
   const maxRadius = 280;  // Same for both stages
@@ -246,15 +244,32 @@ export function renderSystem(containerId, planetData, stage = 1) {
       
       // Check if this is an extreme planet or regular orbit system
       const extremePlanets = ['KELT-9', 'WASP-76', 'Kepler-80'];
-      if (!extremePlanets.includes(hostname) && systemInfo.id) {
+      
+      if (!extremePlanets.includes(hostname)) {
+      // ORBITAL SYSTEMS: Setup standard animation controls
+      setupAnimationControls('interactive-animation');
+      
+      if (systemInfo.id) {
         showInteractiveControls(systemInfo.id);
       }
-      // Extreme planets handle their own controls in camilleExtreme.js
-    }, 100);
-  }
-
+    } else {
+      // EXTREME PLANETS: Let camilleExtreme.js handle their own controls
+      console.log(`🌟 Extreme planet detected: ${hostname} - using specialized controls`);
+    }
+  }, 100);
+}
   return { svg, planets, orbits: null, auToPixels };
 }
+
+//       if (!extremePlanets.includes(hostname) && systemInfo.id) {
+//         showInteractiveControls(systemInfo.id);
+//       }
+//       // Extreme planets handle their own controls in camilleExtreme.js
+//     }, 100);
+//   }
+
+//   return { svg, planets, orbits: null, auToPixels };
+// }
 
 //Enhanced system-specific background elements
 function addSystemSpecificBackground(svg, hostname, stage = 1) {
@@ -458,32 +473,70 @@ function updatePlanetVisual(planet, hostname, isSystemView = false) {
 }
 
 //Setup animation controls
+// Replace the setupAnimationControls function in camilleOrbit.js
 function setupAnimationControls(prefix = 'animation') {
+  console.log(`🎮 Setting up animation controls with prefix: ${prefix}`);
+  
   const playPauseBtn = document.getElementById(`${prefix}-play-pause`);
   const speedSlider = document.getElementById(`${prefix}-speed-slider`);
   const speedValue = document.getElementById(`${prefix}-speed-value`);
   
+  // Initialize global state if not already set
+  if (window.isAnimationPlaying === undefined) {
+    window.isAnimationPlaying = true;
+  }
+  if (window.animationSpeed === undefined) {
+    window.animationSpeed = 1;
+  }
+  
   if (playPauseBtn) {
+    // Set initial button text based on current state
+    playPauseBtn.textContent = window.isAnimationPlaying ? 'Pause' : 'Play';
+    
     // Remove existing listeners
     playPauseBtn.replaceWith(playPauseBtn.cloneNode(true));
     const newBtn = document.getElementById(`${prefix}-play-pause`);
     
     newBtn.onclick = function() {
-      isAnimationPlaying = !isAnimationPlaying;
-      this.textContent = isAnimationPlaying ? 'Pause' : 'Play';
+      window.isAnimationPlaying = !window.isAnimationPlaying;
+      this.textContent = window.isAnimationPlaying ? 'Pause' : 'Play';
       
       // Update both animation controls if they exist
       const otherBtn = document.getElementById(prefix === 'animation' ? 'interactive-animation-play-pause' : 'animation-play-pause');
       if (otherBtn) {
         otherBtn.textContent = this.textContent;
       }
+      
+      // Update local state
+      isAnimationPlaying = window.isAnimationPlaying;
+      
+      console.log(`Animation state changed to: ${window.isAnimationPlaying ? 'Playing' : 'Paused'}`);
+      
+      // If we're playing and there's no timer, restart it
+      if (window.isAnimationPlaying && !animationTimer && currentSystemPlanets.length > 0) {
+        const containerSelector = currentContainer.startsWith('#') ? currentContainer : `#${currentContainer}`;
+        const planets = d3.select(containerSelector).selectAll('.orbit-planet');
+        if (!planets.empty()) {
+          const hostname = currentSystemPlanets[0].hostname;
+          const maxOrbitalDistance = d3.max(currentSystemPlanets, d => d.a || 1);
+          const auToPixels = d3.scaleLinear()
+            .domain([0, maxOrbitalDistance])
+            .range([0, 280 - 40]);
+          setupPlanetAnimation(planets, currentSystemPlanets, hostname, auToPixels);
+        }
+      }
     };
   }
   
   if (speedSlider && speedValue) {
+    // Set initial values based on current state
+    speedSlider.value = window.animationSpeed;
+    speedValue.textContent = `${window.animationSpeed}x`;
+    
     speedSlider.oninput = function() {
-      animationSpeed = parseFloat(this.value);
-      speedValue.textContent = `${animationSpeed}x`;
+      window.animationSpeed = parseFloat(this.value);
+      animationSpeed = window.animationSpeed; // Update local state
+      speedValue.textContent = `${window.animationSpeed}x`;
       
       // Update both speed controls if they exist
       const otherSlider = document.getElementById(prefix === 'animation' ? 'interactive-animation-speed-slider' : 'animation-speed-slider');
@@ -492,9 +545,12 @@ function setupAnimationControls(prefix = 'animation') {
         otherSlider.value = this.value;
         otherValue.textContent = speedValue.textContent;
       }
+      
+      console.log(`Animation speed changed to: ${window.animationSpeed}x`);
     };
   }
 }
+
 
 //Setup planet navigation
 function setupPlanetNavigation() {
@@ -527,14 +583,10 @@ function setupPlanetNavigation() {
 function showInteractiveControls(systemId) {
   console.log(`Showing interactive controls for: ${systemId}`);
   
-  // FIRST: Clear any existing controls
-  const animationSection = document.querySelector('.animation-controls-section');
-  if (animationSection) {
-    animationSection.innerHTML = '';
-    animationSection.style.display = 'none';
-  }
+  // DON'T hide animation controls in interactive mode - they should remain visible
+  // The interactive stage has its own controls in the controls-bar
   
-  // Hide all control panels first
+  // Hide all system-specific control panels first
   document.querySelectorAll('.control-panel').forEach(panel => {
     panel.style.display = 'none';
   });
@@ -697,6 +749,36 @@ function setupGJInteractiveControls() {
       showTemperatureZones(!isShowing);
     };
   }
+  
+  // ADD MISSING CONTROLS
+  
+  // Companion Stars Toggle
+  const companionBtn = document.getElementById('gj-companions');
+  if (companionBtn) {
+    companionBtn.replaceWith(companionBtn.cloneNode(true));
+    const newBtn = document.getElementById('gj-companions');
+    
+    newBtn.onclick = function() {
+      const isShowing = this.textContent.includes('Hide');
+      this.textContent = isShowing ? 'Show Companions' : 'Hide Companions';
+      toggleCompanionStars(!isShowing);
+    };
+  }
+  
+  // Stellar Influence Slider
+  const influenceSlider = document.getElementById('gj-influence');
+  if (influenceSlider) {
+    influenceSlider.oninput = function() {
+      const influence = parseInt(this.value);
+      updateStellarInfluence(influence);
+      
+      // Update display
+      const display = document.getElementById('gj-influence-value');
+      if (display) {
+        display.textContent = `${influence}%`;
+      }
+    };
+  }
 }
 
 // PHASE 1: Enhanced initializeEnhancedSystem (preserved your existing logic)
@@ -736,9 +818,13 @@ export function initializeEnhancedSystem(containerId, hostname, stage = 1) {
   }
 }
 
-// Enhanced cleanup
+
+// Update cleanupEnhancedSystem to preserve global state
 export function cleanupEnhancedSystem() {
-  //console.log("Cleaning up enhanced system");
+  console.log("Cleaning up enhanced system");
+  
+  // Store animation state before cleanup
+  const animState = window.getAnimationState ? window.getAnimationState() : { isPlaying: true, speed: 1 };
   
   // Stop and null ALL timers
   if (animationTimer) {
@@ -747,8 +833,10 @@ export function cleanupEnhancedSystem() {
     console.log("✓ Animation timer stopped");
   }
   
-  // Remove ALL tooltips (there might be multiple)
-  d3.selectAll("#tooltip").style("opacity", 0);
+  // Remove ALL tooltips
+  d3.selectAll(".orbit-tooltip").remove();
+  d3.selectAll(".orbit-tooltip-text").remove();
+  d3.selectAll("#orbit-tooltip").style("opacity", 0);
   
   // Clear ALL SVG containers
   const containers = ['orbit-container', 'orbit-container-interactive'];
@@ -756,7 +844,6 @@ export function cleanupEnhancedSystem() {
     const container = document.getElementById(id);
     if (container) {
       container.innerHTML = '';
-      //console.log(`✓ Cleared container: ${id}`);
     }
   });
   
@@ -765,15 +852,18 @@ export function cleanupEnhancedSystem() {
   d3.selectAll(".plasma-ring").remove();
   d3.selectAll(".resonance-line").remove();
   
-  // Reset state variables
+  // Reset state variables but preserve global animation state
   currentSystemPlanets = [];
   currentSelectedPlanet = 0;
-  isAnimationPlaying = true;
-  animationSpeed = 1;
   currentContainer = null;
   currentStage = 1;
   
-  //console.log("✓ System cleanup complete");
+  // Restore animation state
+  if (window.setAnimationState) {
+    window.setAnimationState(animState);
+  }
+  
+  console.log("✓ System cleanup complete, animation state preserved");
 }
 
 // Expose functions to window for test framework
@@ -813,37 +903,60 @@ export function setupKeyboardNavigation() {
   });
 }
 
-// PHASE 1: Render system in overview mode (Stage 1) - FIXED
-// function renderOverviewSystem(system) {
-//   console.log(` Rendering overview for: ${system.hostname}`);
-  
-//   // Cleanup previous system
-//   cleanupEnhancedSystem();
-  
-//   // Clear the main orbit container
-//   const orbitContainer = document.getElementById('orbit-container');
-//   if (orbitContainer) {
-//     orbitContainer.innerHTML = "";
-//   }
-  
-//   // Hide interactive controls
-//   document.querySelectorAll('.system-interactive-controls').forEach(panel => {
-//     panel.style.display = 'none';
-//   });
-  
-//   // Initialize enhanced system for Stage 1 (Overview mode)
-//   console.log('Initializing enhanced system for stage 1...');
-//   initializeEnhancedSystem('orbit-container', system.hostname, 1);
-// }
 
-// Fix for camilleOrbit.js - Update renderOverviewSystem and renderInteractiveSystem
-
+// Update renderOverviewSystem in camilleOrbit.js
 function renderOverviewSystem(system) {
-  // IMPORTANT: Use the system parameter, not window.currentActiveSystem
   console.log(`📍 Rendering overview for: ${system.hostname || system.title}`);
+  
+  // Store animation state before cleanup
+  const animState = window.getAnimationState ? window.getAnimationState() : { isPlaying: true, speed: 1 };
   
   // Cleanup previous system
   cleanupEnhancedSystem();
+  
+  // IMPORTANT: Restore animation controls for orbital systems
+  const extremePlanets = ['KELT-9', 'WASP-76', 'Kepler-80'];
+  
+  if (!extremePlanets.includes(system.hostname)) {
+    // This is an ORBITAL SYSTEM - ensure animation controls are visible
+    setTimeout(() => {
+      if (typeof window.ensureAnimationControlsVisible === 'function') {
+        window.ensureAnimationControlsVisible();
+      } else {
+        // Fallback method
+        const animationSection = document.querySelector('.animation-controls-section');
+        if (animationSection) {
+          animationSection.style.display = 'block';
+        }
+        
+        const orbitalControls = [
+          'animation-play-pause',
+          'animation-speed-slider',
+          'animation-speed-value',
+          'animation-speed-label'
+        ];
+        
+        orbitalControls.forEach(id => {
+          const element = document.getElementById(id);
+          if (element) {
+            element.style.display = id.includes('label') ? 'inline' : 'inline-block';
+            console.log(`✓ Made visible: ${id}`);
+          }
+        });
+      }
+      
+      // Restore animation state
+      if (window.setAnimationState) {
+        window.setAnimationState(animState);
+      }
+    }, 200);
+  } else {
+    // This is an EXTREME PLANET - hide orbital controls
+    const animationSection = document.querySelector('.animation-controls-section');
+    if (animationSection) {
+      animationSection.style.display = 'none';
+    }
+  }
   
   // Clear the main orbit container
   const orbitContainer = document.getElementById('orbit-container');
@@ -858,19 +971,17 @@ function renderOverviewSystem(system) {
   
   // Initialize enhanced system for Stage 1 (Overview mode)
   console.log('Initializing enhanced system for stage 1...');
-  // Use the system parameter's hostname
   initializeEnhancedSystem('orbit-container', system.hostname, 1);
 }
 
-// Replace renderInteractiveSystem function (around line 841)
+// Update renderInteractiveSystem in camilleOrbit.js
 function renderInteractiveSystem(system) {
-  // IMPORTANT: Use the system parameter, not window.currentActiveSystem
   console.log(`🎮 Rendering interactive mode for: ${system.hostname || system.title}`);
   
-  // Cleanup previous system
-  cleanupEnhancedSystem();
+  // Store animation state
+  const animState = window.getAnimationState ? window.getAnimationState() : { isPlaying: true, speed: 1 };
   
-  // Use the interactive container for Stage 2
+  // Don't do full cleanup - just clear the container
   const interactiveContainer = document.getElementById('orbit-container-interactive');
   if (interactiveContainer) {
     interactiveContainer.innerHTML = "";
@@ -881,57 +992,26 @@ function renderInteractiveSystem(system) {
     interactiveContainer.style.display = 'block';
   }
   
-  // Initialize enhanced system for Stage 2 (Interactive mode) in the interactive container
+  // Initialize enhanced system for Stage 2 (Interactive mode)
   console.log('🚀 Initializing enhanced system for stage 2...');
-  // Use the system parameter's hostname
   initializeEnhancedSystem('orbit-container-interactive', system.hostname, 2);
   
-  // Setup interactive animation controls
-  setupInteractiveAnimationControls();
-  
-  // Show interactive controls ONLY ONCE after a short delay
-  const systemInfo = systemNarratives[system.hostname] || {};
-  if (systemInfo.id) {
-    setTimeout(() => {
+  // Setup interactive animation controls with proper state restoration
+  setTimeout(() => {
+    // Restore animation state
+    if (window.setAnimationState) {
+      window.setAnimationState(animState);
+    }
+    
+    setupAnimationControls('interactive-animation');
+    
+    // Show interactive controls after a delay
+    const systemInfo = systemNarratives[system.hostname] || {};
+    if (systemInfo.id) {
       showInteractiveControls(systemInfo.id);
-    }, 200);
-  }
+    }
+  }, 200);
 }
-
-// PHASE 1: Render system in interactive mode (Stage 2) - FIXED
-// function renderInteractiveSystem(system) {
-//   console.log(`🎮 Rendering interactive mode for: ${system.hostname}`);
-  
-//   // Cleanup previous system
-//   cleanupEnhancedSystem();
-  
-//   // Use the interactive container for Stage 2
-//   const interactiveContainer = document.getElementById('orbit-container-interactive');
-//   if (interactiveContainer) {
-//     interactiveContainer.innerHTML = "";
-//     interactiveContainer.style.width = '100%';
-//     interactiveContainer.style.height = '600px';
-//     interactiveContainer.style.background = 'transparent';
-//     interactiveContainer.style.border = 'none';
-//     interactiveContainer.style.display = 'block';
-//   }
-  
-//   // Initialize enhanced system for Stage 2 (Interactive mode) in the interactive container
-//   console.log('🚀 Initializing enhanced system for stage 2...');
-//   initializeEnhancedSystem('orbit-container-interactive', system.hostname, 2);
-  
-//   // Setup interactive animation controls
-//   setupInteractiveAnimationControls();
-  
-//   // Show interactive controls ONLY ONCE after a short delay
-//   const systemInfo = systemNarratives[system.hostname] || {};
-//   if (systemInfo.id) {
-//     // Remove duplicate timeout
-//     setTimeout(() => {
-//       showInteractiveControls(systemInfo.id);
-//     }, 200);
-//   }
-// }
 
 // PHASE 1: Enhanced helper functions (preserved your existing logic where possible)
 function getOrbitValue(p) {
@@ -1019,8 +1099,27 @@ function getPlanetDisplayColor(planet, hostname) {
 }
 
 function isInHabitableZone(planet) {
-  const orbitalPeriod = +planet.pl_orbper || 0;
+  // For GJ 667C (M-dwarf star), habitable zone is closer
+  const orbitalDistance = parseFloat(planet.pl_orbsmax) || 0;
+  const orbitalPeriod = parseFloat(planet.pl_orbper) || 0;
+  
+  // GJ 667C habitable zone: approximately 0.11 - 0.23 AU
+  // Or roughly 20-60 day orbital periods for this system
+  if (orbitalDistance > 0) {
+    return orbitalDistance >= 0.11 && orbitalDistance <= 0.23;
+  }
+  // Fallback to period if distance unavailable
   return orbitalPeriod >= 20 && orbitalPeriod <= 60;
+}
+
+// Container selection - ALL interactive functions should use interactive container
+function getInteractiveSVG() {
+  // Interactive controls are ONLY used in Stage 2, so always use interactive container
+  const svg = d3.select('#orbit-container-interactive svg');
+  if (svg.empty()) {
+    console.warn('Interactive SVG container not found! Make sure you are in Stage 2.');
+  }
+  return svg;
 }
 
 function formatValue(value, unit) {
@@ -1028,15 +1127,14 @@ function formatValue(value, unit) {
   return isNaN(num) ? "Unknown" : `${num.toFixed(2)} ${unit}`;
 }
 
-// PHASE 1: Enhanced tooltips (preserved your existing logic)
 function setupTooltips(planets, hostname, systemInfo) {
   // Remove any existing tooltip first (but check if one exists)
-  let tooltip = d3.select("#tooltip");
+  let tooltip = d3.select("#orbit-tooltip");
   
   if (tooltip.empty()) {
     // Create new tooltip if it doesn't exist
     tooltip = d3.select("body").append("div")
-      .attr("id", "tooltip")
+      .attr("id", "orbit-tooltip")
       .style("position", "absolute")
       .style("opacity", 0)
       .style("color", "#fff")
@@ -1061,7 +1159,8 @@ function setupTooltips(planets, hostname, systemInfo) {
 
   planets.on("mouseover", function (event, d) {
     const planetLetter = d.pl_name?.split(" ").pop();
-    const descriptions = systemInfo.descriptions || {};
+    // Safely access descriptions with fallback for empty systemInfo
+    const descriptions = (systemInfo && systemInfo.descriptions) ? systemInfo.descriptions : {};
     const description = descriptions[planetLetter] || `A planet in the ${hostname} system.`;
     
     selected = d3.select(this);  // Now we can assign to it
@@ -1102,37 +1201,43 @@ function setupTooltips(planets, hostname, systemInfo) {
   });
 }
 
-// PHASE 1: Enhanced planet animation (improved from your existing logic)
+
+// Update the setupPlanetAnimation function to use global state
 function setupPlanetAnimation(planets, planetData, hostname, auToPixels) {
-  if (animationTimer) animationTimer.stop();
+  // Always stop previous timer first
+  if (animationTimer) {
+    animationTimer.stop();
+    animationTimer = null;
+  }
 
   let currentTime = 0;
   let localTime = 0;
-  animationTimer = d3.timer(function (elapsed) {
-    if (!isAnimationPlaying) {
+  
+  // Create the animation function
+  const animateFunction = function(elapsed) {
+    // Use global state instead of local
+    if (!window.isAnimationPlaying) {
       localTime = elapsed;
       return;
     }
-    else {
-      // System-specific speed factors
-      let speedFactor = 1;
-      if (hostname === "TOI-178") speedFactor = 0.7;
-      else if (hostname === "GJ 667 C") speedFactor = 1.2;
-      
-      let delta = elapsed - localTime;
-      currentTime += (delta / 1000) * animationSpeed * speedFactor;
-      localTime = elapsed;
-    }
+    
+    // System-specific speed factors
+    let speedFactor = 1;
+    if (hostname === "TOI-178") speedFactor = 0.7;
+    else if (hostname === "GJ 667 C") speedFactor = 1.2;
+    
+    // Use global animation speed
+    let delta = elapsed - localTime;
+    currentTime += (delta / 1000) * window.animationSpeed * speedFactor;
+    localTime = elapsed;
 
+    // Planet position calculation function
     function calc(d, i) {
       const period = +d.pl_orbper || 365;
       const ecc = d.ecc;
-      const a = d.a
+      const a = d.a;
       
-      // Calculate orbital position
-      // const timeScale = period * 100 / speedFactor;
       const timeScale = currentTime;
-      // const progress = (elapsed * animationSpeed / timeScale);
       const M = ((timeScale % period) / period) * 2 * Math.PI;
       
       // Solve Kepler's equation
@@ -1145,22 +1250,44 @@ function setupPlanetAnimation(planets, planetData, hostname, auToPixels) {
       let x_rel = a * (Math.cos(E) - ecc);
       let y_rel = a * Math.sqrt(1 - ecc * ecc) * Math.sin(E);
       
-      // Add ellipse center offset
-      let x_orb = x_rel;
-      let y_orb = y_rel;
-      
       // Convert to screen coordinates
-      const x = auToPixels(x_orb);
-      const y = auToPixels(y_orb);
+      const x = auToPixels(x_rel);
+      const y = auToPixels(y_rel);
       
       return [x, y];
-    };
+    }
 
+    // Update planet positions
     planets
       .attr("cx", d => calc(d)[0])
       .attr("cy", d => calc(d)[1]);
-  });
+  };
+  
+  // Start the animation timer
+  animationTimer = d3.timer(animateFunction);
+  
+  // Store the animation function for manual updates
+  window.currentAnimationFunction = animateFunction;
 }
+
+// Add global state management functions
+window.getAnimationState = function() {
+  return {
+    isPlaying: window.isAnimationPlaying,
+    speed: window.animationSpeed
+  };
+};
+
+window.setAnimationState = function(state) {
+  if (state.isPlaying !== undefined) {
+    window.isAnimationPlaying = state.isPlaying;
+    isAnimationPlaying = state.isPlaying;
+  }
+  if (state.speed !== undefined) {
+    window.animationSpeed = state.speed;
+    animationSpeed = state.speed;
+  }
+};
 
 // ==================================================
 // PHASE 2: KEPLER-90 INTERACTIVE IMPLEMENTATIONS
@@ -1433,18 +1560,21 @@ function playResonanceMusic(play) {
 function toggleHabitableZone(show) {
   console.log(`${show ? 'Showing' : 'Hiding'} habitable zone for GJ 667C`);
   
-  const svg = d3.select('#orbit-container svg');
-  if (svg.empty()) return;
+  const svg = getInteractiveSVG(); // FIXED: Use correct container
+  if (svg.empty()) {
+    console.warn('No SVG container found for habitable zone toggle');
+    return;
+  }
   
   if (show) {
     // Enhance existing habitable zone
     svg.select(".habitable-zone")
-      // .transition()
-      // .duration(1000)
+      .transition()
+      .duration(800)
       .attr("stroke-opacity", 0.6)
       .attr("stroke-width", 12);
       
-    // Add zone labels
+    // Add zone labels with animation
     svg.append("text")
       .attr("class", "zone-label")
       .attr("x", 0)
@@ -1454,19 +1584,35 @@ function toggleHabitableZone(show) {
       .attr("font-size", "14px")
       .text("Habitable Zone")
       .attr("opacity", 0)
-      // .transition()
-      // .duration(1000)
+      .transition()
+      .duration(1000)
       .attr("opacity", 0.9);
+      
+    // Add additional info
+    svg.append("text")
+      .attr("class", "zone-label")
+      .attr("x", 0)
+      .attr("y", -70)
+      .attr("text-anchor", "middle")
+      .attr("fill", "#50C878")
+      .attr("font-size", "10px")
+      .text("0.11 - 0.23 AU from star")
+      .attr("opacity", 0)
+      .transition()
+      .duration(1000)
+      .delay(300)
+      .attr("opacity", 0.7);
   } else {
+    // Hide zone with animation
     svg.select(".habitable-zone")
-      // .transition()
-      // .duration(800)
+      .transition()
+      .duration(600)
       .attr("stroke-opacity", 0.15)
       .attr("stroke-width", 8);
       
     svg.selectAll(".zone-label")
-      // .transition()
-      // .duration(800)
+      .transition()
+      .duration(600)
       .attr("opacity", 0)
       .remove();
   }
@@ -1475,11 +1621,16 @@ function toggleHabitableZone(show) {
 function highlightHabitablePlanets() {
   console.log('Highlighting habitable planets in GJ 667C');
   
-  const svg = d3.select('#orbit-container svg');
-  if (svg.empty()) return;
+  const svg = getInteractiveSVG(); // FIXED: Use correct container
+  if (svg.empty()) {
+    console.warn('No SVG container found for planet highlighting');
+    return;
+  }
   
   // Highlight potentially habitable planets
   svg.selectAll(".orbit-planet")
+    .transition()
+    .duration(800)
     .style("fill", function(d) {
       return isInHabitableZone(d) ? "#50C878" : "#8B4513";
     })
@@ -1494,61 +1645,78 @@ function highlightHabitablePlanets() {
       return isInHabitableZone(d) ? parseFloat(baseRadius) * 1.4 : baseRadius;
     });
     
-  // Add habitability labels
+  // Add habitability labels with improved positioning
   svg.selectAll(".orbit-planet")
     .filter(d => isInHabitableZone(d))
     .each(function(d, i) {
-      const transform = d3.select(this).attr("transform");
-      const match = transform.match(/translate\(([^,]+),([^)]+)\)/);
-      if (match) {
-        const x = parseFloat(match[1]);
-        const y = parseFloat(match[2]);
+      const planet = d3.select(this);
+      const cx = planet.attr("cx") || 0;
+      const cy = planet.attr("cy") || 0;
+      
+      svg.append("text")
+        .attr("class", "habitable-label")
+        .attr("x", cx)
+        .attr("y", parseFloat(cy) - 25)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#50C878")
+        .attr("font-size", "12px")
+        .attr("font-weight", "bold")
+        .text("Potentially Habitable")
+        .attr("opacity", 0)
+        .transition()
+        .duration(1000)
+        .delay(500)
+        .attr("opacity", 1);
         
-        svg.append("text")
-          .attr("class", "habitable-label")
-          .attr("x", x)
-          .attr("y", y - 25)
-          .attr("text-anchor", "middle")
-          .attr("fill", "#50C878")
-          .attr("font-size", "10px")
-          .text("Habitable?")
-          .attr("opacity", 0)
-          // .transition()
-          // .duration(1000)
-          .attr("opacity", 1);
-      }
+      // Add distance info
+      svg.append("text")
+        .attr("class", "habitable-label")
+        .attr("x", cx)
+        .attr("y", parseFloat(cy) - 10)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#50C878")
+        .attr("font-size", "10px")
+        .text(`${(parseFloat(d.pl_orbsmax) || 0).toFixed(2)} AU`)
+        .attr("opacity", 0)
+        .transition()
+        .duration(1000)
+        .delay(700)
+        .attr("opacity", 0.8);
     });
     
+  // Reset after 5 seconds
   setTimeout(() => {
     svg.selectAll(".habitable-label")
-      // .transition()
-      // .duration(1000)
+      .transition()
+      .duration(1000)
       .attr("opacity", 0)
       .remove();
       
     svg.selectAll(".orbit-planet")
-    //   .transition()
-    //   .duration(1000)
+      .transition()
+      .duration(1000)
       .style("fill", d => isInHabitableZone(d) ? "#50C878" : "#8B4513")
       .style("stroke", d => isInHabitableZone(d) ? "#32CD32" : "rgba(255,255,255,0.3)")
       .style("stroke-width", 1.5)
-      .attr("r", function() { return d3.select(this).attr("data-base-radius"); });
-  }, 4000);
+      .attr("r", function() { 
+        return d3.select(this).attr("data-base-radius"); 
+      });
+  }, 5000);
 }
 
 function toggleCompanionStars(show) {
   console.log(`${show ? 'Showing' : 'Hiding'} companion stars for GJ 667C`);
   
-  const svg = d3.select('#orbit-container svg');
+  const svg = getInteractiveSVG();
   if (svg.empty()) return;
   
   if (show) {
     // Enhance companion stars
     svg.selectAll(".companion-star")
-      // .transition()
-      // .duration(1000)
+      .transition()
+      .duration(1000)
       .style("opacity", 1)
-      .attr("r", 10);
+      .attr("r", 12);
       
     // Add gravitational influence lines
     svg.append("line")
@@ -1559,90 +1727,142 @@ function toggleCompanionStars(show) {
       .attr("y2", 0)
       .attr("stroke", "#FFD700")
       .attr("stroke-width", 2)
-      .attr("stroke-dasharray", "3,3")
+      .attr("stroke-dasharray", "5,3")
       .attr("opacity", 0)
-      // .transition()
-      // .duration(1500)
-      .attr("opacity", 0.4);
+      .transition()
+      .duration(1500)
+      .attr("opacity", 0.6);
+      
+    // Add binary system info
+    svg.append("text")
+      .attr("class", "companion-info")
+      .attr("x", -190)
+      .attr("y", -180)
+      .attr("text-anchor", "middle")
+      .attr("fill", "#FFD700")
+      .attr("font-size", "12px")
+      .attr("font-weight", "bold")
+      .text("Binary Companions")
+      .attr("opacity", 0)
+      .transition()
+      .duration(1000)
+      .delay(800)
+      .attr("opacity", 0.9);
   } else {
+    // Hide companion elements
     svg.selectAll(".companion-star")
-      // .transition()
-      // .duration(800)
+      .transition()
+      .duration(800)
       .style("opacity", 0.6)
       .attr("r", 6);
       
-    svg.selectAll(".gravitational-line")
-      // .transition()
-      // .duration(800)
+    svg.selectAll(".gravitational-line, .companion-info")
+      .transition()
+      .duration(800)
       .attr("opacity", 0)
       .remove();
   }
 }
 
-function showTemperatureZones() {
-  console.log('Showing temperature zones for GJ 667C');
+function showTemperatureZones(show) {
+  console.log(`${show ? 'Showing' : 'Hiding'} temperature zones for GJ 667C`);
   
-  const svg = d3.select('#orbit-container svg');
-  if (svg.empty()) return;
+  const svg = getInteractiveSVG(); // FIXED: Use correct container
+  if (svg.empty()) {
+    console.warn('No SVG container found for temperature zones');
+    return;
+  }
   
-  // Create temperature gradient zones
-  const zones = [
-    {radius: 40, color: "#FF4500", temp: "Hot Zone"},
-    {radius: 80, color: "#32CD32", temp: "Habitable"},
-    {radius: 120, color: "#4169E1", temp: "Cold Zone"}
-  ];
-  
-  zones.forEach((zone, i) => {
-    svg.append("circle")
-      .attr("class", "temp-zone")
-      .attr("cx", 0)
-      .attr("cy", 0)
-      .attr("r", zone.radius)
-      .attr("fill", "none")
-      .attr("stroke", zone.color)
-      .attr("stroke-width", 4)
-      .attr("stroke-opacity", 0)
-      // .transition()
-      // .delay(i * 300)
-      // .duration(1000)
-      .attr("stroke-opacity", 0.3);
-      
-    // Add temperature labels
-    svg.append("text")
-      .attr("class", "temp-label")
-      .attr("x", zone.radius * 0.7)
-      .attr("y", zone.radius * 0.7)
-      .attr("fill", zone.color)
-      .attr("font-size", "12px")
-      .text(zone.temp)
-      .attr("opacity", 0)
-      // .transition()
-      // .delay(i * 300)
-      // .duration(1000)
-      .attr("opacity", 0.8);
-  });
-  
-  setTimeout(() => {
+  if (show) {
+    // Create temperature gradient zones for M-dwarf star
+    const zones = [
+      {radius: 35, color: "#FF4500", temp: "Too Hot", desc: "> 400K"},
+      {radius: 75, color: "#32CD32", temp: "Habitable", desc: "200-400K"}, 
+      {radius: 115, color: "#4169E1", temp: "Too Cold", desc: "< 200K"}
+    ];
+    
+    zones.forEach((zone, i) => {
+      // Create zone circle
+      svg.append("circle")
+        .attr("class", "temp-zone")
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("r", 0)
+        .attr("fill", "none")
+        .attr("stroke", zone.color)
+        .attr("stroke-width", 3)
+        .attr("stroke-opacity", 0)
+        .attr("stroke-dasharray", "8,4")
+        .transition()
+        .delay(i * 400)
+        .duration(1000)
+        .attr("r", zone.radius)
+        .attr("stroke-opacity", 0.6);
+        
+      // Add temperature labels
+      svg.append("text")
+        .attr("class", "temp-label")
+        .attr("x", zone.radius * 0.7)
+        .attr("y", zone.radius * 0.7 - 10)
+        .attr("fill", zone.color)
+        .attr("font-size", "14px")
+        .attr("font-weight", "bold")
+        .text(zone.temp)
+        .attr("opacity", 0)
+        .transition()
+        .delay(i * 400 + 500)
+        .duration(800)
+        .attr("opacity", 0.9);
+        
+      // Add temperature description
+      svg.append("text")
+        .attr("class", "temp-label")
+        .attr("x", zone.radius * 0.7)
+        .attr("y", zone.radius * 0.7 + 5)
+        .attr("fill", zone.color)
+        .attr("font-size", "10px")
+        .text(zone.desc)
+        .attr("opacity", 0)
+        .transition()
+        .delay(i * 400 + 700)
+        .duration(800)
+        .attr("opacity", 0.7);
+    });
+  } else {
+    // Remove zones with animation
     svg.selectAll(".temp-zone, .temp-label")
-      // .transition()
-      // .duration(1000)
+      .transition()
+      .duration(800)
       .attr("opacity", 0)
       .remove();
-  }, 5000);
+  }
 }
 
 function updateStellarInfluence(influence) {
   console.log(`⭐ Updating stellar influence visualization: ${influence}%`);
-  // Implementation for showing gravitational effects
-  const svg = d3.select('#orbit-container svg');
+  
+  const svg = getInteractiveSVG();
   if (svg.empty()) return;
   
   // Adjust companion star prominence based on influence
   svg.selectAll(".companion-star")
-    // .transition()
-    // .duration(500)
+    .transition()
+    .duration(500)
     .style("opacity", 0.3 + (influence / 100) * 0.7)
-    .attr("r", 4 + (influence / 100) * 8);
+    .attr("r", 4 + (influence / 100) * 10);
+    
+  // Update gravitational line intensity
+  svg.selectAll(".gravitational-line")
+    .transition()
+    .duration(500)
+    .attr("stroke-width", 1 + (influence / 100) * 3)
+    .attr("opacity", 0.2 + (influence / 100) * 0.5);
+    
+  // Visual feedback on the habitable zone
+  svg.select(".habitable-zone")
+    .transition()
+    .duration(500)
+    .attr("stroke-width", 8 + (influence / 100) * 6);
 }
 
 // ==================================================
@@ -1710,7 +1930,7 @@ function comparePeriods(show) {
 function showPeriodRatios(show) {
   console.log(`${show ? 'Showing' : 'Hiding'} period ratios for TOI-178`);
   
-  const svg = d3.select('#orbit-container svg');
+  const svg = d3.select('#orbit-container-interactive svg');
   if (svg.empty()) return;
   
   if (show) {
@@ -1891,6 +2111,8 @@ window.showPeriodRatios = showPeriodRatios;
 window.toggleHabitableZone = toggleHabitableZone;
 window.highlightHabitablePlanets = highlightHabitablePlanets;
 window.showTemperatureZones = showTemperatureZones;
+window.toggleCompanionStars = toggleCompanionStars;
+window.updateStellarInfluence = updateStellarInfluence;
 
 // Also expose these utility functions if they exist
 if (typeof updateKELTVisualization !== 'undefined') {

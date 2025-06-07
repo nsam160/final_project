@@ -244,6 +244,8 @@ let showingConnections = false;
 let isSystemTransitioning = false;
 let isStageSwitching = false;
 let currentSystemKey = null;
+window.isAnimationPlaying = true;
+window.animationSpeed = 1;
 
 // Use safe element selection to avoid null reference errors
 const overview = document.getElementById("overview");
@@ -476,61 +478,6 @@ function enhanceCapsules() {
   });
 }
 
-//const backButton = document.getElementById("back-button");
-// if (backButton) {
-//   backButton.addEventListener("click", () => {
-//     // Clean up ANY active system
-//     if (typeof cleanupEnhancedSystem === 'function') {
-//       cleanupEnhancedSystem();
-//     }
-//     if (typeof cleanupExtremeSystem === 'function') {
-//       cleanupExtremeSystem();
-//     }
-    
-//     // Clear the global reference
-//     window.currentActiveSystem = null;
-    
-//     if (detailedView) detailedView.style.opacity = 0;
-//     setTimeout(() => {
-//       if (detailedView) detailedView.style.display = "none";
-      
-//       // Clear ALL containers
-//       ['orbit-container', 'orbit-container-interactive'].forEach(id => {
-//         const element = document.getElementById(id);
-//         if (element) element.innerHTML = "";
-//       });
-      
-//       // Hide ALL control panels
-//       document.querySelectorAll('.control-panel').forEach(panel => {
-//         panel.style.display = 'none';
-//       });
-      
-//       // Clear animation controls section
-//       const animationSection = document.querySelector('.animation-controls-section');
-//       if (animationSection) {
-//         animationSection.innerHTML = '';
-//       }
-
-//       // Hide all system containers
-//       ["system1", "system2", "system3"].forEach(id => {
-//         const element = document.getElementById(id);
-//         if (element) {
-//           element.style.display = "none";
-//         }
-//       });
-
-//       const section = document.getElementById("section-systems");
-//       if (section) section.style.display = "block";
-      
-//       if (overview) {
-//         overview.style.display = "flex";
-//         overview.style.opacity = 1;
-//       }
-//     }, 400);
-//   });
-// }
-
-// Update the back button handler (around line 470)
 const backButton = document.getElementById("back-button");
 if (backButton) {
   backButton.addEventListener("click", () => {
@@ -544,7 +491,16 @@ if (backButton) {
     if (typeof cleanupExtremeSystem === 'function') {
       cleanupExtremeSystem();
     }
+    // FORCE restore animation controls
+    const animationSection = document.querySelector('.animation-controls-section');
+    if (animationSection) {
+      animationSection.style.display = 'block';
+    }
     
+    // Ensure animation controls are properly restored
+    setTimeout(() => {
+      ensureAnimationControlsVisible();
+    }, 100);
     // Clear the global reference
     window.currentActiveSystem = null;
     
@@ -563,10 +519,23 @@ if (backButton) {
         panel.style.display = 'none';
       });
       
-      // Clear animation controls section
+      // DON'T clear animation controls section - just ensure it's visible
       const animationSection = document.querySelector('.animation-controls-section');
       if (animationSection) {
-        animationSection.innerHTML = '';
+        animationSection.style.display = 'block';
+        // Ensure controls are visible
+        const animationControls = [
+          'animation-play-pause',
+          'animation-speed-slider', 
+          'animation-speed-value',
+          'animation-speed-label'
+        ];
+        animationControls.forEach(id => {
+          const element = document.getElementById(id);
+          if (element) {
+            element.style.display = id.includes('label') ? 'inline' : 'inline-block';
+          }
+        });
       }
 
       // Hide all system containers
@@ -645,7 +614,282 @@ function getOrbitValue(p) {
   }
   return 1.0;
 }
-  // Add more interactive elements here
+
+
+// Stage Navigation System Functions
+function setupStageNavigation() {
+  console.log('Setting up stage navigation...');
+  
+  const stageButtons = document.querySelectorAll('.stage-btn');
+  
+  stageButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const stageNumber = parseInt(this.getAttribute('data-stage'));
+      switchToStage(stageNumber);
+    });
+  });
+  
+  console.log('Stage navigation setup complete');
+}
+
+
+// Expose switchToStage to window for test framework access
+window.switchToStage = switchToStage;
+
+// Update the switchToStage function in global.js (around line 2270)
+// Update the switchToStage function in global.js
+function switchToStage(stageNumber) {
+  if (isStageSwitching) {
+    console.log('Stage switch in progress...');
+    return;
+  }
+  
+  isStageSwitching = true;
+  console.log(`🔄 Switching to stage ${stageNumber}`);
+  
+  // Check if this is an extreme planet
+  const isExtremePlanet = window.currentActiveSystem && 
+    (window.currentActiveSystem.isExtreme || window.currentActiveSystem.extremeType !== undefined || 
+     ['kelt', 'wasp', 'kepler80'].includes(window.currentActiveSystem.id));
+  
+  // Store the current animation state BEFORE clearing
+  const wasPlaying = window.isAnimationPlaying !== undefined ? window.isAnimationPlaying : true;
+  const currentSpeed = window.animationSpeed !== undefined ? window.animationSpeed : 1;
+  
+  // Only clear containers, not the entire system
+  ['orbit-container', 'orbit-container-interactive'].forEach(id => {
+    const container = document.getElementById(id);
+    if (container) {
+      container.innerHTML = '';
+    }
+  });
+  
+  // Update button states
+  document.querySelectorAll('.stage-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  const activeButton = document.querySelector(`.stage-btn[data-stage="${stageNumber}"]`);
+  if (activeButton) {
+    activeButton.classList.add('active');
+  }
+  
+  // Hide ALL panels first
+  document.querySelectorAll('.stage-panel').forEach(panel => {
+    panel.classList.remove('active');
+    panel.style.display = 'none';
+    panel.style.opacity = '0';
+  });
+  
+  // Show the active panel
+  const activePanel = document.getElementById(`system-stage-${stageNumber}`);
+  if (activePanel) {
+    setTimeout(() => {
+      activePanel.style.display = 'block';
+      activePanel.classList.add('active');
+      setTimeout(() => {
+        activePanel.style.opacity = '1';
+      }, 50);
+    }, 100);
+  }
+  
+  // Restore animation state for orbital systems
+  if (!isExtremePlanet) {
+    window.isAnimationPlaying = wasPlaying;
+    window.animationSpeed = currentSpeed;
+  }
+  
+  // Call appropriate render function
+  if (window.currentActiveSystem) {
+    const system = window.currentActiveSystem;
+    console.log(`📍 Rendering ${system.hostname || system.title} in stage ${stageNumber}`);
+    
+    setTimeout(() => {
+      try {
+        if (stageNumber === 1) {
+          if (isExtremePlanet) {
+            console.log('🚀 Calling renderExtremeOverview...');
+            if (typeof window.renderExtremeOverview === 'function') {
+              window.renderExtremeOverview(system);
+            }
+          } else {
+            console.log('🌍 Calling renderOverviewSystem...');
+            if (typeof window.renderOverviewSystem === 'function') {
+              window.renderOverviewSystem(system);
+            }
+          }
+        } else if (stageNumber === 2) {
+          if (isExtremePlanet) {
+            console.log('🎮 Calling renderExtremeInteractive...');
+            if (typeof window.renderExtremeInteractive === 'function') {
+              window.renderExtremeInteractive(system);
+            }
+          } else {
+            console.log('🌍 Calling renderInteractiveSystem...');
+            if (typeof window.renderInteractiveSystem === 'function') {
+              window.renderInteractiveSystem(system);
+            }
+          }
+        }
+        
+        // IMPORTANT: Re-setup animation controls AFTER rendering
+        if (!isExtremePlanet) {
+          setTimeout(() => {
+            // Re-setup animation controls for the current stage
+            const prefix = stageNumber === 1 ? 'animation' : 'interactive-animation';
+            setupAnimationControlsFixed(prefix, wasPlaying, currentSpeed);
+          }, 300);
+        }
+        
+      } catch (error) {
+        console.error('Error rendering system:', error);
+      } finally {
+        setTimeout(() => {
+          isStageSwitching = false;
+        }, 300);
+      }
+    }, 300);
+  } else {
+    console.warn('⚠️ No current active system for stage switching');
+    isStageSwitching = false;
+  }
+}
+
+// Add this new function to properly setup animation controls
+function setupAnimationControlsFixed(prefix, wasPlaying, currentSpeed) {
+  console.log(` Setting up animation controls with prefix: ${prefix}`);
+  
+  const playPauseBtn = document.getElementById(`${prefix}-play-pause`);
+  const speedSlider = document.getElementById(`${prefix}-speed-slider`);
+  const speedValue = document.getElementById(`${prefix}-speed-value`);
+  
+  if (playPauseBtn) {
+    // Restore the play/pause state
+    playPauseBtn.textContent = wasPlaying ? 'Pause' : 'Play';
+    
+    // Remove existing listeners by cloning
+    const newBtn = playPauseBtn.cloneNode(true);
+    playPauseBtn.parentNode.replaceChild(newBtn, playPauseBtn);
+    
+    // Add new click handler
+    newBtn.onclick = function() {
+      window.isAnimationPlaying = !window.isAnimationPlaying;
+      this.textContent = window.isAnimationPlaying ? 'Pause' : 'Play';
+      
+      // Update both animation controls if they exist
+      const otherBtn = document.getElementById(prefix === 'animation' ? 'interactive-animation-play-pause' : 'animation-play-pause');
+      if (otherBtn) {
+        otherBtn.textContent = this.textContent;
+      }
+      
+      console.log(`Animation state: ${window.isAnimationPlaying ? 'Playing' : 'Paused'}`);
+    };
+    
+    console.log(`✅ Play/Pause button setup complete. State: ${wasPlaying ? 'Playing' : 'Paused'}`);
+  }
+  
+  if (speedSlider && speedValue) {
+    // Restore the speed value
+    speedSlider.value = currentSpeed;
+    speedValue.textContent = `${currentSpeed}x`;
+    
+    // Remove existing listener by cloning
+    const newSlider = speedSlider.cloneNode(true);
+    speedSlider.parentNode.replaceChild(newSlider, speedSlider);
+    
+    // Add new input handler
+    newSlider.oninput = function() {
+      window.animationSpeed = parseFloat(this.value);
+      const valueDisplay = document.getElementById(`${prefix}-speed-value`);
+      if (valueDisplay) {
+        valueDisplay.textContent = `${window.animationSpeed}x`;
+      }
+      
+      // Update both speed controls if they exist
+      const otherSlider = document.getElementById(prefix === 'animation' ? 'interactive-animation-speed-slider' : 'animation-speed-slider');
+      const otherValue = document.getElementById(prefix === 'animation' ? 'interactive-animation-speed-value' : 'animation-speed-value');
+      if (otherSlider && otherValue) {
+        otherSlider.value = this.value;
+        otherValue.textContent = valueDisplay.textContent;
+      }
+      
+      console.log(`Animation speed: ${window.animationSpeed}x`);
+    };
+    
+    console.log(`✅ Speed slider setup complete. Speed: ${currentSpeed}x`);
+  }
+}
+
+// Function to ensure animation controls are properly visible and functional
+function ensureAnimationControlsVisible() {
+  console.log("🔧 Ensuring animation controls are visible and functional...");
+  
+  // Get the animation controls section
+  const animationSection = document.querySelector('.animation-controls-section');
+  if (!animationSection) {
+    console.warn("❌ Animation controls section not found!");
+    return;
+  }
+  
+  // Ensure the section is visible
+  animationSection.style.display = 'block';
+  animationSection.style.visibility = 'visible';
+  animationSection.style.opacity = '1';
+  
+  // Check if the controls HTML exists
+  const playPauseBtn = document.getElementById('animation-play-pause');
+  if (!playPauseBtn) {
+    console.log("🔧 Animation controls HTML missing, restoring...");
+    // Find the control group or create it
+    let controlGroup = animationSection.querySelector('.control-group');
+    if (!controlGroup) {
+      controlGroup = document.createElement('div');
+      controlGroup.className = 'control-group';
+      animationSection.appendChild(controlGroup);
+    }
+    
+    controlGroup.innerHTML = `
+      <h3>Animation Controls</h3>
+      <button class="play-pause-btn" id="animation-play-pause">⏸️ Pause</button>
+      <div class="speed-control">
+        <span id="animation-speed-label">Speed:</span>
+        <input type="range" class="speed-slider" min="0.1" max="3" step="0.1" value="1" id="animation-speed-slider">
+        <span id="animation-speed-value">1x</span>
+      </div>
+    `;
+  }
+  
+  // Ensure all individual controls are visible
+  const controlElements = [
+    'animation-play-pause',
+    'animation-speed-slider',
+    'animation-speed-value',
+    'animation-speed-label'
+  ];
+  
+  controlElements.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.style.display = id.includes('label') ? 'inline' : 'inline-block';
+      element.style.visibility = 'visible';
+      element.style.opacity = '1';
+    } else {
+      console.warn(`❌ Animation control element not found: ${id}`);
+    }
+  });
+  
+  // Re-setup event listeners if the setupAnimationControls function exists
+  if (typeof setupAnimationControls === 'function') {
+    setupAnimationControls('animation');
+  }
+  
+  console.log("✅ Animation controls visibility ensured");
+}
+
+// Expose globally
+window.ensureAnimationControlsVisible = ensureAnimationControlsVisible;
+
+
 // ==================================================
 // D3 ORBIT STORIES Global Code: Camille's Code END
 // ==================================================
@@ -2342,133 +2586,6 @@ window.addEventListener('scroll', () => {
   }
 });
 
-// Stage Navigation System Functions
-function setupStageNavigation() {
-  console.log('Setting up stage navigation...');
-  
-  const stageButtons = document.querySelectorAll('.stage-btn');
-  
-  stageButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      const stageNumber = parseInt(this.getAttribute('data-stage'));
-      switchToStage(stageNumber);
-    });
-  });
-  
-  console.log('Stage navigation setup complete');
-}
-
-
-// Expose switchToStage to window for test framework access
-window.switchToStage = switchToStage;
-
-// Update the switchToStage function in global.js (around line 2270)
-function switchToStage(stageNumber) {
-  // Prevent rapid stage switching
-  if (isStageSwitching) {
-    console.log('Stage switch in progress...');
-    return;
-  }
-  
-  isStageSwitching = true;
-  console.log(`🔄 Switching to stage ${stageNumber}`);
-  
-  // IMPORTANT: Clean up everything first
-  if (typeof cleanupEnhancedSystem === 'function') {
-    cleanupEnhancedSystem();
-  }
-  if (typeof cleanupExtremeSystem === 'function') {
-    cleanupExtremeSystem();
-  }
-  
-  // Update button states
-  document.querySelectorAll('.stage-btn').forEach(btn => {
-    btn.classList.remove('active');
-  });
-  
-  const activeButton = document.querySelector(`.stage-btn[data-stage="${stageNumber}"]`);
-  if (activeButton) {
-    activeButton.classList.add('active');
-  }
-  
-  // Hide ALL panels first
-  document.querySelectorAll('.stage-panel').forEach(panel => {
-    panel.classList.remove('active');
-    panel.style.display = 'none';
-    panel.style.opacity = '0';
-  });
-  
-  // Clear ALL containers
-  ['orbit-container', 'orbit-container-interactive'].forEach(id => {
-    const container = document.getElementById(id);
-    if (container) {
-      container.innerHTML = '';
-    }
-  });
-  
-  // Show the active panel
-  const activePanel = document.getElementById(`system-stage-${stageNumber}`);
-  if (activePanel) {
-    setTimeout(() => {
-      activePanel.style.display = 'block';
-      activePanel.classList.add('active');
-      setTimeout(() => {
-        activePanel.style.opacity = '1';
-      }, 50);
-    }, 100);
-  }
-  
-  // Call appropriate render function based on stage
-  if (window.currentActiveSystem) {
-    const system = window.currentActiveSystem;
-    console.log(`📍 Rendering ${system.hostname || system.title} in stage ${stageNumber}`);
-    
-    const isExtremePlanet = system.isExtreme || system.extremeType !== undefined || 
-                           ['kelt', 'wasp', 'kepler80'].includes(system.id);
-    console.log(`🌟 Is extreme planet: ${isExtremePlanet}`);
-    
-    setTimeout(() => {
-      try {
-        if (stageNumber === 1) {
-          if (isExtremePlanet) {
-            console.log('🚀 Calling renderExtremeOverview...');
-            if (typeof window.renderExtremeOverview === 'function') {
-              window.renderExtremeOverview(system);
-            }
-          } else {
-            console.log('🌍 Calling renderOverviewSystem...');
-            if (typeof window.renderOverviewSystem === 'function') {
-              window.renderOverviewSystem(system);
-            }
-          }
-        } else if (stageNumber === 2) {
-          if (isExtremePlanet) {
-            console.log('🎮 Calling renderExtremeInteractive...');
-            if (typeof window.renderExtremeInteractive === 'function') {
-              window.renderExtremeInteractive(system);
-            }
-          } else {
-            console.log('🌍 Calling renderInteractiveSystem...');
-            if (typeof window.renderInteractiveSystem === 'function') {
-              window.renderInteractiveSystem(system);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error rendering system:', error);
-      } finally {
-        // Always reset the flag
-        setTimeout(() => {
-          isStageSwitching = false;
-        }, 300);
-      }
-    }, 300);
-  } else {
-    console.warn('⚠️ No current active system for stage switching');
-    isStageSwitching = false;
-  }
-}
-
 // scroll section
 const sections = document.querySelectorAll('.scroll-section');
 
@@ -2483,4 +2600,3 @@ entry.target.classList.remove('visible');
 }, { threshold: 0.1 });
 
 sections.forEach(section => observer.observe(section));
-

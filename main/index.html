@@ -19,6 +19,7 @@
 
     <script type="module" src="global.js"></script>
     <script type="module" src="./camilleExtreme.js"></script>
+    <script type="module" src="./camilleOrbit.js"></script>
     <script src="./audio.js"></script>
 
     <title>Exploring the Universe Beyond</title>
@@ -229,7 +230,7 @@
               <h3>Animation Controls</h3>
               <button class="play-pause-btn" id="animation-play-pause">⏸️ Pause</button>
               <div class="speed-control">
-                <span>Speed:</span>
+                <span id="animation-speed-label">Speed:</span>
                 <input type="range" class="speed-slider" min="0.1" max="3" step="0.1" value="1" id="animation-speed-slider">
                 <span id="animation-speed-value">1x</span>
               </div>
@@ -276,7 +277,7 @@
               Click on a planet in the orbit animation to view its detailed information.
             </div>
             <div class="planet-navigation-controls">
-              <button class="toggle-button" id="next-planet-btn">
+              <button class="planet-nav-button" id="next-planet-btn">
                 Next Planet →
               </button>
             </div>
@@ -301,11 +302,11 @@
         
         <!-- Minimal controls bar -->
         <div class="controls-bar">
-          <button class="control-btn" id="interactive-play-pause">Pause</button>
+          <button class="control-btn" id="interactive-animation-play-pause">Pause</button>
           <div class="speed-control">
             <label>Speed:</label>
-            <input type="range" id="interactive-speed" min="0.1" max="3" step="0.1" value="1">
-            <span id="speed-value">1x</span>
+            <input type="range" id="interactive-animation-speed-slider" min="0.1" max="3" step="0.1" value="1">
+            <span id="interactive-animation-speed-value">1x</span>
           </div>
         </div>
         
@@ -541,7 +542,5 @@
     </div>
    </div>
 </section>
-
-  
 </body>
 </html>
