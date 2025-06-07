@@ -161,10 +161,46 @@ body {
 }
 
 .stage-btn.active {
+  /* Default active style - will be overridden by type-specific */
   background: linear-gradient(45deg, #4ecdc4, #44a08d);
   border-color: #4ecdc4;
   color: white;
   box-shadow: 0 0 20px rgba(78, 205, 196, 0.4);
+}
+
+/* Stage Button Type Differentiation */
+.stage-btn.orbital-stage {
+  border-color: rgba(78, 205, 196, 0.5);
+}
+
+.stage-btn.orbital-stage:hover {
+  background: rgba(78, 205, 196, 0.1);
+  border-color: #4ecdc4;
+  color: #4ecdc4;
+}
+
+.stage-btn.orbital-stage.active {
+  background: linear-gradient(45deg, #4ecdc4, #44a08d);
+  border-color: #4ecdc4;
+  color: white;
+  box-shadow: 0 0 20px rgba(78, 205, 196, 0.4);
+}
+
+.stage-btn.extreme-stage {
+  border-color: rgba(255, 107, 71, 0.5);
+}
+
+.stage-btn.extreme-stage:hover {
+  background: rgba(255, 107, 71, 0.1);
+  border-color: #ff6b47;
+  color: #ff6b47;
+}
+
+.stage-btn.extreme-stage.active {
+  background: linear-gradient(45deg, #ff6b47, #ff3300);
+  border-color: #ff6b47;
+  color: white;
+  box-shadow: 0 0 20px rgba(255, 107, 71, 0.4);
 }
 
 .stage-btn.active:hover {
@@ -174,36 +210,48 @@ body {
 
 .stage-content {
   position: relative;
-  min-height: 600px;
+  min-height: 700px;
+  transition: min-height 0.3s ease;
 }
 
 .stage-panel {
-  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transition: opacity 0.3s ease;
   opacity: 0;
-  transition: opacity 0.4s ease;
+  display: none;
 }
 
 .stage-panel.active {
-  display: block !important;
+  position: relative;
   opacity: 1;
+  display: block !important;
 }
 
 /* Stage 2 Interactive Mode Styles */
+/* Redesign minimal interactive layout for extreme planets */
 .minimal-interactive-layout {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 350px; /* Main area + side controls */
   gap: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
+  padding: 20px;
 }
 
+/* Full visualization area */
 .interactive-visualization {
   position: relative;
-  background: rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 20px;
-  min-height: 500px;
+  width: 100%;
+  min-height: 700px;
+  background: transparent;
+}
+
+/* Hide the bottom controls bar for extreme planets */
+.extreme-container ~ .controls-bar {
+  display: none !important;
 }
 
 .system-info-minimal {
@@ -265,14 +313,122 @@ body {
   text-align: center;
 }
 
+
+/* System controls as side panel
+.system-controls {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 300px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  padding: 20px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Alternatively, for a bottom-right corner position */
+/* .system-controls.corner-position {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  top: auto;
+  transform: none;
+  max-height: 400px;
+}   */
+
+/* Floating control bubble
+.system-controls.floating-bubble {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: auto;
+  min-width: 250px;
+  max-width: 300px;
+  background: rgba(20, 20, 30, 0.95);
+  border: 2px solid rgba(78, 205, 196, 0.3);
+  border-radius: 20px;
+  padding: 15px;
+  transform: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Collapsible controls */
+/* .system-controls .controls-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  cursor: pointer;
+} */
+
+/* .system-controls.collapsed .control-grid {
+  display: none;
+}
+
+.system-controls.collapsed {
+  min-width: auto;
+  width: auto;
+} */ 
+
+/* Compact control panel */
+#wasp-controls,
+#kelt-controls,
+#kepler80-controls {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
 .control-panel {
   margin-top: 15px;
 }
 
-.control-panel h4 {
+/* .control-panel h4 {
   margin: 0 0 15px 0;
   color: #4ecdc4;
   font-size: 1.1rem;
+} */
+
+/* Smaller title */
+.control-panel h4 {
+  color: #4ecdc4;
+  font-size: 1.2rem;
+  margin: 0 0 15px 0;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Compact control items */
+.control-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 0 0 10px 0;
+}
+
+/* Smaller labels */
+.control-item label {
+  color: #feca57;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+/* Compact value displays */
+.control-item label span {
+  background: rgba(255, 107, 71, 0.2);
+  color: #ff6b47;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  min-width: 50px;
 }
 
 .control-grid {
@@ -330,6 +486,18 @@ body {
   background: rgba(255, 255, 255, 0.05);
   padding: 1em;
   border-radius: 5px;
+  position: relative; /* Added for indicator positioning */
+}
+
+/* Enhanced Control Group Styling by Type */
+.animation-controls-section .control-group {
+  border-left: 3px solid #4ecdc4;
+  padding-left: 20px;
+}
+
+.extreme-overview-section .control-group {
+  border-left: 3px solid #ff6b47;
+  padding-left: 20px;
 }
 
 .control-button {
@@ -351,6 +519,39 @@ body {
 .control-button:active {
   transform: translateY(0);
 }
+
+/* System Type Indicators */
+.system-type-indicator {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  z-index: 10;
+}
+
+.system-type-indicator i {
+  margin-right: 6px;
+}
+
+.orbital-type {
+  background: linear-gradient(45deg, #4ecdc4, #44a08d);
+  color: white;
+  box-shadow: 0 2px 10px rgba(78, 205, 196, 0.3);
+}
+
+.extreme-type {
+  background: linear-gradient(45deg, #ff6b47, #ff3300);
+  color: white;
+  box-shadow: 0 2px 10px rgba(255, 107, 71, 0.3);
+}
+
 
 /* Planet Glow Effect */
 .planet {
@@ -376,19 +577,69 @@ body {
   transition: opacity 0.4s ease;
 }
 
-#orbit-container {
-  width: 100%;
-  height: 100%;
-  min-height: 450px; /* Ensure minimum height */
+#orbit-container,
+#orbit-container-interactive {
+  position: relative;
+  min-height: 600px;
+  background: transparent;
+  /* display: none; */
+  box-sizing: border-box;
 }
 
-#orbit-container svg {
-  width: 100%;
-  height: 100%;
-  max-width: none; /* Remove the max-width limit */
-  max-height: 450px;
-  margin: auto;
+/* Container Type Differentiation */
+#orbit-container.orbital-container,
+#orbit-container-interactive.orbital-container {
+  /* border: 2px solid rgba(78, 205, 196, 0.2);
+  box-shadow: inset 0 0 20px rgba(78, 205, 196, 0.05); */
+  border: none;
+  box-shadow: none;
+}
+/* 
+#orbit-container.extreme-container,
+#orbit-container-interactive.extreme-container {
+  border: 2px solid rgba(255, 107, 71, 0.2);
+  box-shadow: inset 0 0 20px rgba(255, 107, 71, 0.05);
+  border:none;
+  box-shadow: none;
+ } */
+
+/* Update orbit container for extreme planets */
+#orbit-container.extreme-container,
+#orbit-container-interactive.extreme-container {
+  border: none;
+  /* background: radial-gradient(ellipse at center, 
+    transparent 0%, 
+    rgba(0, 0, 0, 0.3) 70%, 
+    rgba(0, 0, 0, 0.6) 100%); */
+  background: transparent !important;
+  box-shadow: none;
+  padding: 0px;
+}
+
+/* Make SVG area larger for extreme planets */
+#orbit-container.extreme-container svg,
+#orbit-container-interactive.extreme-container svg {
+  min-height: 500px !important;
+}
+#orbit-container-interactive.extreme-container svg{
+  background: transparent !important;
+}
+
+#orbit-container.active,
+#orbit-container-interactive.active,
+#system-stage-1.active #orbit-container,
+#system-stage-2.active #orbit-container-interactive { 
+  display: block!important;
+}
+
+#orbit-container svg,
+#orbit-container-interactive svg {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 600px;
   display: block;
+  margin: 0 auto;
 }
 
 #system-info {
@@ -798,11 +1049,11 @@ body {
   gap: 20px;
 }
 
-.control-group {
+/* .control-group {
   display: flex;
   align-items: center;
   gap: 15px;
-}
+} */
 
 .control-group h3 {
   margin: 0;
@@ -1018,10 +1269,16 @@ body {
 /* PHASE 2: EXTREME INTERACTIVE CONTROLS */
 /* ============================ */
 
+.extreme-overview-section{
+  display:none;
+}
+.extreme-overview-section.active {
+  display:block !important;
+}
 /* Extreme overview stats */
 .extreme-overview-stats {
-  background: rgba(20, 20, 30, 0.8);
-  border: 1px solid #444;
+  background: rgba(20, 20, 30, 0.6);
+  border: 1px solid rgba(255, 107, 71, 0.3); /* Changed to match extreme theme */
   border-radius: 10px;
   padding: 15px;
   margin: 15px 0;
@@ -1054,7 +1311,7 @@ body {
 }
 
 
-/* Extreme control items layout */
+/* Extreme control items layout
 .control-item {
   margin: 15px 0;
   padding: 10px;
@@ -1074,7 +1331,7 @@ body {
 .control-item label span {
   color: #4ecdc4;
   font-weight: 600;
-}
+} */
 
 /* =============================== */
 /* PHASE 2: EXTREME INTERACTIVE CONTROLS */
@@ -1242,17 +1499,21 @@ body {
   }
   
   .extreme-slider {
-    height: 8px;
+    height: 6px;
+    margin:8px 0;
   }
   
   .extreme-slider::-webkit-slider-thumb {
     width: 18px;
     height: 18px;
+    border:2x solid #fff;
   }
-  
+  #toggle-terminator,
   .control-button {
-    padding: 8px 12px;
-    font-size: 0.8rem;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    border-radius: 20px;
+    margin-top: 5px;
   }
 }
 
@@ -1292,6 +1553,31 @@ body {
   opacity: 1;
   transform: translateY(0);
   }
+
+/* Navigation Separation Responsive */
+@media (max-width: 768px) {
+  .system-type-indicator {
+    position: static;
+    display: block;
+    margin: 10px auto;
+    text-align: center;
+    max-width: fit-content;
+  }
+  
+  .stage-btn {
+    font-size: 0.8rem;
+    padding: 10px 18px;
+  }
+  
+  .control-group {
+    padding-left: 15px;
+  }
+}
+
+/* Animation Controls Section Enhancement */
+.animation-controls-section.orbital-controls {
+  border-top: 2px solid rgba(78, 205, 196, 0.2);
+}
 
 /* ============================ */
 /*  Camille's style.css   END */

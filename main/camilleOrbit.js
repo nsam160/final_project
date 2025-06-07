@@ -109,6 +109,7 @@ export function renderSystem(containerId, planetData, stage = 1) {
     .append("svg")
     .attr("viewBox", [-width / 2, -height / 2, width, height])
     .style("background", "#000")
+    // .style("background", "transparent")
     .style("width", "100%")
     .style("height", "100%")
     .style("border-radius", "10px");
@@ -473,7 +474,6 @@ function updatePlanetVisual(planet, hostname, isSystemView = false) {
 }
 
 //Setup animation controls
-// Replace the setupAnimationControls function in camilleOrbit.js
 function setupAnimationControls(prefix = 'animation') {
   console.log(`🎮 Setting up animation controls with prefix: ${prefix}`);
   
@@ -548,6 +548,22 @@ function setupAnimationControls(prefix = 'animation') {
       
       console.log(`Animation speed changed to: ${window.animationSpeed}x`);
     };
+  }
+
+  // ADD: Visual indicator for orbital systems
+  // Only add to the main animation controls section (not interactive)
+  if (prefix === 'animation') {
+    const animSection = document.querySelector('.animation-controls-section');
+    if (animSection) {
+      const controlGroup = animSection.querySelector('.control-group');
+      if (controlGroup && !controlGroup.querySelector('.system-type-indicator')) {
+        const indicator = document.createElement('div');
+        indicator.className = 'system-type-indicator orbital-type';
+        indicator.innerHTML = '<i class="fas fa-circle-notch"></i> Orbital System';
+        controlGroup.style.position = 'relative';
+        controlGroup.insertBefore(indicator, controlGroup.firstChild);
+      }
+    }
   }
 }
 

@@ -209,43 +209,6 @@ function resetStageNavigation() {
   });
 }
 
-// // PHASE 2: Enhanced Overview Mode (Stage 1) - NO ORBITAL CONTROLS
-// export function renderExtremeOverview(extremeSystem) {
-//   console.log(` Rendering extreme overview: ${extremeSystem.title}`);
-  
-//   currentExtremeStage = 1;
-//   const orbitContainer = document.getElementById('orbit-container');
-//   if (!orbitContainer) {
-//     console.error(" Orbit container not found");
-//     return;
-//   }
-  
-//   // Clear container
-//   orbitContainer.innerHTML = "";
-  
-//   // Get real planet data
-//   let planetData = null;
-//   if (window.ExoplanetData && window.ExoplanetData.isLoaded()) {
-//     const allPlanets = window.ExoplanetData.getAll();
-//     planetData = allPlanets.find(p => 
-//       p.pl_name === extremeSystem.planetName || 
-//       p.pl_name.includes(extremeSystem.planetName.split(' ')[0])
-//     );
-//   }
-  
-//   // Render extreme planet visualization
-//   renderExtremePlanetVisualization(orbitContainer, planetData, extremeSystem, 1);
-//   updateExtremeProfile(planetData, extremeSystem);
-  
-//   // PHASE 2: Setup extreme-specific overview controls (NO orbital controls)
-//   setTimeout(() => {
-//     setupExtremeOverviewControls(extremeSystem);
-//   }, 100);
-  
-//   // Hide any standard animation controls
-//   hideStandardAnimationControls();
-// }
-
 // PHASE 2: Enhanced Overview Mode (Stage 1) - NO ORBITAL CONTROLS
 export function renderExtremeOverview(extremeSystem) {
   console.log(`📍 Rendering extreme overview: ${extremeSystem.title}`);
@@ -259,7 +222,13 @@ export function renderExtremeOverview(extremeSystem) {
     return;
   }
   
-  // Clear container
+  // Check if this exact system is already rendered in this container
+  if (isSystemAlreadyRendered(orbitContainer, extremeSystem.id)) {
+    console.log("✅ System already rendered, skipping re-render");
+    return;
+  }
+  
+  // Clear container only if necessary
   orbitContainer.innerHTML = "";
   orbitContainer.style.display = 'block';
   
@@ -285,40 +254,8 @@ export function renderExtremeOverview(extremeSystem) {
   }, 100);
   
   // Hide any standard animation controls
-  hideStandardAnimationControls();
+  hideOrbitalAnimationControls();
 }
-
-// PHASE 2: Enhanced Interactive Mode (Stage 2) - EXTREME CONTROLS
-// export function renderExtremeInteractive(extremeSystem) {
-//   console.log(` Rendering extreme interactive: ${extremeSystem.title}`);
-  
-//   currentExtremeStage = 2;
-  
-//   const orbitContainer = document.getElementById('orbit-container');
-//   if (!orbitContainer) return;
-  
-//   // Clear container
-//   orbitContainer.innerHTML = "";
-  
-//   // Get real planet data
-//   let planetData = null;
-//   if (window.ExoplanetData && window.ExoplanetData.isLoaded()) {
-//     const allPlanets = window.ExoplanetData.getAll();
-//     planetData = allPlanets.find(p => 
-//       p.pl_name === extremeSystem.planetName || 
-//       p.pl_name.includes(extremeSystem.planetName.split(' ')[0])
-//     );
-//   }
-  
-//   // Render enhanced interactive visualization
-//   renderExtremePlanetVisualization(orbitContainer, planetData, extremeSystem, 2);
-  
-//   // PHASE 2: Setup extreme-specific interactive controls
-//   setTimeout(() => {
-//     setupExtremeInteractiveControls(extremeSystem);
-//     showExtremeInteractiveControlPanel(extremeSystem.id);
-//   }, 200);
-// }
 
 // PHASE 2: Enhanced Interactive Mode (Stage 2) - EXTREME CONTROLS
 export function renderExtremeInteractive(extremeSystem) {
@@ -330,6 +267,12 @@ export function renderExtremeInteractive(extremeSystem) {
   const container = document.getElementById('orbit-container-interactive');
   if (!container) {
     console.error("❌ Interactive container not found!");
+    return;
+  }
+  
+  // Check if this exact system is already rendered in this container
+  if (isSystemAlreadyRendered(container, extremeSystem.id)) {
+    console.log("✅ System already rendered, skipping re-render");
     return;
   }
   
@@ -358,14 +301,33 @@ export function renderExtremeInteractive(extremeSystem) {
     setupExtremeInteractiveControls(extremeSystem);
     showExtremeInteractiveControlPanel(extremeSystem.id);
   }, 200);
+
+  // setTimeout(() => {
+  //   const controlsBar = document.querySelector('.controls-bar');
+  //   if (controlsBar) {
+  //     controlsBar.style.display = 'none';
+  //   }
+  // }, 100);
+
   
   // Hide standard animation controls
-  hideStandardAnimationControls();
+  hideOrbitalAnimationControls();
+}
+
+// Helper function to check if content already exists
+function isSystemAlreadyRendered(container, systemId) {
+  // Check if the container has content and if it's for the same system
+  const existingSvg = container.querySelector('svg');
+  if (!existingSvg) return false;
+  
+  // Check for a unique identifier
+  const currentSystemId = existingSvg.getAttribute('data-system-id');
+  return currentSystemId === systemId;
 }
 
 // PHASE 2: Hide standard orbital animation controls for extreme planets
-function hideStandardAnimationControls() {
-  console.log("🚫 Hiding standard orbital animation controls for extreme planets");
+function hideOrbitalAnimationControls() {
+  console.log("🚫 Hiding orbital animation controls for extreme planets");
   const animationSection = document.querySelector('.animation-controls-section');
   if (animationSection) {
     animationSection.style.display = 'none';
@@ -412,6 +374,7 @@ function renderExtremePlanetVisualization(container, planetData, extremeSystem, 
   const svg = container
     .append("svg")
     .attr("viewBox", [-width / 2, -height / 2, width, height])
+    .attr("data-system-id", extremeSystem.id)  // Add system ID for tracking
     .style("background", "radial-gradient(circle, #000428 0%, #004e92 100%)")
     .style("width", "100%")
     .style("height", "100%")
@@ -893,6 +856,7 @@ function startExtremeEnvironmentalAnimation(svg, extremeSystem, stage) {
 }
 
 // PHASE 2: Setup extreme-specific overview controls (replace orbital controls)
+// PHASE 2: Setup extreme-specific overview controls (replace orbital controls)
 function setupExtremeOverviewControls(extremeSystem) {
   console.log(`🎮 Setting up overview controls for: ${extremeSystem.title}`);
   
@@ -933,6 +897,15 @@ function setupExtremeOverviewControls(extremeSystem) {
     </div>
   `;
   extremeSection.style.display = 'block';
+  
+  // ADD: Visual indicator AFTER setting innerHTML
+  const controlGroup = extremeSection.querySelector('.control-group');
+  if (controlGroup && !controlGroup.querySelector('.system-type-indicator')) {
+    const indicator = document.createElement('div');
+    indicator.className = 'system-type-indicator extreme-type';
+    indicator.innerHTML = '<i class="fas fa-fire"></i> Extreme Planet';
+    controlGroup.insertBefore(indicator, controlGroup.firstChild);
+  }
 }
 
 // PHASE 2: Setup extreme-specific interactive controls
@@ -942,6 +915,7 @@ function setupExtremeInteractiveControls(extremeSystem) {
   // Show the appropriate extreme control panel
   showExtremeInteractiveControlPanel(extremeSystem.id);
 }
+
 // PHASE 2: Get HTML for extreme-specific controls
 function getExtremeControlsHTML(extremeSystem) {
   if (extremeSystem.id === "kelt") {
@@ -1327,4 +1301,3 @@ export function cleanupExtremeSystem() {
     }
   });
 }
-

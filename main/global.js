@@ -301,17 +301,6 @@ function initializeCamilleSection() {
   setupKeyboardNavigation();
 }
 
-/*
-d3.csv("exoplanet.csv").then(data => {
-  allExoplanets = data;
-  systemData.forEach(system => {
-    const planetData = data.filter(d => d.hostname === system.hostname);
-    drawMiniSystem(`#mini-${system.id}`, planetData);
-  });
-  setupConnectionLines();
-  enhanceCapsules();
-});*/
-
 // Draw mini orbit previews
 function drawMiniSystem(selector, planets) {
   const svg = d3.select(selector).attr("viewBox", "0 0 100 80");
@@ -636,8 +625,7 @@ function setupStageNavigation() {
 // Expose switchToStage to window for test framework access
 window.switchToStage = switchToStage;
 
-// Update the switchToStage function in global.js (around line 2270)
-// Update the switchToStage function in global.js
+// Update the switchToStage function
 function switchToStage(stageNumber) {
   if (isStageSwitching) {
     console.log('Stage switch in progress...');
@@ -648,25 +636,57 @@ function switchToStage(stageNumber) {
   console.log(`🔄 Switching to stage ${stageNumber}`);
   
   // Check if this is an extreme planet
+  // Just add these 3 lines after console.log
   const isExtremePlanet = window.currentActiveSystem && 
-    (window.currentActiveSystem.isExtreme || window.currentActiveSystem.extremeType !== undefined || 
-     ['kelt', 'wasp', 'kepler80'].includes(window.currentActiveSystem.id));
+    (window.currentActiveSystem.extremeType || 
+    ['kelt', 'wasp', 'kepler80'].includes(window.currentActiveSystem.id));
   
-  // Store the current animation state BEFORE clearing
+  // Store the current animation state BEFORE any changes
   const wasPlaying = window.isAnimationPlaying !== undefined ? window.isAnimationPlaying : true;
   const currentSpeed = window.animationSpeed !== undefined ? window.animationSpeed : 1;
   
-  // Only clear containers, not the entire system
-  ['orbit-container', 'orbit-container-interactive'].forEach(id => {
-    const container = document.getElementById(id);
-    if (container) {
-      container.innerHTML = '';
+  // IMPORTANT: Only clear the container we're LEAVING, not the one we're going TO
+  if (stageNumber === 1) {
+    
+    // Going to Stage 1, clear Stage 2's container
+    const stage2Container = document.getElementById('orbit-container-interactive');
+    if (stage2Container) {
+      stage2Container.innerHTML = '';
+      stage2Container.style.display = 'none';
     }
-  });
+    // Ensure Stage 1 container is visible
+    const stage1Container = document.getElementById('orbit-container');
+    if (stage1Container) {
+      stage1Container.style.display = 'block';
+      stage1Container.className = isExtremePlanet ? 'extreme-container' : 'orbital-container';
+    }
+  } else if (stageNumber === 2) {
+    // Going to Stage 2, clear Stage 1's container
+    const stage1Container = document.getElementById('orbit-container');
+    if (stage1Container) {
+      stage1Container.innerHTML = '';
+      stage1Container.style.display = 'none';
+    }
+    // Ensure Stage 2 container is visible
+    const stage2Container = document.getElementById('orbit-container-interactive');
+    if (stage2Container) {
+      stage2Container.style.display = 'block';
+      // ADD: Type-specific class
+      stage2Container.className = isExtremePlanet ? 'extreme-container' : 'orbital-container';
+    }
+  }
   
   // Update button states
   document.querySelectorAll('.stage-btn').forEach(btn => {
     btn.classList.remove('active');
+    
+    if (isExtremePlanet) {
+      btn.classList.add('extreme-stage');
+      btn.classList.remove('orbital-stage');
+    } else {
+      btn.classList.add('orbital-stage');
+      btn.classList.remove('extreme-stage');
+    }
   });
   
   const activeButton = document.querySelector(`.stage-btn[data-stage="${stageNumber}"]`);
