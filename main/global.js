@@ -1127,6 +1127,42 @@ ExoplanetData.onDataLoaded((data) => {
     .attr("transform", `translate(${usableArea.left},0)`)
     .call(yAxis.tickSize(-usableArea.width).tickFormat(""));
 
+  const legendData = [
+    { label: 'Kepler', color: mapColor['Kepler'] },
+    { label: 'K2', color: mapColor['K2'] },
+    { label: 'TESS', color: mapColor['TESS'] }
+  ];
+
+  const legendItemWidth = 100;
+  const totalLegendWidth = legendData.length * legendItemWidth;
+  const legendX = usableArea.left + (usableArea.width - totalLegendWidth) / 2 + 30;
+  const legendY = usableArea.top - 20; // adjust vertical position below title
+
+  const legendGroup = mapChartGroup.append("g")
+    .attr("class", "legend")
+    .attr("transform", `translate(${legendX}, ${legendY})`);
+
+  legendGroup.selectAll("rect")
+    .data(legendData)
+    .enter()
+    .append("rect")
+    .attr("x", (d, i) => i * legendItemWidth)
+    .attr("y", 0)
+    .attr("width", 12)
+    .attr("height", 12)
+    .attr("fill", d => d.color)
+    .attr("stroke", "white");
+
+  legendGroup.selectAll("text")
+    .data(legendData)
+    .enter()
+    .append("text")
+    .attr("x", (d, i) => i * legendItemWidth + 16)
+    .attr("y", 10)
+    .style("fill", "white")
+    .style("font-size", "12px")
+    .text(d => d.label);
+
   mapChartGroup.selectAll(".exoplanet-point")
     .data(validData)
     .enter()
