@@ -2103,6 +2103,14 @@ ExoplanetData.onDataLoaded((data) => {
 // Royce's Code 
 // ===========================
 
+const metric_text = {
+  "pl_rade": "<p><strong>Radius (Earth Radius):</strong> This measures a planet’s size compared to Earth. A radius of 1 means the planet is the same size as Earth. Planets very close to 1 R⊕ often have similar gravity and surface area, making them prime candidates for Earth-like conditions.</p>",
+  "pl_bmasse": "<p><strong>Mass (Earth Mass):</strong> Mass tells us how much matter a planet contains compared to Earth. A mass near 1 M⊕ suggests a rocky composition and surface gravity similar to ours. Too heavy or too light can mean very different atmospheric retention or geologic activity.</p>",
+  "pl_eqt": "<p><strong>Equilibrium Temperature (Kelvin):</strong> Equilibrium temperature (Tₑq) is the theoretical blackbody temperature a planet would have if it absorbed and re-radiated starlight exactly like Earth (no greenhouse effect). Earth’s Tₑq is 255 K. Planets near this value receive just the right amount of stellar energy to allow liquid water if they have an atmosphere.</p>",
+  "pl_orbeccen": "<p><strong>Eccentricity:</strong> Eccentricity measures how circular a planet’s orbit is. Earth’s eccentricity is 0.0167 (nearly a perfect circle). If a planet’s eccentricity is close to 0, its distance (and temperature) from its star stays relatively constant. Higher eccentricity can cause extreme seasonal or temperature swings.</p>",
+  "pl_orbsmax": "<p><strong>Distance (AU):</strong> This is the semi-major axis of the planet’s orbit in astronomical units (AU). 1 AU is the average distance from Earth to the Sun. A distance near 1 AU means the planet lies in a similar “habitable zone,” receiving Earth-like insolation.</p>",
+  "pl_orbper": "<p><strong>Orbital Period (Days):</strong> Orbital period is the time a planet takes to complete one revolution around its star, measured in Earth days. Earth’s orbital period is 365.26 days. A period near one year often correlates with a familiar pattern of seasons and insolation cycles.</p>"
+};
 
 const FEATURES = [
   { key: "pl_rade",    label: "Radius",         unit: "Earth Radius", factor: 1, earth: 1     },
@@ -2161,7 +2169,7 @@ legend.append("line")
   .attr("y1", 0)
   .attr("x2", 24)                   // 24px long
   .attr("y2", 0)
-  .attr("stroke", "#e11d48")        // same red as earth-line
+  .attr("stroke", "rgb(106, 128, 200)")        // same red as earth-line
   .attr("stroke-width", 2)
   .attr("stroke-dasharray", "4 4");
 
@@ -2264,18 +2272,19 @@ ExoplanetData.onDataLoaded(rows => {
       /* ---- Earth guide ---- */
       chartGroup.select(".earth-line")
         .attr("x1", x(cfg.earth)).attr("x2", x(cfg.earth))
-        .attr("y1", top50UsableArea.bottom).attr("y2", top50UsableArea.top);
+        .attr("y1", top50UsableArea.bottom).attr("y2", top50UsableArea.top)
+        .attr("stroke", "rgb(106, 128, 200)");
         // .attr("y1", 0).attr("y2", innerH);
 
       /* ---- dots ---- */
     chartGroup.selectAll("circle.dot")
-  .data(planets, d => d.pl_name)
-  .join(
+    .data(planets, d => d.pl_name)
+    .join(
     enter => enter.append("circle")
       .attr("class", "dot")
       .attr("r", 6)
       .attr("fill", "transparent")
-      .attr("stroke", "#10b981")
+      .attr("stroke", "rgb(214, 172, 80)")
       .attr("stroke-width", 2)
       .attr("cx", d => x(raw(d)))
       .attr("cy", d => y(d.pl_name) + y.bandwidth()/2)
@@ -2418,11 +2427,12 @@ ExoplanetData.onDataLoaded(rows => {
       .join("g")
       .attr("class", "heatmap")
       .attr("transform", `translate(${top3UsableArea.left},${top3UsableArea.top})`);
-    const limePalette = [
-      "#fcffe6", "#f4ffb8", "#eaff8f", "#d3f261",
-      "#bae637", "#a0d911", "#7cb305", "#5b8c00",
-      "#3f6600", "#254000"
-    ];
+    const limePalette = ['rgb(232, 236, 255)', 'rgb(199, 210, 245)', 'rgb(166, 185, 233)', 'rgb(138, 159, 220)', 'rgb(106, 128, 200)', '	rgb(89, 110, 172)', '	rgb(71, 91, 148)', '	rgb(55, 74, 124)', 'rgb(40, 56, 102)', 'rgb(24, 39, 81)'];
+    // [
+    //   "#fcffe6", "#f4ffb8", "#eaff8f", "#d3f261",
+    //   "#bae637", "#a0d911", "#7cb305", "#5b8c00",
+    //   "#3f6600", "#254000"
+    // ];
 
     // reverse the array so index 0 is darkest (best match)
     const reversedLime = limePalette.slice().reverse();
@@ -2526,17 +2536,32 @@ ExoplanetData.onDataLoaded(rows => {
   /* first draw + listener */
   draw(dropdown.property("value"), habDD.property("value"));
   habDD.on("change", () => draw(dropdown.property("value"), habDD.property("value")));
-  dropdown.on("change", () => draw(dropdown.property("value"), habDD.property("value")));
+  dropdown.on("change", () => {
+    draw(dropdown.property("value"), habDD.property("value"));
+    const text = document.querySelector('.details-text');
+    text.innerHTML = `${metric_text[dropdown.property("value")]}`;
+    console.log(dropdown.property("value"));
+  });
 });
 
 document.addEventListener("DOMContentLoaded", () => {
   const detailsPanel = document.getElementById("details-panel");
   const toggleBtn    = document.getElementById("toggle-details");
   const closeBtn     = document.getElementById("close-details");
+  const rightPanel = document.querySelector('.chart-wrapper-right')
 
   // Show the panel when “Show More Details” is clicked
   toggleBtn.addEventListener("click", () => {
-    detailsPanel.classList.add("open");
+    if (toggleBtn.innerHTML === 'Show More Details'){
+      toggleBtn.innerHTML = 'Show Less Details';
+      rightPanel.style.width = '50%';
+      rightPanel.style.display = 'block';
+    }
+    else {
+      toggleBtn.innerHTML = 'Show More Details';
+      rightPanel.style.width = '0';
+      rightPanel.style.display = 'none';
+    }
   });
 
   // Hide the panel when “✕” is clicked

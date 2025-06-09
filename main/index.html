@@ -33,7 +33,7 @@
       <a href="#section-discoveries" class="progress-label">3. Exoplanet Discovery</a>
       <a href="#section-systems" class="progress-label">4. Strange New Worlds</a>
       <a href="#section-search" class="progress-label">5. Earth-like Worlds</a>
-      <a href="#section-explorer" class="progress-label">6. Universe Explorer</a>
+      <a href="#section-explorer" class="progress-label">6. 3D-Universe Explorer</a>
     </div>
 
   </header>
@@ -57,7 +57,8 @@
           Welcome to the World of <span class="highlight">Exoplanets</span><br>
         </h1>
         <p>
-          Unveiling the Secrets of Distant Worlds.
+          Unveiling the Secrets of Distant Worlds. <br>
+          <i style="font-size:10px">Camille Tran, Nghi Sam, Jacquelyn Garcia, Royce Nguyen</i>
         </p>
         <div class="hero-buttons">
           <a href="https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars" class="btn primary" target="_blank">Data</a>
@@ -75,17 +76,17 @@
 <!-- =============================== -->
 <!-- Team Section: Our Team -->
 <!-- =============================== -->
-<section id="section-team" class="scroll-section">
+<!-- <section id="section-team" class="scroll-section">
   <div class="hero-container">
     <ul class="team-list">
       <li>Camille Tran</li>
       <li>Nghi Sam</li>
       <li>Jacquelyn Garcia</li>
-      <li>Royce Nguyen</li>
+      <li>Royce Nguyen</li> -->
       <!-- Add more team members here -->
-    </ul>
+    <!-- </ul>
   </div>
-</section>
+</section> -->
 
 
   <!-- =================================== -->
@@ -386,69 +387,85 @@
   <h2 class="section-title">Earth-Like Worlds</h2>
 
   <!-- Search Controls -->
-  <div class="search-container">
-    <label>Features To Compare:
-      <select id="features"></select>
-    </label>
+      <div class="search-container">
+        <div id="f1">Features To Compare:
+          <select id="features"></select>
+        </div>
 
-    <label>Habitable?
-      <select id="habitable">
-        <option value="all">All</option>
-        <option value="yes">Yes</option>
-        <option value="no">No</option>
-      </select>
-    </label>
-  </div>
+        <div id="f2">Habitable?
+          <select id="habitable">
+            <option value="all">All</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+
+        <!-- The Show/Hide button sits at the top-right of the chart-wrapper-outer -->
+        <button id="toggle-details" class="toggle-button">Show More Details</button>
+      </div>
 
   <!-- 1) Chart Container at 90% width, centered -->
   <div class="chart-wrapper-outer">
-    <div class="chart-wrapper">
+    <div class="chart-wrapper-left">
       <div class="bar-chart"></div> <!-- D3 injects the SVG here -->
     </div>
-    <!-- The Show/Hide button sits at the top-right of the chart-wrapper-outer -->
-    <button id="toggle-details" class="toggle-button">Show More Details</button>
-  </div>
+
+    <div class="chart-wrapper-right">
+      <h3 id="top3-title"></h3>
+      <div class="details-text"><p><strong>Radius (Earth Radius):</strong> This measures a planet’s size compared to Earth. A radius of 1 means the planet is the same size as Earth. Planets very close to 1 R⊕ often have similar gravity and surface area, making them prime candidates for Earth-like conditions.</p></div>
+      <div class="top3chart"></div>
+      <p>
+        <i><small style="opacity: 0.5;margin-top: 10px;display: block;">
+          The <strong>heat-map ABOVE</strong> displays the same three planets across <em>all six</em> metrics. Each row corresponds to one of the Top 3 planets, and each column corresponds to one of the six features (Radius, Mass, Temperature, Eccentricity, Distance, Orbital Period). Darker cells indicate very small percentage differences from Earth’s value—meaning that planet is close to Earth not just in the chosen feature but across multiple dimensions.
+        </small></i>
+      </p>
+    
+      <p>
+        <i><small style="opacity: 0.5;margin-top: 10px;display: block;">
+          In other words, the heat-map gives you a quick, holistic view of how each of the Top 3 planets measures up across every metric. A mostly dark-green row means that planet is highly Earth-like overall, whereas lighter or gray cells indicate larger deviations or missing data.
+        </small></i>
+      </p>
+    </div>
 
   <!-- 2) Sliding Panel: initially hidden off-screen on the right -->
-  <div id="details-panel">
-    <div class="details-header">
-      <button id="close-details" class="close-button">✕</button>
-      <h3 id="top3-title"></h3>
+  <!-- <div id="details-panel">
+    <div class="details-header"> -->
+      <!-- <button id="close-details" class="close-button">✕</button> -->
+      <!-- <h3 id="top3-title"></h3>
       <ol id="top3-list"></ol>
-    </div>
-    <div class="details-content">
+    </div> -->
+
+    <!-- <div class="details-content">
       <div class="top3chart"></div>
       <div class="details-text">
         <p>The <strong>heat-map ABOVE</strong> displays the same three planets across <em>all six</em> metrics. Each row corresponds to one of the Top 3 planets, and each column corresponds to one of the six features (Radius, Mass, Temperature, Eccentricity, Distance, Orbital Period). Darker cells indicate very small percentage differences from Earth’s value—meaning that planet is close to Earth not just in the chosen feature but across multiple dimensions.</p>
     
-    <p>In other words, the heat-map gives you a quick, holistic view of how each of the Top 3 planets measures up across every metric. A mostly dark-green row means that planet is highly Earth-like overall, whereas lighter or gray cells indicate larger deviations or missing data.</p>
-    
-    <p>Use this visualization to understand not only why these planets rank first for your selected metric, but also how they compare to Earth in all other important characteristics. Together, the dot-chart, the Top 3 list, and this heat-map help you identify the most promising candidates for Earth-like habitability.</p>
-         <p><strong>Radius (Earth Radius):</strong>  
-    This measures a planet’s size compared to Earth. A radius of 1 means the planet is the same size as Earth. Planets very close to 1 R⊕ often have similar gravity and surface area, making them prime candidates for Earth-like conditions.</p>
-    
-    <p><strong>Mass (Earth Mass):</strong>  
-    Mass tells us how much matter a planet contains compared to Earth. A mass near 1 M⊕ suggests a rocky composition and surface gravity similar to ours. Too heavy or too light can mean very different atmospheric retention or geologic activity.</p>
-    
-    <p><strong>Equilibrium Temperature (Kelvin):</strong>  
-    Equilibrium temperature (Tₑq) is the theoretical blackbody temperature a planet would have if it absorbed and re-radiated starlight exactly like Earth (no greenhouse effect). Earth’s Tₑq is 255 K. Planets near this value receive just the right amount of stellar energy to allow liquid water if they have an atmosphere.</p>
-    
-    <p><strong>Eccentricity:</strong>  
-    Eccentricity measures how circular a planet’s orbit is. Earth’s eccentricity is 0.0167 (nearly a perfect circle). If a planet’s eccentricity is close to 0, its distance (and temperature) from its star stays relatively constant. Higher eccentricity can cause extreme seasonal or temperature swings.</p>
-    
-    <p><strong>Distance (AU):</strong>  
-    This is the semi-major axis of the planet’s orbit in astronomical units (AU). 1 AU is the average distance from Earth to the Sun. A distance near 1 AU means the planet lies in a similar “habitable zone,” receiving Earth-like insolation.</p>
-    
-    <p><strong>Orbital Period (Days):</strong>  
-    Orbital period is the time a planet takes to complete one revolution around its star, measured in Earth days. Earth’s orbital period is 365.26 days. A period near one year often correlates with a familiar pattern of seasons and insolation cycles.</p>
-    
-    <p>Above, you see the <strong>Top 3 planets</strong> most similar to Earth for the single feature you selected. For example, if you chose “Mass,” these three planets have masses closest to 1 M⊕ among the dataset. Their names and values are shown at the top of this panel.</p>
-    
-    
-
+        <p>In other words, the heat-map gives you a quick, holistic view of how each of the Top 3 planets measures up across every metric. A mostly dark-green row means that planet is highly Earth-like overall, whereas lighter or gray cells indicate larger deviations or missing data.</p>
+        
+        <p>Use this visualization to understand not only why these planets rank first for your selected metric, but also how they compare to Earth in all other important characteristics. Together, the dot-chart, the Top 3 list, and this heat-map help you identify the most promising candidates for Earth-like habitability.</p>
+            <p><strong>Radius (Earth Radius):</strong>  
+        This measures a planet’s size compared to Earth. A radius of 1 means the planet is the same size as Earth. Planets very close to 1 R⊕ often have similar gravity and surface area, making them prime candidates for Earth-like conditions.</p>
+        
+        <p><strong>Mass (Earth Mass):</strong>  
+        Mass tells us how much matter a planet contains compared to Earth. A mass near 1 M⊕ suggests a rocky composition and surface gravity similar to ours. Too heavy or too light can mean very different atmospheric retention or geologic activity.</p>
+        
+        <p><strong>Equilibrium Temperature (Kelvin):</strong>  
+        Equilibrium temperature (Tₑq) is the theoretical blackbody temperature a planet would have if it absorbed and re-radiated starlight exactly like Earth (no greenhouse effect). Earth’s Tₑq is 255 K. Planets near this value receive just the right amount of stellar energy to allow liquid water if they have an atmosphere.</p>
+        
+        <p><strong>Eccentricity:</strong>  
+        Eccentricity measures how circular a planet’s orbit is. Earth’s eccentricity is 0.0167 (nearly a perfect circle). If a planet’s eccentricity is close to 0, its distance (and temperature) from its star stays relatively constant. Higher eccentricity can cause extreme seasonal or temperature swings.</p>
+        
+        <p><strong>Distance (AU):</strong>  
+        This is the semi-major axis of the planet’s orbit in astronomical units (AU). 1 AU is the average distance from Earth to the Sun. A distance near 1 AU means the planet lies in a similar “habitable zone,” receiving Earth-like insolation.</p>
+        
+        <p><strong>Orbital Period (Days):</strong>  
+        Orbital period is the time a planet takes to complete one revolution around its star, measured in Earth days. Earth’s orbital period is 365.26 days. A period near one year often correlates with a familiar pattern of seasons and insolation cycles.</p>
+        
+        <p>Above, you see the <strong>Top 3 planets</strong> most similar to Earth for the single feature you selected. For example, if you chose “Mass,” these three planets have masses closest to 1 M⊕ among the dataset. Their names and values are shown at the top of this panel.</p>
       </div>
-    </div>
-  </div>
+    </div> -->
+  <!-- </div> -->
+</div>
 
   <!-- Tooltip DIV (floats above everything) -->
   <div id="roytooltip"></div>
@@ -458,22 +475,21 @@
     <div id="top3Overall"></div>
     <div id="top3TextNghi">
       <p>
-        These are the top ten planets closest to Earth in terms of the different 
-        properties. Below are the listed properties of Earth that we compared it to
-        to get the 10 resemblance:
+        These are the top ten planets most similar to Earth based on various properties.
+        Below are the Earth reference values used to compare and rank the planets:
       </p>
       <ul class="instructionExplorer">
-        <li><b>Radius (in Earth Radius):</b> 1</li>
-        <li><b>Mass (in Earth Mass):</b> 1</li>
+        <li><b>Radius (in Earth radii):</b> 1</li>
+        <li><b>Mass (in Earth masses):</b> 1</li>
         <li><b>Temperature (in Kelvin):</b> 255</li>
         <li><b>Eccentricity:</b> 0.0167</li>
-        <li><b>Distance (in AU):</b> 1.0167</li>
-        <li><b>Orbital Period (in Days):</b> 365.26</li>
+        <li><b>Distance from star (in AU):</b> 1.0167</li>
+        <li><b>Orbital period (in days):</b> 365.26</li>
       </ul>
       <p>
-        Judging from the table, it appears that 'Proxima Centauri b' is the best choice
-        for new life outside of Earth. It has conditions most similar to Earth and 
-        it is the closest known Exoplanet to Earth.
+        Based on the comparison table, <strong>Proxima Centauri b</strong> appears to be
+        the most promising candidate for life beyond Earth. It shares several Earth-like 
+        characteristics and is also the closest known exoplanet to our solar system.
       </p>
     </div>
   </div>
@@ -486,7 +502,7 @@
   <!-- ================================ -->  
 <section class="scroll-section" id="section-explorer">
   <!-- insert code here  -->
-   <h2 class="section-title">Universe Explorer</h2>
+   <h2 class="section-title">3D-Universe Explorer</h2>
    <div id="solarExplorer">
     <div id="filterSolarSystem">
       <label><b>How To Use:</b>

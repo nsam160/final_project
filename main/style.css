@@ -24,7 +24,7 @@ body {
 /*Main Header */
 #main-header {
   position: fixed;
-  top: 6px;
+  top: 0;
   left: 0;
   width: 100%;
   padding: 15px 0;
@@ -35,6 +35,7 @@ body {
   transition: all 0.3s ease;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1); /* Very subtle shadow */
 }
+
 .site-title{
   padding-left: 1em;
 }
@@ -1603,6 +1604,12 @@ html, body {
 
 #top3TextNghi {
   flex: 1;
+  margin: auto;
+
+  p, ul {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
 }
 
 #top3Overall {
@@ -1785,6 +1792,14 @@ select {
   flex: 1;
 }
 
+.side-by-side-container, #increaseDiscovery {
+  align-items: center;
+}
+
+#increaseExoplanetText, .right-side {
+  text-align: center;
+}
+
 .Exogrid .tick line {
   stroke: white;
   stroke-opacity: 0.15;
@@ -1910,15 +1925,27 @@ select {
 /* Royces's style.css  start  */
 /* ============================ */
 
-.chart-wrapper {
-  display: flex;
+.chart-wrapper-outer {
   gap: 1em;              /* space between chart and list   */
   /* align-items:flex-start; /* top-align the two blocks        */
   margin: 1em;
+  display: flex;
+  flex-direction: row;
+  padding: 2em;
+  align-items: center;
+}
+
+.chart-wrapper-left {
+  flex: 1;
+}
+
+.chart-wrapper-right {
+  width: 0;
+  display: none;
+  text-align: center;
 }
 
 .bar-chart {
-  flex: 1;
   align-items: center;
   justify-content: center;
   padding: 2rem;
@@ -1929,11 +1956,22 @@ select {
   border-radius: 1rem;
   color: white;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  flex: 1;
+  max-width: 590px;
+}
+
+.bar-chart svg {
+  width: 100%;
+}
+
+#top3-title {
+  margin-top: 0;
 }
 
 .top3chart {
-  width: 100;
-  padding: 2rem;
+  min-width: fit-content;
+  max-width: 450px;
+  padding: 2.5rem;
   margin: auto;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
@@ -1941,6 +1979,10 @@ select {
   border-radius: 1rem;
   color: white;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.top3chart svg {
+  width: 100%;
 }
 
 #heatmapTop3 {
@@ -1972,32 +2014,54 @@ select {
   font-size:9px;
   text-anchor:middle;
 }
-.search-container {
-  margin-left: 55px;  /* move the whole block in from the left */
-}
 
 /* ─────────── 1) Centered Chart Container ─────────── */
-.chart-wrapper-outer {
-  width: 70%;                   /* 90% of viewport width */
-  margin: 1rem auto;             /* center horizontally, with top/bottom gap */
-  position: relative;            /* to anchor the toggle button */
-  box-sizing: border-box;
-}
+/* .chart-wrapper-outer {
+  display: flex;
+  flex-direction: column;
+} */
 
 /* The actual chart area */
-.chart-wrapper {
-  width: 100%;
-  height: 0%;
-  background: transparent;       /* or a subtle panel background */
-  min-height: 500px;             /* or whatever min‐height you prefer */
+/* .chart-wrapper {
+  background: transparent;       or a subtle panel background
+  min-height: 500px;             or whatever min‐height you prefer
   margin: 0 auto;
   position: relative;
+} */
+
+.chart-row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  transition: all 0.4s ease;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.search-and-chart {
+  flex-shrink: 0;
+  transition: margin-left 0.4s ease;
+}
+
+/* Hidden by default */
+#details-panel {
+  width: 500px;
+  max-width: 40%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+/* Shown when toggled */
+#details-panel.show {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 
 /* ─────────── 2) “Show More Details” / “Close” Buttons ─────────── */
 .toggle-button, .close-button {
-  position: absolute;
   border: none;
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
@@ -2008,8 +2072,6 @@ select {
 
 /* Show More Details: place top-right of chart-wrapper-outer */
 .toggle-button {
-  top: 10px;
-  right: 10px;
   z-index: 1002; /* above chart but below dropdowns */
 }
 
@@ -2024,26 +2086,26 @@ html, body {
   overflow-x: hidden;
 }
 /* ─────────── 3) Sliding Details Panel ─────────── */
-#details-panel {
+/* #details-panel {
   position: fixed;
-  top: 0;
-  right: -35vw;                   /* hide off-screen to the right (35% of viewport) */
-  width: 35vw;                    /* panel width = 35% of viewport width */
-  height: 100vh;
+  top: 0; */
+  /* right: -35vw;                   /* hide off-screen to the right (35% of viewport) */
+  /* width: 35vw;                    panel width = 35% of viewport width */ */
+  /* height: 100vh;
   background: rgba(30, 30, 40, 0.95);
   color: #eee;
   box-shadow: -2px 0 8px rgba(0,0,0,0.6);
   overflow-y: auto;
-  transition: right 0.3s ease;
-  z-index: 1100;                  /* sits above the chart (1000), but below the close button (1003) */
-  display: flex;
+  transition: right 0.3s ease; */
+  /* z-index: 1100;                  sits above the chart (1000), but below the close button (1003) */
+  /* display: flex;
   flex-direction: column;
-}
+} */
 
 /* When panel has .open class, slide it into view */
-#details-panel.open {
+/* #details-panel.open {
   right: 0;
-}
+} */
 
 /* Panel header */
 .details-header {
@@ -2072,23 +2134,24 @@ html, body {
   gap: 1rem;
 }
 
-/* Heatmap container */
-.top3chart svg{
-  width: 345px;
-  /* The D3 code appends an SVG within; let that SVG fill the width */
-}
+
 
 /* Explanatory text below the heatmap */
 .details-text {
-  font-size: 0.9rem;
-  line-height: 1.5;
-  overflow-y: auto;
+  margin-bottom: 1em;
 }
 
 /* ─────────── 4) Ensure dropdowns stay on top of panel ─────────── */
 .search-container {
-  position: relative; /* so the selects can have higher z-index if necessary */
-  z-index: 1005;      /* higher than the panel’s 1000 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 1rem auto;
+  text-align: center;
+  flex-wrap: wrap;
+  max-width: 800px;
+  width: 100%;
 }
 
 /* ─────────── 5) Tooltip styling (unchanged) ─────────── */
@@ -2129,7 +2192,7 @@ html, body {
 /* Ensure the button is on top and not affected by backdrop filters */
 .volume-button {
   position: fixed !important;  /* Changed to fixed to ensure it's relative to viewport */
-  top: 16px;
+  bottom: 0px;
   right: 16px;
   background: transparent;
   border: none;
