@@ -480,16 +480,24 @@ if (backButton) {
     if (typeof cleanupExtremeSystem === 'function') {
       cleanupExtremeSystem();
     }
+    
     // FORCE restore animation controls
     const animationSection = document.querySelector('.animation-controls-section');
     if (animationSection) {
       animationSection.style.display = 'block';
     }
     
+    // FORCE restore controls bar
+    const controlsBar = document.querySelector('.controls-bar');
+    if (controlsBar) {
+      controlsBar.style.display = 'flex';
+    }
+    
     // Ensure animation controls are properly restored
     setTimeout(() => {
       ensureAnimationControlsVisible();
     }, 100);
+    
     // Clear the global reference
     window.currentActiveSystem = null;
     
@@ -507,25 +515,6 @@ if (backButton) {
       document.querySelectorAll('.control-panel').forEach(panel => {
         panel.style.display = 'none';
       });
-      
-      // DON'T clear animation controls section - just ensure it's visible
-      const animationSection = document.querySelector('.animation-controls-section');
-      if (animationSection) {
-        animationSection.style.display = 'block';
-        // Ensure controls are visible
-        const animationControls = [
-          'animation-play-pause',
-          'animation-speed-slider', 
-          'animation-speed-value',
-          'animation-speed-label'
-        ];
-        animationControls.forEach(id => {
-          const element = document.getElementById(id);
-          if (element) {
-            element.style.display = id.includes('label') ? 'inline' : 'inline-block';
-          }
-        });
-      }
 
       // Hide all system containers
       ["system1", "system2", "system3"].forEach(id => {
@@ -604,7 +593,6 @@ function getOrbitValue(p) {
   return 1.0;
 }
 
-
 // Stage Navigation System Functions
 function setupStageNavigation() {
   console.log('Setting up stage navigation...');
@@ -626,6 +614,7 @@ function setupStageNavigation() {
 window.switchToStage = switchToStage;
 
 // Update the switchToStage function
+// REPLACE the existing switchToStage function
 function switchToStage(stageNumber) {
   if (isStageSwitching) {
     console.log('Stage switch in progress...');
@@ -636,7 +625,6 @@ function switchToStage(stageNumber) {
   console.log(`🔄 Switching to stage ${stageNumber}`);
   
   // Check if this is an extreme planet
-  // Just add these 3 lines after console.log
   const isExtremePlanet = window.currentActiveSystem && 
     (window.currentActiveSystem.extremeType || 
     ['kelt', 'wasp', 'kepler80'].includes(window.currentActiveSystem.id));
@@ -647,7 +635,6 @@ function switchToStage(stageNumber) {
   
   // IMPORTANT: Only clear the container we're LEAVING, not the one we're going TO
   if (stageNumber === 1) {
-    
     // Going to Stage 1, clear Stage 2's container
     const stage2Container = document.getElementById('orbit-container-interactive');
     if (stage2Container) {
@@ -671,7 +658,6 @@ function switchToStage(stageNumber) {
     const stage2Container = document.getElementById('orbit-container-interactive');
     if (stage2Container) {
       stage2Container.style.display = 'block';
-      // ADD: Type-specific class
       stage2Container.className = isExtremePlanet ? 'extreme-container' : 'orbital-container';
     }
   }
@@ -752,10 +738,9 @@ function switchToStage(stageNumber) {
           }
         }
         
-        // IMPORTANT: Re-setup animation controls AFTER rendering
+        // IMPORTANT: Re-setup animation controls AFTER rendering for orbital systems
         if (!isExtremePlanet) {
           setTimeout(() => {
-            // Re-setup animation controls for the current stage
             const prefix = stageNumber === 1 ? 'animation' : 'interactive-animation';
             setupAnimationControlsFixed(prefix, wasPlaying, currentSpeed);
           }, 300);

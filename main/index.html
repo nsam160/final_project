@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style.css">
+    <!-- <link rel="stylesheet" href="./camille-style.css"> -->
+    <link rel="stylesheet" href="./camille-style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -292,6 +294,16 @@
         <!-- Full-width visualization -->
         <div class="interactive-visualization">
           <div id="orbit-container-interactive"></div>
+                  
+          <!-- Minimal controls bar -->
+            <div class="controls-bar orbital-controls-bar">
+              <button class="control-btn" id="interactive-animation-play-pause">Pause</button>
+              <div class="speed-control">
+                <label>Speed:</label>
+                <input type="range" id="interactive-animation-speed-slider" min="0.1" max="3" step="0.1" value="1">
+                <span id="interactive-animation-speed-value">1x</span>
+              </div>
+            </div>
           
           <!-- Minimal system info -->
           <div class="system-info-minimal">
@@ -300,22 +312,12 @@
           </div>
         </div>
         
-        <!-- Minimal controls bar -->
-        <div class="controls-bar">
-          <button class="control-btn" id="interactive-animation-play-pause">Pause</button>
-          <div class="speed-control">
-            <label>Speed:</label>
-            <input type="range" id="interactive-animation-speed-slider" min="0.1" max="3" step="0.1" value="1">
-            <span id="interactive-animation-speed-value">1x</span>
-          </div>
-        </div>
-        
         <!-- System-specific controls -->
-        <div class="system-controls">
+       <div class="system-controls orbital-system-controls">
           <!-- <div class="system-controls corner-position"></div> -->
           <!-- <div class="system-controls floating-bubble"></div> -->
           <!-- Kepler-90 Controls -->
-          <div id="kepler-controls" class="control-panel" style="display: none;">
+          <div id="kepler-controls" class="control-panel orbital-control-panel" style="display: none;">
             <h4>Kepler-90 System</h4>
             <div class="control-grid">
               <button class="feature-btn" id="kepler-resonance">Show Resonances</button>
@@ -323,7 +325,7 @@
             </div>
           </div>
           <!-- TOI-178 Controls -->
-          <div id="toi-controls" class="control-panel" style="display: none;">
+          <div id="toi-controls" class="control-panel orbital-control-panel" style="display: none;">
             <h4>TOI-178 Resonance Chain</h4>
             <div class="control-grid">
               <button class="feature-btn" id="toi-chain">Show Chain</button>
@@ -332,7 +334,7 @@
           </div>
           
           <!-- GJ 667C Controls -->
-          <div id="gj-controls" class="control-panel" style="display: none;">
+           <div id="gj-controls" class="control-panel orbital-control-panel" style="display: none;">
             <h4>GJ 667C Habitable Zone</h4>
             <div class="control-grid">
               <button class="feature-btn" id="gj-zone">Show Zone</button>

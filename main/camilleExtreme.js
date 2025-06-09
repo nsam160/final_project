@@ -89,6 +89,47 @@ export function initializeExtremePlanets() {
 // Export the system data
 export { extremeSystemData };
 
+// PHASE 2: Manual verification function for debugging
+window.testExtremeControls = function() {
+  console.log('🔧 Testing extreme controls visibility...');
+  
+  const panels = ['kelt-controls', 'wasp-controls', 'kepler80-controls'];
+  panels.forEach(panelId => {
+    const panel = document.getElementById(panelId);
+    if (panel) {
+      console.log(`📋 ${panelId}:`, {
+        exists: true,
+        display: panel.style.display,
+        computedDisplay: window.getComputedStyle(panel).display,
+        visibility: window.getComputedStyle(panel).visibility,
+        opacity: window.getComputedStyle(panel).opacity,
+        position: window.getComputedStyle(panel).position,
+        gridArea: window.getComputedStyle(panel).gridArea
+      });
+    } else {
+      console.log(`❌ ${panelId}: Not found`);
+    }
+  });
+  
+  const systemControls = document.querySelector('.system-controls');
+  if (systemControls) {
+    console.log('🎛️ System controls container:', {
+      display: window.getComputedStyle(systemControls).display,
+      gridArea: window.getComputedStyle(systemControls).gridArea,
+      position: window.getComputedStyle(systemControls).position
+    });
+  }
+  
+  const gridLayout = document.querySelector('.minimal-interactive-layout');
+  if (gridLayout) {
+    console.log('📐 Grid layout:', {
+      display: window.getComputedStyle(gridLayout).display,
+      gridTemplateAreas: window.getComputedStyle(gridLayout).gridTemplateAreas,
+      gridTemplateColumns: window.getComputedStyle(gridLayout).gridTemplateColumns
+    });
+  }
+};
+
 // PHASE 2: Enhanced capsule setup
 function setupExtremeCapsules() {
   console.log(" Setting up extreme capsules...");
@@ -222,13 +263,7 @@ export function renderExtremeOverview(extremeSystem) {
     return;
   }
   
-  // Check if this exact system is already rendered in this container
-  if (isSystemAlreadyRendered(orbitContainer, extremeSystem.id)) {
-    console.log("✅ System already rendered, skipping re-render");
-    return;
-  }
-  
-  // Clear container only if necessary
+  // Clear container
   orbitContainer.innerHTML = "";
   orbitContainer.style.display = 'block';
   
@@ -270,12 +305,6 @@ export function renderExtremeInteractive(extremeSystem) {
     return;
   }
   
-  // Check if this exact system is already rendered in this container
-  if (isSystemAlreadyRendered(container, extremeSystem.id)) {
-    console.log("✅ System already rendered, skipping re-render");
-    return;
-  }
-  
   // Clear container and make visible
   container.innerHTML = "";
   container.style.display = 'block';
@@ -301,17 +330,13 @@ export function renderExtremeInteractive(extremeSystem) {
     setupExtremeInteractiveControls(extremeSystem);
     showExtremeInteractiveControlPanel(extremeSystem.id);
   }, 200);
-
-  // setTimeout(() => {
-  //   const controlsBar = document.querySelector('.controls-bar');
-  //   if (controlsBar) {
-  //     controlsBar.style.display = 'none';
-  //   }
-  // }, 100);
-
   
-  // Hide standard animation controls
+  // Hide standard animation controls AND controls bar
   hideOrbitalAnimationControls();
+  const controlsBar = document.querySelector('.controls-bar');
+  if (controlsBar) {
+    controlsBar.style.display = 'none';
+  }
 }
 
 // Helper function to check if content already exists
@@ -327,12 +352,25 @@ function isSystemAlreadyRendered(container, systemId) {
 
 // PHASE 2: Hide standard orbital animation controls for extreme planets
 function hideOrbitalAnimationControls() {
-  console.log("🚫 Hiding orbital animation controls for extreme planets");
+  console.log("🚫 Hiding standard orbital animation controls for extreme planets");
+  
+  // Hide the entire animation controls section
   const animationSection = document.querySelector('.animation-controls-section');
   if (animationSection) {
     animationSection.style.display = 'none';
   }
- 
+  
+  // Hide ORBITAL-SPECIFIC controls
+  const orbitalControlsBar = document.querySelector('.orbital-controls-bar');
+  if (orbitalControlsBar) {
+    orbitalControlsBar.style.display = 'none';
+  }
+  
+  const orbitalSystemControls = document.querySelector('.orbital-system-controls');
+  if (orbitalSystemControls) {
+    orbitalSystemControls.style.display = 'none';
+  }
+  
   // Hide planet navigation controls too
   const planetNav = document.querySelector('.planet-navigation-controls');
   if (planetNav) {
@@ -353,7 +391,7 @@ function hideOrbitalAnimationControls() {
       element.style.display = 'none';
     }
   });
-} 
+}
 
 // PHASE 2: Enhanced extreme planet visualization
 function renderExtremePlanetVisualization(container, planetData, extremeSystem, stage) {
@@ -1102,28 +1140,79 @@ function setupKepler80ControlListeners() {
 function updateKELTVisualization() {
   console.log('Updating KELT-9b visualization');
   if (currentExtremeSystem?.id === "kelt" && currentExtremeStage === 2) {
-    // Re-render the visualization with new parameters
-    renderExtremeInteractive(currentExtremeSystem);
+    // Don't re-render, just update the visual elements
+    const svg = d3.select('#orbit-container-interactive svg');
+    if (!svg.empty()) {
+      const intensity = extremeControlStates.kelt.plasmaIntensity / 100;
+      const radiation = extremeControlStates.kelt.stellarRadiation / 100;
+      
+      // Update plasma rings
+      svg.selectAll(".plasma-ring")
+        .attr("stroke", d3.interpolateRgb("#ff3300", "#ffff00")(intensity))
+        .attr("stroke-width", 3 + (intensity * 2))
+        .attr("stroke-opacity", 0.2 * intensity);
+        
+      // Update planet gradient
+      svg.select(".extreme-planet")
+        .style("filter", `drop-shadow(0 0 ${40 + intensity * 20}px ${currentExtremeSystem.color})`);
+    }
   }
 }
 
 function updateWASPVisualization() {
   console.log('Updating WASP-76b visualization');
   if (currentExtremeSystem?.id === "wasp" && currentExtremeStage === 2) {
-    renderExtremeInteractive(currentExtremeSystem);
+    const svg = d3.select('#orbit-container-interactive svg');
+    if (!svg.empty()) {
+      const dayNight = extremeControlStates.wasp.dayNightRatio / 100;
+      const rainIntensity = extremeControlStates.wasp.ironRainIntensity / 100;
+      
+      // Update terminator line position
+      const terminatorX = -300 + (dayNight * 600);
+      svg.select(".terminator-line")
+        .attr("x1", terminatorX)
+        .attr("x2", terminatorX);
+        
+      // Update day/night sides
+      svg.select(".day-side")
+        .attr("width", terminatorX + 300)
+        .attr("opacity", dayNight);
+        
+      svg.select(".night-side")
+        .attr("x", terminatorX)
+        .attr("width", 300 - terminatorX)
+        .attr("opacity", 1 - dayNight);
+    }
   }
 }
 
 function updateKepler80Visualization() {
   console.log('Updating Kepler-80f visualization');
   if (currentExtremeSystem?.id === "kepler80" && currentExtremeStage === 2) {
-    renderExtremeInteractive(currentExtremeSystem);
+    const svg = d3.select('#orbit-container-interactive svg');
+    if (!svg.empty()) {
+      const compression = extremeControlStates.kepler80.compressionLevel / 100;
+      const gravity = extremeControlStates.kepler80.gravityMultiplier / 100;
+      
+      // Update density cells
+      svg.selectAll(".density-cell")
+        .attr("fill", d3.interpolateRgb("#888888", "#ffffff")(compression))
+        .attr("opacity", 0.4 + (compression * 0.4));
+        
+      // Update planet size based on compression
+      svg.select(".extreme-planet")
+        .attr("r", 100 * (1 - compression * 0.1));
+    }
   }
 }
 
 // PHASE 2: Show extreme interactive control panel
 function showExtremeInteractiveControlPanel(systemId) {
   console.log(`🎮 Showing extreme interactive control panel for: ${systemId}`);
+  
+  // Debug: Check if the grid container exists
+  const gridContainer = document.querySelector('.minimal-interactive-layout');
+  console.log(`🔍 Grid container found:`, !!gridContainer);
   
   // Hide all system control panels first
   document.querySelectorAll('.control-panel').forEach(panel => {
@@ -1137,6 +1226,8 @@ function showExtremeInteractiveControlPanel(systemId) {
   if (panel) {
     panel.style.display = 'block';
     console.log(`✅ Showing control panel: ${panelId}`);
+    console.log(`🔍 Panel computed style:`, window.getComputedStyle(panel));
+    console.log(`🔍 Panel parent:`, panel.parentElement);
     
     // Insert the controls HTML into the control grid
     const controlGrid = document.getElementById(`${systemId}-interactive-controls`);
@@ -1285,6 +1376,12 @@ export function cleanupExtremeSystem() {
   const animationSection = document.querySelector('.animation-controls-section');
   if (animationSection) {
     animationSection.style.display = 'block';
+  }
+  
+  // Show controls bar again
+  const controlsBar = document.querySelector('.controls-bar');
+  if (controlsBar) {
+    controlsBar.style.display = 'flex';
   }
   
   const orbitalControls = [
