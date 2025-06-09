@@ -104,47 +104,6 @@ function updateExtremeInteractiveInfo(extremeSystem) {
 // Export the system data
 export { extremeSystemData };
 
-// PHASE 2: Manual verification function for debugging
-window.testExtremeControls = function() {
-  console.log('🔧 Testing extreme controls visibility...');
-  
-  const panels = ['kelt-controls', 'wasp-controls', 'kepler80-controls'];
-  panels.forEach(panelId => {
-    const panel = document.getElementById(panelId);
-    if (panel) {
-      console.log(`📋 ${panelId}:`, {
-        exists: true,
-        display: panel.style.display,
-        computedDisplay: window.getComputedStyle(panel).display,
-        visibility: window.getComputedStyle(panel).visibility,
-        opacity: window.getComputedStyle(panel).opacity,
-        position: window.getComputedStyle(panel).position,
-        gridArea: window.getComputedStyle(panel).gridArea
-      });
-    } else {
-      console.log(`❌ ${panelId}: Not found`);
-    }
-  });
-  
-  const systemControls = document.querySelector('.system-controls');
-  if (systemControls) {
-    console.log('🎛️ System controls container:', {
-      display: window.getComputedStyle(systemControls).display,
-      gridArea: window.getComputedStyle(systemControls).gridArea,
-      position: window.getComputedStyle(systemControls).position
-    });
-  }
-  
-  const gridLayout = document.querySelector('.minimal-interactive-layout');
-  if (gridLayout) {
-    console.log('📐 Grid layout:', {
-      display: window.getComputedStyle(gridLayout).display,
-      gridTemplateAreas: window.getComputedStyle(gridLayout).gridTemplateAreas,
-      gridTemplateColumns: window.getComputedStyle(gridLayout).gridTemplateColumns
-    });
-  }
-};
-
 // PHASE 2: Enhanced capsule setup
 function setupExtremeCapsules() {
   console.log(" Setting up extreme capsules...");
@@ -1227,10 +1186,6 @@ function updateKepler80Visualization() {
 function showExtremeInteractiveControlPanel(systemId) {
   console.log(`🎮 Showing extreme interactive control panel for: ${systemId}`);
   
-  // Debug: Check if the grid container exists
-  const gridContainer = document.querySelector('.minimal-interactive-layout');
-  console.log(`🔍 Grid container found:`, !!gridContainer);
-  
   // Hide all system control panels first
   document.querySelectorAll('.control-panel').forEach(panel => {
     panel.style.display = 'none';
@@ -1243,8 +1198,6 @@ function showExtremeInteractiveControlPanel(systemId) {
   if (panel) {
     panel.style.display = 'block';
     console.log(`✅ Showing control panel: ${panelId}`);
-    console.log(`🔍 Panel computed style:`, window.getComputedStyle(panel));
-    console.log(`🔍 Panel parent:`, panel.parentElement);
     
     // Insert the controls HTML into the control grid
     const controlGrid = document.getElementById(`${systemId}-interactive-controls`);
