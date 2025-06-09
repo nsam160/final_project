@@ -45,3 +45,8 @@ body {
   padding: 0.3rem 1rem;
   font-family: 'Outfit', sans-serif;
 }
+
+#special {
+  font-style: normal;
+  color: white;
+}
