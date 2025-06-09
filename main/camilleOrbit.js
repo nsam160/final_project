@@ -599,15 +599,12 @@ function setupPlanetNavigation() {
 function showInteractiveControls(systemId) {
   console.log(`Showing interactive controls for: ${systemId}`);
   
-  // DON'T hide animation controls in interactive mode - they should remain visible
-  // The interactive stage has its own controls in the controls-bar
-  
-  // Hide all system-specific control panels first
+  // Hide ALL system-specific control panels first
   document.querySelectorAll('.control-panel').forEach(panel => {
     panel.style.display = 'none';
   });
   
-  // Show the appropriate control panel based on system
+  // Show ONLY the appropriate control panel based on system
   const panelId = `${systemId}-controls`;
   const panel = document.getElementById(panelId);
   
@@ -635,6 +632,17 @@ function showInteractiveControls(systemId) {
     setupSystemInteractiveControls(systemId);
   } else {
     console.warn(`Interactive controls panel not found for: ${systemId}`);
+  }
+  
+  // Ensure orbital controls are visible
+  const orbitalBar = document.querySelector('.orbital-controls-bar');
+  if (orbitalBar) {
+    orbitalBar.style.display = 'flex';
+  }
+  
+  const orbitalControls = document.querySelector('.orbital-system-controls');
+  if (orbitalControls) {
+    orbitalControls.style.display = 'block';
   }
 }
 
@@ -801,6 +809,19 @@ function setupGJInteractiveControls() {
 export function initializeEnhancedSystem(containerId, hostname, stage = 1) {
   console.log(`Initializing enhanced system for ${hostname} in container ${containerId} (Stage ${stage})`);
   
+  // Add this for Stage 1
+  if (stage === 1) {
+    const container = document.getElementById('orbit-container');
+    if (container) {
+      container.style.width = '100%';
+      container.style.height = '600px';
+      container.style.maxWidth = 'none';
+      container.style.border = 'none';
+      container.style.background = 'transparent';
+      container.style.padding = '0';
+    }
+  }
+  
   if (stage === 2) {
     const container = document.getElementById('orbit-container-interactive');
     if (container) {
@@ -813,6 +834,8 @@ export function initializeEnhancedSystem(containerId, hostname, stage = 1) {
     }
   }
   
+  // ... rest of the function
+
   
   if (!window.ExoplanetData || !window.ExoplanetData.isLoaded()) {
     console.log("Data not loaded yet, waiting...");
@@ -1020,6 +1043,17 @@ function renderInteractiveSystem(system) {
     }
     
     setupAnimationControls('interactive-animation');
+    
+    // Ensure orbital controls are visible
+    const orbitalBar = document.querySelector('.orbital-controls-bar');
+    if (orbitalBar) {
+      orbitalBar.style.display = 'flex';
+    }
+    
+    const orbitalControls = document.querySelector('.orbital-system-controls');
+    if (orbitalControls) {
+      orbitalControls.style.display = 'block';
+    }
     
     // Show interactive controls after a delay
     const systemInfo = systemNarratives[system.hostname] || {};
