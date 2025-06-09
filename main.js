@@ -2,7 +2,16 @@ const submit = document.querySelector('#hook-options');
 const answer = document.querySelector('#hook-answer');
 submit.addEventListener('change', (event) => {
     let number = +event.target.value;
-    if (number < 8){
+    if (isNaN(Number(event.target.value))){
+        if (event.target.value.toLowerCase().slice(0,2) === 'no')
+            answer.innerHTML = `That's Right! We Aren't Alone!`;
+        else if (event.target.value.toLowerCase().slice(0,3) === 'yes')
+            answer.innerHTML = `Hmm, let's discover more and see if you change your mind!`;
+        else {
+            answer.innerHTML = `Oops I don't quite understand that answer, but it's ok!`;
+        }
+    }
+    else if (number < 8){
         answer.innerHTML = `Hmm, that's not quite right 🤔, there are already 8 planets in our solar system. That's ok though! Let's relearn them! `;
     }
     else if (number === 8){
