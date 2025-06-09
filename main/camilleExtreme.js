@@ -86,6 +86,21 @@ export function initializeExtremePlanets() {
   console.log(" Extreme planets Phase 2 initialized successfully.");
 }
 
+// Function to update interactive system info for extreme planets
+function updateExtremeInteractiveInfo(extremeSystem) {
+  const nameElement = document.getElementById('interactive-system-name');
+  const countElement = document.getElementById('interactive-planet-count');
+  
+  if (nameElement) {
+    nameElement.textContent = extremeSystem.title;
+  }
+  
+  if (countElement) {
+    // For extreme planets, show description instead of planet count
+    countElement.textContent = extremeSystem.shortDesc;
+  }
+}
+
 // Export the system data
 export { extremeSystemData };
 
@@ -297,6 +312,8 @@ export function renderExtremeInteractive(extremeSystem) {
   console.log(`🎮 Rendering extreme interactive: ${extremeSystem.title}`);
   
   currentExtremeStage = 2;
+
+   updateExtremeInteractiveInfo(extremeSystem)
   
   // IMPORTANT: Use the INTERACTIVE container for Stage 2!
   const container = document.getElementById('orbit-container-interactive');
